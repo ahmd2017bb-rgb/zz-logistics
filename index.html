@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Z&Z Logistics - موقع حقيقي</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <main class="login" id="loginBox">
+    <div class="card">
+      <div class="logo">Z&Z</div>
+      <h1>Z&Z Logistics</h1>
+      <p>دخول آمن عبر رمز يصل إلى البريد الإلكتروني</p>
+
+      <label>البريد الإلكتروني</label>
+      <input id="email" type="email" value="ahmadalreefai2021@gmail.com">
+
+      <button onclick="sendCode()">إرسال رمز الدخول</button>
+
+      <div id="codeArea" class="hidden">
+        <label>رمز الدخول</label>
+        <input id="code" placeholder="اكتب الرمز الذي وصلك">
+        <button onclick="verifyCode()">دخول</button>
+      </div>
+
+      <p id="msg"></p>
+    </div>
+  </main>
+
+  <section class="site hidden" id="siteBox">
+    <header>
+      <div class="brand">
+        <div class="small-logo">Z&Z</div>
+        <div>
+          <h2>Z&Z Logistics</h2>
+          <span>Delivery & Logistics Services</span>
+        </div>
+      </div>
+      <button onclick="logout()" class="logout">خروج</button>
+    </header>
+
+    <section class="hero">
+      <div>
+        <span class="tag">شركة توصيل وخدمات لوجستية</span>
+        <h1>حلول توصيل احترافية للشركات</h1>
+        <p>إدارة طرود، سائقين، Routes، وتقارير تشغيل يومية داخل ألمانيا.</p>
+        <a href="#contact">اطلب عرض سعر</a>
+      </div>
+      <div class="hero-card">
+        <h3>خدمات Z&Z</h3>
+        <ul>
+          <li>توصيل طرود يومي</li>
+          <li>إدارة السائقين والمقاولين</li>
+          <li>POD إثبات التسليم</li>
+          <li>تقارير تشغيل</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div><h3>🚚 Delivery</h3><p>توصيل سريع ومنظم.</p></div>
+      <div><h3>🗺️ Routes</h3><p>توزيع حسب المناطق.</p></div>
+      <div><h3>👷 Drivers</h3><p>إدارة السائقين.</p></div>
+      <div><h3>📊 Reports</h3><p>تقارير يومية.</p></div>
+    </section>
+
+    <section id="contact" class="contact">
+      <h2>تواصل معنا</h2>
+      <p>Germany / NRW</p>
+      <p id="userEmail"></p>
+    </section>
+  </section>
+
+<script src="app.js"></script>
+</body>
+</html>
