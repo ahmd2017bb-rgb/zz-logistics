@@ -504,6 +504,25 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   /* ── badges ── */
   .badge{border:1px solid #999 !important;padding:2px 7px !important}
 }
+/* ── STAFF HISTORY ──────────────────────────── */
+.sh-row{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--card);}
+.sh-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;transition:background .15s;flex-wrap:wrap;}
+.sh-hdr:hover{background:var(--surface2);}
+.sh-av{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sh-av-off{background:var(--muted)!important;opacity:.55;}
+.sh-meta{flex:1;min-width:120px;}
+.sh-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.sh-sname{font-weight:700;font-size:14px;color:var(--text);}
+.sh-role{font-size:11px;background:var(--surface2);color:var(--muted);padding:2px 7px;border-radius:20px;}
+.sh-badge-act{font-size:11px;background:#d1fae5;color:#065f46;padding:2px 7px;border-radius:20px;}
+.sh-badge-off{font-size:11px;background:#fee2e2;color:#991b1b;padding:2px 7px;border-radius:20px;}
+.sh-period{font-size:11px;color:var(--muted);margin-top:2px;}
+.sh-nums{display:flex;gap:12px;flex-shrink:0;}
+.sh-num{text-align:center;}
+.sh-nv{display:block;font-size:14px;font-weight:700;}
+.sh-nl{display:block;font-size:10px;color:var(--muted);white-space:nowrap;}
+.sh-body{padding:0 14px 14px;border-top:1px solid var(--border);}
+.sh-sec{font-size:12px;font-weight:700;color:var(--primary);margin:12px 0 6px;}
 </style>
 </head>
 <body>
@@ -935,6 +954,15 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <table class="tbl full-tbl"><thead><tr><th data-i18n="reports.col_area">المنطقة</th><th data-i18n="reports.col_orders">الطلبات</th><th data-i18n="reports.col_done">مكتمل</th></tr></thead><tbody id="rp-area"></tbody></table>
           </div>
         </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-top" style="flex-wrap:wrap;gap:10px">
+            <h3 class="card-title">📚 ذاكرة الموظفين — السجل الكامل</h3>
+            <input type="text" id="sh-search" placeholder="🔍 بحث بالاسم أو الوظيفة..." oninput="renderStaffHistory()" style="border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:8px;padding:7px 12px;font-size:13px;outline:none;width:200px">
+          </div>
+          <div id="staff-history-list" style="padding:4px 0">
+            <p style="color:var(--muted);text-align:center;padding:30px;font-size:14px">سيظهر هنا السجل الكامل لجميع الموظفين</p>
+          </div>
+        </div>
       </section>
 
       <!-- ====== STAFF ====== -->
@@ -1205,6 +1233,26 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
     <div class="modal-ft">
       <button class="btn btn-ghost" data-i18n="modal.cancel" onclick="closeModal('modal-sheet-emp')">إلغاء</button>
       <button class="btn btn-primary" style="width:auto;padding:11px 28px" data-i18n="shemp.save" onclick="saveSheetEmp()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PAYMENT -->
+<div class="modal-bg hidden" id="modal-payment">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-top"><h3>💶 تسجيل دفعة</h3><button class="modal-x" onclick="closeModal('modal-payment')">✕</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="pay-staff-id">
+      <div class="form-group"><label>الموظف</label><input type="text" id="pay-staff-name" readonly style="width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted)"></div>
+      <div class="frow">
+        <div class="form-group"><label>المبلغ (€) *</label><input type="number" id="pay-amount" placeholder="0.00" step="0.01" min="0"></div>
+        <div class="form-group"><label>التاريخ *</label><input type="date" id="pay-date"></div>
+      </div>
+      <div class="form-group"><label>ملاحظات</label><input type="text" id="pay-notes" placeholder="اختياري..."></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-payment')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 28px" onclick="savePayment()">💾 حفظ الدفعة</button>
     </div>
   </div>
 </div>
@@ -2341,6 +2389,120 @@ function renderReports(){
   const areas={};
   orders.forEach(o=>{const d=drivers.find(x=>x.id===o.driver);const a=d?d.area:'—';if(!areas[a])areas[a]={t:0,d:0};areas[a].t++;if(o.status==='delivered')areas[a].d++});
   $('rp-area').innerHTML=Object.entries(areas).map(([a,s])=>`<tr><td>${a}</td><td>${s.t}</td><td>${s.d}</td></tr>`).join('');
+  renderStaffHistory();
+}
+
+// ── STAFF HISTORY ────────────────────────────────
+function _iterSheetMonths(cb){
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('zzsheet_')&&k!=='zzsheet_'+sheetMonthKey){
+      try{const d=JSON.parse(localStorage.getItem(k));cb(k.replace('zzsheet_',''),d);}catch(e){}
+    }
+  }
+}
+function getEmpAllTimeStats(staffId){
+  let totDays=0,totH=0;
+  const attRecs=attendance.filter(a=>a.staffId===staffId);
+  const attDates=new Set(attRecs.filter(a=>a.start&&a.end).map(a=>a.date));
+  attRecs.forEach(a=>{if(a.start&&a.end){totDays++;totH+=calcHours(a.start,a.end,a.break||0);}});
+  _iterSheetMonths((mo,d)=>{
+    const shEmp=(d.emps||[]).find(e=>e.staffId===staffId);if(!shEmp)return;
+    Object.entries(d.days||{}).forEach(([dd,day])=>{const sv=day[shEmp.id];if(sv&&sv.s&&sv.e&&!attDates.has(mo+'-'+dd)){totDays++;totH+=calcHours(sv.s,sv.e,0);}});
+  });
+  if(sheetMonthKey){const shEmp=sheetEmps.find(e=>e.staffId===staffId);if(shEmp)Object.entries(sheetDays).forEach(([dd,day])=>{const sv=day[shEmp.id];if(sv&&sv.s&&sv.e&&!attDates.has(sheetMonthKey+'-'+dd)){totDays++;totH+=calcHours(sv.s,sv.e,0);}});}
+  return{totDays,totH};
+}
+function getEmpDateRange(staffId){
+  const dates=[];
+  attendance.filter(a=>a.staffId===staffId&&a.start&&a.end).forEach(a=>dates.push(a.date));
+  _iterSheetMonths((mo,d)=>{const shEmp=(d.emps||[]).find(e=>e.staffId===staffId);if(!shEmp)return;Object.entries(d.days||{}).forEach(([dd,day])=>{if((day[shEmp.id]||{}).s)dates.push(mo+'-'+dd);});});
+  if(sheetMonthKey){const shEmp=sheetEmps.find(e=>e.staffId===staffId);if(shEmp)Object.entries(sheetDays).forEach(([dd,day])=>{if((day[shEmp.id]||{}).s)dates.push(sheetMonthKey+'-'+dd);});}
+  dates.sort();return{first:dates[0]||'',last:dates[dates.length-1]||''};
+}
+function getEmpMonthlyBreakdown(staffId){
+  const map={};
+  const attRecs=attendance.filter(a=>a.staffId===staffId);
+  const attDates=new Set(attRecs.filter(a=>a.start&&a.end).map(a=>a.date));
+  attRecs.forEach(a=>{if(!a.start||!a.end)return;const mo=a.date.slice(0,7);if(!map[mo])map[mo]={days:0,hours:0};map[mo].days++;map[mo].hours+=calcHours(a.start,a.end,a.break||0);});
+  _iterSheetMonths((mo,d)=>{
+    const shEmp=(d.emps||[]).find(e=>e.staffId===staffId);if(!shEmp)return;
+    Object.entries(d.days||{}).forEach(([dd,day])=>{const sv=day[shEmp.id];if(sv&&sv.s&&sv.e&&!attDates.has(mo+'-'+dd)){if(!map[mo])map[mo]={days:0,hours:0};map[mo].days++;map[mo].hours+=calcHours(sv.s,sv.e,0);}});
+  });
+  if(sheetMonthKey){const shEmp=sheetEmps.find(e=>e.staffId===staffId);if(shEmp)Object.entries(sheetDays).forEach(([dd,day])=>{const sv=day[shEmp.id];if(sv&&sv.s&&sv.e&&!attDates.has(sheetMonthKey+'-'+dd)){if(!map[sheetMonthKey])map[sheetMonthKey]={days:0,hours:0};map[sheetMonthKey].days++;map[sheetMonthKey].hours+=calcHours(sv.s,sv.e,0);}});}
+  return Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0])).map(([mo,v])=>({mo,...v}));
+}
+function renderStaffHistory(){
+  if(!$('staff-history-list'))return;
+  const ql=($('sh-search')||{value:''}).value.toLowerCase();
+  const all=[...staff.map(s=>({...s,active:true})),...staffArchive.map(s=>({...s,active:false}))].filter(s=>!ql||s.name.toLowerCase().includes(ql)||(s.role||'').toLowerCase().includes(ql));
+  if(!all.length){$('staff-history-list').innerHTML='<p style="color:var(--muted);text-align:center;padding:30px">لا توجد سجلات موظفين بعد</p>';return;}
+  $('staff-history-list').innerHTML=all.map(s=>{
+    const{totDays,totH}=getEmpAllTimeStats(s.id);
+    const totS=totH*(s.rate||0);
+    const paid=payments.filter(p=>p.staffId===s.id).reduce((a,p)=>a+p.amount,0);
+    const bal=totS-paid;
+    const{first,last}=getEmpDateRange(s.id);
+    const sn=s.name.replace(/'/g,"\\'").replace(/"/g,'\\"');
+    return`<div class="sh-row" id="shr-${s.id}">
+      <div class="sh-hdr" onclick="toggleShr(${s.id})">
+        <div class="sh-av${s.active?'':' sh-av-off'}">${s.name[0]}</div>
+        <div class="sh-meta">
+          <div class="sh-name-row"><span class="sh-sname">${s.name}</span><span class="sh-role">${s.role}</span><span class="${s.active?'sh-badge-act':'sh-badge-off'}">${s.active?'نشط':'مفصول'}</span></div>
+          <div class="sh-period">${first?`${first} ↔ ${last}`:'لا توجد بيانات مسجلة'}</div>
+        </div>
+        <div class="sh-nums">
+          <div class="sh-num"><span class="sh-nv">${totDays||'—'}</span><span class="sh-nl">أيام</span></div>
+          <div class="sh-num"><span class="sh-nv">${totH?formatHours(totH):'—'}</span><span class="sh-nl">ساعات</span></div>
+          <div class="sh-num"><span class="sh-nv" style="color:var(--green)">${totS>0?totS.toFixed(0)+'€':'—'}</span><span class="sh-nl">مستحق</span></div>
+          <div class="sh-num"><span class="sh-nv" style="color:#2563eb">${paid>0?paid.toFixed(0)+'€':'—'}</span><span class="sh-nl">مدفوع</span></div>
+          <div class="sh-num"><span class="sh-nv" style="${bal>0.5?'color:#d97706':'color:var(--green)'}">${bal>0.5?bal.toFixed(0)+'€':'✓'}</span><span class="sh-nl">المتبقي</span></div>
+        </div>
+        <button class="act-btn act-edit" style="flex-shrink:0;white-space:nowrap" onclick="event.stopPropagation();openPaymentModal(${s.id},'${sn}')">+ دفعة</button>
+        <span id="sht-${s.id}" style="font-size:12px;color:var(--muted);flex-shrink:0">▼</span>
+      </div>
+      <div class="sh-body hidden" id="shb-${s.id}"></div>
+    </div>`;
+  }).join('');
+}
+function toggleShr(id){
+  const body=$('shb-'+id);if(!body)return;
+  if(body.classList.contains('hidden')){body.innerHTML=_buildShrBody(id);body.classList.remove('hidden');const t=$('sht-'+id);if(t)t.textContent='▲';}
+  else{body.classList.add('hidden');const t=$('sht-'+id);if(t)t.textContent='▼';}
+}
+function _buildShrBody(staffId){
+  const s=[...staff,...staffArchive].find(x=>x.id===staffId);if(!s)return'';
+  const months=getEmpMonthlyBreakdown(staffId);
+  const empPays=payments.filter(p=>p.staffId===staffId).sort((a,b)=>b.date.localeCompare(a.date));
+  let h='';
+  if(months.length){
+    h+='<div class="sh-sec">📅 الدوام الشهري</div><table class="tbl full-tbl" style="font-size:13px"><thead><tr><th>الشهر</th><th>الأيام</th><th>الساعات</th><th>المستحق</th></tr></thead><tbody>';
+    months.forEach(({mo,days,hours})=>{const[y,m]=mo.split('-').map(Number);h+=`<tr><td>${MONTHS_AR[m-1]} ${y}</td><td>${days}</td><td>${formatHours(hours)}</td><td>${(hours*(s.rate||0)).toFixed(2)}€</td></tr>`;});
+    h+='</tbody></table>';
+  }
+  if(empPays.length){
+    h+='<div class="sh-sec" style="margin-top:12px">💶 سجل المدفوعات</div><table class="tbl full-tbl" style="font-size:13px"><thead><tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظات</th><th></th></tr></thead><tbody>';
+    empPays.forEach(p=>{h+=`<tr><td>${p.date}</td><td style="font-weight:700">${p.amount.toFixed(2)}€</td><td>${p.notes||'—'}</td><td><button class="act-btn act-delete" onclick="delPayment(${p.id})">حذف</button></td></tr>`;});
+    h+='</tbody></table>';
+  }
+  if(!months.length&&!empPays.length)h='<p style="color:var(--muted);padding:16px;text-align:center">لا توجد بيانات مسجلة بعد</p>';
+  return h;
+}
+function openPaymentModal(staffId,name){
+  $('pay-staff-id').value=staffId;$('pay-staff-name').value=name;
+  $('pay-amount').value='';$('pay-date').value=new Date().toISOString().slice(0,10);$('pay-notes').value='';
+  openM('modal-payment');
+}
+function savePayment(){
+  const staffId=parseInt($('pay-staff-id').value),amount=parseFloat($('pay-amount').value),date=$('pay-date').value;
+  if(!amount||amount<=0){toast('يرجى إدخال مبلغ صحيح','error');return;}
+  if(!date){toast('يرجى تحديد تاريخ الدفعة','error');return;}
+  payments.push({id:nextPayId++,staffId,staffName:$('pay-staff-name').value,amount,date,notes:$('pay-notes').value.trim()});
+  closeModal('modal-payment');toast('تم تسجيل الدفعة','success');
+  autosave();renderStaffHistory();
+}
+function delPayment(id){
+  payments=payments.filter(p=>p.id!==id);autosave();toast('تم حذف الدفعة','success');renderStaffHistory();
 }
 
 // ══════════════════════════════════════════════════
@@ -2572,6 +2734,7 @@ let attendance=[
   {id:3,staffId:1,date:'2025-01-16',start:'07:00',end:'17:00',break:30,notes:'Überstunden'},
 ];
 let nextStaffId=4,nextAttId=4;
+let payments=[],staffArchive=[],nextPayId=1;
 let attDateFilter='',attStaffFilter='';
 let currentSalaryPeriod='week';
 let pendingImport=[];
@@ -2737,7 +2900,9 @@ function saveStaffMember(){
   renderStaffPage();autosave();
 }
 function delStaff(id){
-  staff=staff.filter(s=>s.id!==id);
+  const s=staff.find(x=>x.id===id);
+  if(s&&!staffArchive.find(a=>a.id===id))staffArchive.push({id:s.id,name:s.name,role:s.role,rate:s.rate,deletedAt:new Date().toISOString().slice(0,10)});
+  staff=staff.filter(x=>x.id!==id);
   attendance=attendance.filter(a=>a.staffId!==id);
   if(sheetMonthKey){_syncSheetStaff();_sheetAutoSave();}
   renderStaffPage();
@@ -2944,7 +3109,8 @@ function clearExcelPreview(){
 // ══════════════════════════════════════════════════
 const DB={
   orders:'zzdata_orders',drivers:'zzdata_drivers',
-  staff:'zzdata_staff',attendance:'zzdata_attendance',meta:'zzdata_meta'
+  staff:'zzdata_staff',attendance:'zzdata_attendance',meta:'zzdata_meta',
+  payments:'zzdata_payments',staffArchive:'zzdata_staff_archive'
 };
 let _firstLoad=true; // tracks if localStorage had no data (first-run)
 
@@ -2954,11 +3120,14 @@ function loadAllData(){
   try{const r=localStorage.getItem(DB.drivers);if(r){drivers=JSON.parse(r);loaded=true;}}catch(e){}
   try{const r=localStorage.getItem(DB.staff);if(r){staff=JSON.parse(r);loaded=true;}}catch(e){}
   try{const r=localStorage.getItem(DB.attendance);if(r){attendance=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=localStorage.getItem(DB.payments);if(r){payments=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=localStorage.getItem(DB.staffArchive);if(r){staffArchive=JSON.parse(r);loaded=true;}}catch(e){}
   try{
     const r=localStorage.getItem(DB.meta);
     if(r){const m=JSON.parse(r);
       if(m.nextOId)nextOId=m.nextOId;if(m.nextDId)nextDId=m.nextDId;
       if(m.nextStaffId)nextStaffId=m.nextStaffId;if(m.nextAttId)nextAttId=m.nextAttId;
+      if(m.nextPayId)nextPayId=m.nextPayId;
     }
   }catch(e){}
   _firstLoad=!loaded;
@@ -2972,7 +3141,9 @@ function autosave(){
     localStorage.setItem(DB.drivers,JSON.stringify(drivers));
     localStorage.setItem(DB.staff,JSON.stringify(staff));
     localStorage.setItem(DB.attendance,JSON.stringify(attendance));
-    localStorage.setItem(DB.meta,JSON.stringify({nextOId,nextDId,nextStaffId,nextAttId}));
+    localStorage.setItem(DB.payments,JSON.stringify(payments));
+    localStorage.setItem(DB.staffArchive,JSON.stringify(staffArchive));
+    localStorage.setItem(DB.meta,JSON.stringify({nextOId,nextDId,nextStaffId,nextAttId,nextPayId}));
     showSaveIndicator();
   }catch(e){console.warn('autosave:',e);}
 }
