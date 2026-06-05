@@ -355,6 +355,19 @@ button,select,input{font-family:inherit;font-size:inherit}
 
 @media(max-width:800px){.pv-map-full{margin:-16px}.nrw-panel{width:220px}}
 
+/* ── AUTH / SETUP ────────────────────────────── */
+.setup-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#071529 0%,#0b1f3a 40%,#1a3a70 100%);padding:20px}
+.id-methods{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.id-method{flex:1;min-width:80px;padding:10px 8px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .18s}
+.id-method:hover{background:var(--white);border-color:var(--blue);color:var(--blue)}
+.id-method.on{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.id-hint{font-size:11px;color:var(--muted);text-align:center;margin:-10px 0 12px;min-height:16px}
+.linked-tag{display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;margin:2px}
+.linked-empty{background:#f3f4f6;color:#9ca3af;border-color:#e5e7eb}
+.profile-links{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.reset-link{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:0}
+.reset-link:hover{color:var(--red)}
+
 /* ── PRINT ────────────────────────────────────── */
 .print-only{display:none}
 .print-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
@@ -431,18 +444,74 @@ button,select,input{font-family:inherit;font-size:inherit}
     <h1>Z&amp;Z Logistics</h1>
     <p class="login-sub">نظام إدارة العمليات اللوجستية — Germany / NRW</p>
     <div class="sep"></div>
-    <div class="login-demo-box">أدخل أي كلمة مرور للدخول<b>0000</b></div>
-    <div class="form-group" style="margin-top:20px">
-      <label>اسم المستخدم</label>
-      <input id="login-user" type="text" value="المدير">
+
+    <div class="id-methods">
+      <button class="id-method on" id="m-user" onclick="switchMethod('user',this)">👤 اسم</button>
+      <button class="id-method" id="m-email" onclick="switchMethod('email',this)">📧 Gmail</button>
+      <button class="id-method" id="m-phone" onclick="switchMethod('phone',this)">📱 هاتف</button>
+      <button class="id-method" id="m-apple" onclick="switchMethod('apple',this)"> Apple ID</button>
+    </div>
+    <p class="id-hint" id="id-hint">اسم المستخدم</p>
+
+    <div class="form-group">
+      <input id="login-identifier" type="text" placeholder="اسم المستخدم"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="form-group">
       <label>كلمة المرور</label>
-      <input id="login-pass" type="password" placeholder="أدخل كلمة المرور" onkeydown="if(event.key==='Enter')doLogin()">
+      <input id="login-pass" type="password" placeholder="كلمة المرور"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="btn btn-primary fw" onclick="doLogin()">دخول إلى النظام ←</button>
     <p id="msg" class="msg-text"></p>
-    <div class="login-note">🔒 هذا النظام مخصص لشركة Z&amp;Z Logistics فقط</div>
+    <div class="login-note">🔒 كلمة المرور مشفرة — Z&amp;Z Logistics</div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="reset-link" onclick="showResetAccount()">نسيت كلمة المرور؟</button>
+    </div>
+  </div>
+</main>
+
+<!-- ========== SETUP (first run) ========== -->
+<main class="setup-screen hidden" id="setupScreen">
+  <div class="login-card" style="max-width:520px">
+    <div class="login-logo">Z&amp;Z</div>
+    <h1>إنشاء حساب المدير</h1>
+    <p class="login-sub">أول مرة؟ أنشئ حسابك للوصول إلى النظام</p>
+    <div class="sep"></div>
+
+    <div class="form-group">
+      <label>اسم المستخدم *</label>
+      <input type="text" id="su-name" placeholder="مثال: أحمد أو Manager">
+    </div>
+    <div class="frow">
+      <div class="form-group">
+        <label>📧 بريد Gmail / iCloud</label>
+        <input type="email" id="su-email" placeholder="name@gmail.com أو @icloud.com">
+      </div>
+      <div class="form-group">
+        <label>📱 رقم الهاتف</label>
+        <input type="text" id="su-phone" placeholder="+49 176 xxxxxxxx">
+      </div>
+    </div>
+    <div class="form-group">
+      <label> Apple ID (iCloud)</label>
+      <input type="text" id="su-apple" placeholder="name@icloud.com أو @me.com">
+    </div>
+    <div class="frow">
+      <div class="form-group">
+        <label>كلمة المرور *</label>
+        <input type="password" id="su-pass" placeholder="4 أحرف على الأقل"
+          onkeydown="if(event.key==='Enter')submitSetup()">
+      </div>
+      <div class="form-group">
+        <label>تأكيد كلمة المرور *</label>
+        <input type="password" id="su-pass2" placeholder="أعد الكتابة"
+          onkeydown="if(event.key==='Enter')submitSetup()">
+      </div>
+    </div>
+    <button class="btn btn-primary fw" onclick="submitSetup()">إنشاء الحساب والدخول ←</button>
+    <p id="su-msg" class="msg-text"></p>
+    <div class="login-note">🔒 كلمة المرور تُحفظ مشفرة — يمكنك تعديل أي معرف لاحقاً من إعدادات الحساب</div>
   </div>
 </main>
 
@@ -464,9 +533,12 @@ button,select,input{font-family:inherit;font-size:inherit}
       <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
     </nav>
     <div class="sb-footer">
-      <div class="sb-user-row">
+      <div class="sb-user-row" onclick="openProfileModal()" style="cursor:pointer" title="إعدادات الحساب">
         <div class="sb-av" id="sbAv">م</div>
-        <div class="sb-email" id="sbName">المدير</div>
+        <div>
+          <div class="sb-email" id="sbName">المدير</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.35)">⚙ إعدادات الحساب</div>
+        </div>
       </div>
       <button class="btn-logout" onclick="doLogout()">⬅ خروج</button>
     </div>
@@ -978,6 +1050,58 @@ button,select,input{font-family:inherit;font-size:inherit}
   </div>
 </div>
 
+<!-- MODAL: PROFILE / ACCOUNT SETTINGS -->
+<div class="modal-bg hidden" id="modal-profile">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-top">
+      <h3>👤 إعدادات الحساب</h3>
+      <button class="modal-x" onclick="closeModal('modal-profile')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="frow">
+        <div class="form-group">
+          <label>اسم المستخدم *</label>
+          <input type="text" id="pr-name">
+        </div>
+        <div class="form-group">
+          <label>📧 بريد Gmail / iCloud</label>
+          <input type="email" id="pr-email" placeholder="name@gmail.com">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="form-group">
+          <label>📱 رقم الهاتف</label>
+          <input type="text" id="pr-phone" placeholder="+49 176...">
+        </div>
+        <div class="form-group">
+          <label> Apple ID</label>
+          <input type="text" id="pr-apple" placeholder="name@icloud.com">
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;margin:8px 0 16px;font-size:12px;color:var(--muted)">
+        💡 يمكنك تسجيل الدخول بأي من هذه المعرفات + كلمة المرور
+      </div>
+      <div class="sep" style="margin:16px 0"></div>
+      <p style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px">تغيير كلمة المرور</p>
+      <div class="frow">
+        <div class="form-group">
+          <label>كلمة المرور الجديدة</label>
+          <input type="password" id="pr-pw" placeholder="اتركها فارغة للإبقاء على الحالية">
+        </div>
+        <div class="form-group">
+          <label>تأكيد كلمة المرور</label>
+          <input type="password" id="pr-pw2" placeholder="أعد الكتابة">
+        </div>
+      </div>
+      <p id="pr-msg" class="msg-text" style="min-height:18px"></p>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-profile')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveProfile()">حفظ التغييرات</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: SHEET EMPLOYEE -->
 <div class="modal-bg hidden" id="modal-sheet-emp">
   <div class="modal" style="max-width:380px">
@@ -1203,32 +1327,148 @@ function updateReturnCount(){
 // ══════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════
-function doLogin(){
-  const u=$('login-user').value.trim()||'المدير';
-  const p=$('login-pass').value.trim();
-  if(!p){$('msg').textContent='يرجى إدخال كلمة المرور';return}
+// ══════════════════════════════════════════════════
+// AUTH SYSTEM
+// ══════════════════════════════════════════════════
+const ACCTS_KEY='zz_accounts';
+const SESSION_KEY='zz_session';
+let currentUser=null;
+
+async function hashPwd(pwd){
+  const enc=new TextEncoder();
+  const buf=await crypto.subtle.digest('SHA-256',enc.encode('zzlg2024::'+pwd));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function loadAccounts(){try{return JSON.parse(localStorage.getItem(ACCTS_KEY))||[];}catch(e){return[];}}
+function saveAccounts(a){localStorage.setItem(ACCTS_KEY,JSON.stringify(a));}
+function checkSession(){
+  try{const s=JSON.parse(localStorage.getItem(SESSION_KEY));if(s&&Date.now()<s.expires)return s;}catch(e){}
+  return null;
+}
+function createSession(acct){
+  const s={id:acct.id,name:acct.name,expires:Date.now()+8*60*60*1000};
+  localStorage.setItem(SESSION_KEY,JSON.stringify(s));
+}
+function clearSession(){localStorage.removeItem(SESSION_KEY);}
+
+function findAccount(identifier){
+  const id=identifier.trim().toLowerCase();
+  return loadAccounts().find(a=>
+    a.name.toLowerCase()===id||
+    (a.email&&a.email.toLowerCase()===id)||
+    (a.phone&&a.phone.replace(/\s/g,'')===id.replace(/\s/g,''))||
+    (a.apple&&a.apple.toLowerCase()===id)
+  );
+}
+
+// Login method selector
+const methodHints={user:'اسم المستخدم',email:'البريد الإلكتروني (Gmail / iCloud)',phone:'رقم الهاتف (+49...)',apple:'Apple ID (iCloud)'};
+const methodPlaceholders={user:'اسم المستخدم',email:'name@gmail.com أو @icloud.com',phone:'+49 176 xxxxxxxx',apple:'name@icloud.com'};
+function switchMethod(m,btn){
+  document.querySelectorAll('.id-method').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('id-hint').textContent=methodHints[m]||'';
+  $('login-identifier').placeholder=methodPlaceholders[m]||'';
+  $('login-identifier').type=(m==='email')?'email':(m==='phone')?'tel':'text';
+  $('login-identifier').value='';
+  $('login-identifier').focus();
+}
+
+async function doLogin(){
+  const id=$('login-identifier').value.trim();
+  const pw=$('login-pass').value;
   $('msg').textContent='';
+  if(!id||!pw){$('msg').textContent='يرجى إدخال المعرف وكلمة المرور';return;}
+  $('msg').textContent='⏳ جاري التحقق…';
+  const acct=findAccount(id);
+  if(!acct){$('msg').textContent='❌ لا يوجد حساب بهذا المعرف';return;}
+  const hash=await hashPwd(pw);
+  if(hash!==acct.passwordHash){$('msg').textContent='❌ كلمة المرور غير صحيحة';return;}
+  currentUser=acct;createSession(acct);enterApp(acct);
+}
+
+function enterApp(acct){
   $('loginScreen').classList.add('hidden');
+  $('setupScreen').classList.add('hidden');
   $('mainApp').classList.remove('hidden');
-  const av=u[0].toUpperCase();
+  const av=(acct.name||'م')[0].toUpperCase();
   $('sbAv').textContent=av;$('tbAv').textContent=av;
-  $('sbName').textContent=u;$('tbName').textContent=u;
+  $('sbName').textContent=acct.name;$('tbName').textContent=acct.name;
   const now=new Date();
   $('routes-date').textContent=now.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
-  // Load today's daily data
-  loadDayUI(todayStr());
-  updateBadge();
-  // Open map first and auto-start loading
+  loadDayUI(todayStr());updateBadge();
   $('pageTitle').textContent=titles['map'];
   $('pageDate').textContent=now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   initNRWMapPage();
-  // Auto-start map loading after Leaflet is ready
-  setTimeout(()=>{ if(nrwLeafletReady && !Object.keys(nrwZones).length) startNRWLoad(); }, 1200);
+  setTimeout(()=>{if(nrwLeafletReady&&!Object.keys(nrwZones).length)startNRWLoad();},1200);
 }
+
 function doLogout(){
+  clearSession();currentUser=null;
   $('mainApp').classList.add('hidden');
   $('loginScreen').classList.remove('hidden');
-  $('login-pass').value='';$('msg').textContent='';
+  $('login-identifier').value='';$('login-pass').value='';$('msg').textContent='';
+}
+
+// ── FIRST RUN ──────────────────────────────────
+function checkFirstRun(){
+  // Try to restore active session
+  const sess=checkSession();
+  if(sess){const acct=loadAccounts().find(a=>a.id===sess.id);if(acct){currentUser=acct;enterApp(acct);return;}}
+  // No accounts? Show setup
+  if(!loadAccounts().length){$('loginScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');}
+}
+
+async function submitSetup(){
+  const name=$('su-name').value.trim(),email=$('su-email').value.trim();
+  const phone=$('su-phone').value.trim(),apple=$('su-apple').value.trim();
+  const pw=$('su-pass').value,pw2=$('su-pass2').value;
+  $('su-msg').textContent='';
+  if(!name){$('su-msg').textContent='يرجى إدخال اسم المستخدم';return;}
+  if(!pw){$('su-msg').textContent='يرجى إدخال كلمة المرور';return;}
+  if(pw.length<4){$('su-msg').textContent='كلمة المرور قصيرة جداً (4 أحرف على الأقل)';return;}
+  if(pw!==pw2){$('su-msg').textContent='كلمتا المرور غير متطابقتين';return;}
+  $('su-msg').textContent='⏳ جاري الإنشاء…';
+  const hash=await hashPwd(pw);
+  const acct={id:Date.now(),name,email,phone,apple,passwordHash:hash,role:'admin'};
+  saveAccounts([acct]);currentUser=acct;createSession(acct);enterApp(acct);
+}
+
+function showResetAccount(){
+  $('confirm-msg').textContent='سيتم حذف بيانات الدخول فقط (الحسابات وكلمات المرور). هل تريد المتابعة؟';
+  $('confirm-ok').onclick=()=>{closeModal('modal-confirm');clearSession();localStorage.removeItem(ACCTS_KEY);location.reload();};
+  openM('modal-confirm');
+}
+
+// ── PROFILE SETTINGS ───────────────────────────
+function openProfileModal(){
+  if(!currentUser)return;
+  $('pr-name').value=currentUser.name||'';
+  $('pr-email').value=currentUser.email||'';
+  $('pr-phone').value=currentUser.phone||'';
+  $('pr-apple').value=currentUser.apple||'';
+  $('pr-pw').value='';$('pr-pw2').value='';$('pr-msg').textContent='';
+  openM('modal-profile');
+}
+
+async function saveProfile(){
+  const name=$('pr-name').value.trim();
+  const email=$('pr-email').value.trim(),phone=$('pr-phone').value.trim(),apple=$('pr-apple').value.trim();
+  const pw=$('pr-pw').value,pw2=$('pr-pw2').value;
+  $('pr-msg').textContent='';
+  if(!name){$('pr-msg').textContent='يرجى إدخال الاسم';return;}
+  if(pw&&pw.length<4){$('pr-msg').textContent='كلمة المرور قصيرة جداً';return;}
+  if(pw&&pw!==pw2){$('pr-msg').textContent='كلمتا المرور غير متطابقتين';return;}
+  const accts=loadAccounts();
+  const idx=accts.findIndex(a=>a.id===currentUser.id);
+  if(idx===-1)return;
+  accts[idx]={...accts[idx],name,email,phone,apple};
+  if(pw)accts[idx].passwordHash=await hashPwd(pw);
+  saveAccounts(accts);currentUser=accts[idx];
+  const av=name[0].toUpperCase();
+  $('sbAv').textContent=av;$('tbAv').textContent=av;
+  $('sbName').textContent=name;$('tbName').textContent=name;
+  closeModal('modal-profile');toast('تم تحديث الحساب ✓','success');
 }
 
 // ══════════════════════════════════════════════════
@@ -2283,6 +2523,8 @@ function sheetDelEmp(id){
 
 // Load all persisted data immediately on page load
 loadAllData();
+// Restore session or show setup if first run
+checkFirstRun();
 
 // Drop zone drag events
 document.addEventListener('DOMContentLoaded',()=>{
