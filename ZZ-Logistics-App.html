@@ -2147,6 +2147,26 @@ function renderStaffPage(){
   if(!$('stab-salary').classList.contains('hidden'))renderSalaryReport();
   if(!$('stab-sheet').classList.contains('hidden')){initSheetMonth();_sheetAutoSave();renderSheet();}
 }
+function _sheetWeekStats(staffId,weekStart,weekEnd,weekAtt){
+  if(!sheetMonthKey||!sheetEmps.length)return{h:0,s:0};
+  const shEmp=sheetEmps.find(e=>e.staffId===staffId);
+  if(!shEmp)return{h:0,s:0};
+  const st=staff.find(s=>s.id===staffId);
+  if(!st)return{h:0,s:0};
+  const dailyLim=st.weekHours/5;
+  let totH=0,totS=0;
+  const[sy,sm]=sheetMonthKey.split('-').map(Number);
+  const dim=new Date(sy,sm,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const dd=pad(d);
+    const date=sheetMonthKey+'-'+dd;
+    if(date<weekStart||date>weekEnd)continue;
+    if(weekAtt.find(a=>a.staffId===staffId&&a.date===date))continue;
+    const sv=sheetDays[dd]&&sheetDays[dd][shEmp.id];
+    if(sv&&sv.s&&sv.e){const h=calcHours(sv.s,sv.e,0);totH+=h;const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);totS+=reg*st.rate+ot*st.rate*1.5;}
+  }
+  return{h:totH,s:totS};
+}
 function updateStaffStats(){
   $('st-count').textContent=staff.length;
   const{start,end}=getWeekRange();
@@ -2161,6 +2181,8 @@ function updateStaffStats(){
       const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);
       totS+=reg*s.rate+ot*s.rate*1.5;
     });
+    const sh=_sheetWeekStats(s.id,start,end,weekAtt);
+    totH+=sh.h;totS+=sh.s;
   });
   $('st-hours').textContent=formatHours(totH);
   $('st-salary').textContent=totS.toFixed(2)+' €';
@@ -2169,17 +2191,20 @@ function renderStaffCards(list){
   const{start,end}=getWeekRange();
   const data=list||staff;
   if(!data.length){$('staff-grid').innerHTML='<p style="color:var(--muted);padding:20px">لا يوجد موظفون — أضف موظفاً جديداً</p>';return;}
+  const allWeekAtt=attendance.filter(a=>a.date>=start&&a.date<=end);
   $('staff-grid').innerHTML=data.map(s=>{
     const allAtt=attendance.filter(a=>a.staffId===s.id);
-    const weekAtt=allAtt.filter(a=>a.date>=start&&a.date<=end);
+    const sWeekAtt=allWeekAtt.filter(a=>a.staffId===s.id);
     const dailyLim=s.weekHours/5;
     let weekH=0,weekS=0;
-    weekAtt.forEach(a=>{
+    sWeekAtt.forEach(a=>{
       const h=calcHours(a.start,a.end,a.break);
       weekH+=h;
       const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);
       weekS+=reg*s.rate+ot*s.rate*1.5;
     });
+    const sh=_sheetWeekStats(s.id,start,end,allWeekAtt);
+    weekH+=sh.h;weekS+=sh.s;
     return`<div class="staff-card">
       <div class="staff-top">
         <div class="staff-av">${s.name[0]}</div>
@@ -2696,6 +2721,7 @@ function sheetOnChange(empId,dd){
   if(totEl)totEl.textContent=totH>0?formatHours(totH):'—';
   if(salEl&&emp)salEl.textContent=totH>0?(totH*emp.rate).toFixed(2)+' €':'—';
   _sheetAutoSave();
+  updateStaffStats();
 }
 function sheetNoteChange(dd){
   const nEl=document.getElementById('sh_note_'+dd);
