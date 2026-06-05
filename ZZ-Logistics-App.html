@@ -212,6 +212,27 @@ button,select,input{font-family:inherit;font-size:inherit}
 .sort-upload-card{max-width:560px;margin:40px auto 0}
 .sort-drop-zone{border:2px dashed var(--blue);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:background .2s}
 .sort-drop-zone:hover{background:#eff6ff}
+
+/* SORTIERKARTEN */
+.sk-page{width:283mm;min-height:196mm;background:#fff;margin:0 auto 10mm;padding:3mm;box-shadow:0 2px 10px rgba(0,0,0,.2);display:flex;flex-direction:column;box-sizing:border-box}
+.sk-ph{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:2mm 4mm;margin-bottom:2mm;border-radius:2px;flex-shrink:0}
+.sk-ph-title{font-size:11pt;font-weight:bold}
+.sk-ph-meta{font-size:8pt}
+.sk-sg{background:#0E7C3A;color:#fff;font-weight:bold;font-size:8.5pt;padding:1.5mm 3mm;margin-bottom:2mm;border-radius:2px;flex-shrink:0}
+.sk-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3mm;flex:1}
+.sk-card{border:2.5px solid #1F2C5C;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.sk-ch{display:flex;align-items:stretch;flex-shrink:0}
+.sk-ct{background:#C8102E;color:#fff;font-weight:bold;font-size:24pt;display:flex;align-items:center;justify-content:center;min-width:18mm;padding:2mm 3mm;letter-spacing:1px;line-height:1}
+.sk-cm{flex:1;background:#1F2C5C;display:flex;flex-direction:column;justify-content:center;padding:2mm 3mm;gap:1mm}
+.sk-cm-sub{font-size:7pt;color:#aac;text-transform:uppercase;letter-spacing:1px}
+.sk-cm-id{font-size:18pt;font-weight:bold;color:#fff;letter-spacing:2px;line-height:1}
+.sk-cb{flex:1;padding:1.5mm 2mm;background:#fff;overflow:hidden}
+.sk-cb table{width:100%;border-collapse:collapse}
+.sk-cb th{background:#1F2C5C;color:#fff;font-size:7.5pt;font-weight:bold;padding:1mm 2mm;text-align:center}
+.sk-cb td{padding:1.2mm 2mm;border-bottom:1px solid #e8e8e8;vertical-align:middle}
+.sk-cd{background:#C8102E;color:#fff;font-size:16pt;font-weight:bold;text-align:center;width:14mm;padding:1.5mm 2mm;line-height:1}
+.sk-pz{font-size:12pt;font-weight:bold;color:#1F2C5C;letter-spacing:.5px;padding-left:3mm}
+
 @media print{
   .no-print{display:none!important}
   .dp-page{box-shadow:none;margin:0;border-radius:0;page-break-after:always}
@@ -428,12 +449,14 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   /* ── dispatch plan print ── */
   body.print-sort #pv-sort{display:block !important}
   body.print-sort #sort-upload-panel,body.print-sort #sort-mapper,body.print-sort .no-print{display:none !important}
-  body.print-sort @page{size:A4 portrait;margin:8mm}
   body.print-sort .dp-page{page-break-after:always;box-shadow:none !important;border-radius:0 !important;margin:0 0 0 0 !important}
   body.print-sort .dp-inp{border:none !important;background:transparent !important;padding:0 !important}
   body.print-sort .dp-tbl td,body.print-sort .dp-tbl th{font-size:10px !important;padding:5px 6px !important}
   body.print-sort .dp-codes{font-size:12px !important}
   body.print-sort .dp-title{font-size:16px !important}
+  body.print-sort .sk-page{page-break-after:always;box-shadow:none!important;margin:0!important;width:100%!important}
+  body.print-sort .sk-page:last-child{page-break-after:avoid}
+  body.print-sort @page{size:A4 landscape;margin:7mm}
 
   /* ── print-only elements ── */
   .print-only{display:block !important}
@@ -815,36 +838,42 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
         <!-- Column mapper step -->
         <div id="sort-mapper" class="hidden">
-          <div class="card" style="max-width:720px;margin:0 auto">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-              <h3 class="card-title">⚙️ تعيين الأعمدة</h3>
-              <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:13px" onclick="clearSortResult()">↩ إلغاء</button>
-            </div>
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px">معاينة أول صفوف من الملف — اختر الأعمدة الصحيحة لكل حقل:</div>
-            <div id="sort-preview" style="overflow-x:auto;margin-bottom:18px;border:1px solid var(--border);border-radius:6px;font-size:11px"></div>
-            <div class="frow">
-              <div class="form-group">
-                <label>👤 اسم السائق *</label>
-                <select id="sm-name" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
-              </div>
-              <div class="form-group">
-                <label>🪪 رقم التعريف (OUT-APP)</label>
-                <select id="sm-id" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
-              </div>
-            </div>
-            <div class="frow">
-              <div class="form-group">
-                <label>📌 الأكواد / Tour No</label>
-                <select id="sm-tour" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
-              </div>
-              <div class="form-group">
-                <label>📮 البريد / PLZ</label>
-                <select id="sm-codes" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
-              </div>
-            </div>
-            <button class="btn btn-primary" style="margin-top:10px" onclick="_buildFromMapper()">✓ إنشاء الجدول</button>
-          </div>
-        </div>
+  <div class="card" style="max-width:720px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 class="card-title">⚙️ تعيين الأعمدة</h3>
+      <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:13px" onclick="clearSortResult()">↩ إلغاء</button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">معاينة أول صفوف من الملف — اختر الأعمدة الصحيحة لكل حقل:</div>
+    <div id="sort-preview" style="overflow-x:auto;margin-bottom:18px;border:1px solid var(--border);border-radius:6px;font-size:11px"></div>
+    <div class="frow">
+      <div class="form-group">
+        <label>📌 رقم التور TOUR NO *</label>
+        <select id="sm-tour" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
+      </div>
+      <div class="form-group">
+        <label>🔢 الكود CODE *</label>
+        <select id="sm-code" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="form-group">
+        <label>📮 البريد PLZ *</label>
+        <select id="sm-plz" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
+      </div>
+      <div class="form-group">
+        <label>🏢 الشركة COMPANY</label>
+        <select id="sm-comp" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="form-group" style="max-width:50%">
+        <label>🪪 رقم التعريف ID</label>
+        <select id="sm-id" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="_buildFromMapper()">✓ إنشاء بطاقات الفرز</button>
+  </div>
+</div>
 
         <div id="sort-result" class="hidden">
           <div class="toolbar no-print" style="margin-bottom:20px">
@@ -1927,135 +1956,107 @@ function _handleSortExcel(file){
 
 function _parseSortRows(rows){
   _sortRawRows=rows;
-  // Find header row — try up to row 6
   let hdrIdx=0,hdr=[];
   for(let i=0;i<Math.min(6,rows.length);i++){
     const r=rows[i].map(c=>String(c).toUpperCase().trim());
-    if(r.some(c=>c.length>0&&(c.includes('NAME')||c.includes('TOUR')||c.includes('DRIVER')||c.includes('FAHRER')))){hdrIdx=i;hdr=r;break;}
+    if(r.some(c=>c.length>0&&(c.includes('TOUR')||c.includes('CODE')||c.includes('PLZ')))){hdrIdx=i;hdr=r;break;}
   }
   if(!hdr.length){hdr=rows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
   _sortHdrIdx=hdrIdx;
   const origHdr=rows[hdrIdx].map(c=>String(c).trim());
-
   const ci=(keys)=>{for(const k of keys){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
-  const iName=ci(['NAME','DRIVER','FAHRER','السائق']);
-  const iTour=ci(['TOUR NO','TOUR_NO','TOUR']);
-  const iCodes=ci(['CODES','CODE','PLZ','POSTAL']);
-  const iId=ci(['OUT-APP','OUT APP','APP','ID']);
-
-  // Build dropdown options
+  const iTour=ci(['TOUR NO','TOUR_NO','TOUR','T-NR']);
+  const iCode=ci(['CODES','CODE','COD','SORT']);
+  const iPlz =ci(['PLZ','POSTAL','POST','ZIP']);
+  const iComp=ci(['COMPANY','FIRMA','COMP','ZUG']);
+  const iId  =ci(['OUT-APP','OUT APP','APP','ID']);
   const NONE=`<option value="-1">— لا شيء —</option>`;
   const opts=origHdr.map((h,i)=>`<option value="${i}">${h||'عمود '+(i+1)}</option>`).join('');
-  ['sm-name','sm-id','sm-tour','sm-codes'].forEach(id=>{const el=$(id);if(el)el.innerHTML=NONE+opts;});
-  if(iName>=0)$('sm-name').value=iName;
-  if(iId>=0)$('sm-id').value=iId;
+  ['sm-tour','sm-code','sm-plz','sm-comp','sm-id'].forEach(id=>{const el=$(id);if(el)el.innerHTML=NONE+opts;});
   if(iTour>=0)$('sm-tour').value=iTour;
-  if(iCodes>=0)$('sm-codes').value=iCodes;
-
-  // Preview table (header + first 4 data rows)
+  if(iCode>=0)$('sm-code').value=iCode;
+  if(iPlz>=0)$('sm-plz').value=iPlz;
+  if(iComp>=0)$('sm-comp').value=iComp;
+  if(iId>=0)$('sm-id').value=iId;
   const pvRows=rows.slice(hdrIdx,Math.min(hdrIdx+5,rows.length));
   let pv=`<table style="width:100%;border-collapse:collapse"><thead><tr>`;
-  origHdr.forEach(h=>pv+=`<th style="background:#1a2744;color:#fff;padding:5px 8px;white-space:nowrap;font-size:11px">${h||'—'}</th>`);
+  origHdr.forEach(h=>pv+=`<th style="background:#1F2C5C;color:#fff;padding:5px 8px;white-space:nowrap;font-size:11px">${h||'—'}</th>`);
   pv+=`</tr></thead><tbody>`;
-  pvRows.slice(1).forEach(row=>{
-    pv+=`<tr>`;
-    origHdr.forEach((_,i)=>pv+=`<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap;font-size:11px">${String(row[i]||'')}</td>`);
-    pv+=`</tr>`;
-  });
+  pvRows.slice(1).forEach(row=>{pv+=`<tr>`;origHdr.forEach((_,i)=>pv+=`<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap;font-size:11px">${String(row[i]||'')}</td>`);pv+=`</tr>`;});
   pv+=`</tbody></table>`;
   $('sort-preview').innerHTML=pv;
-
   $('sort-upload-panel').classList.add('hidden');
   $('sort-mapper').classList.remove('hidden');
 }
 
 function _buildFromMapper(){
-  const iName=parseInt($('sm-name').value);
-  const iId=parseInt($('sm-id').value);
   const iTour=parseInt($('sm-tour').value);
-  const iCodes=parseInt($('sm-codes').value);
-  if(iName<0){toast('يرجى اختيار عمود اسم السائق','error');return;}
-
+  const iCode=parseInt($('sm-code').value);
+  const iPlz =parseInt($('sm-plz').value);
+  const iComp=parseInt($('sm-comp').value);
+  const iId  =parseInt($('sm-id').value);
+  if(iTour<0){toast('يرجى اختيار عمود رقم التور TOUR NO','error');return;}
   const rows=_sortRawRows,hdrIdx=_sortHdrIdx;
-  const map={};
+  const tourMap={};
   for(let i=hdrIdx+1;i<rows.length;i++){
     const r=rows[i];
-    const name=String(r[iName]||'').trim();
-    if(!name||name.toUpperCase()===String(rows[hdrIdx][iName]||'').toUpperCase())continue;
-    if(!map[name])map[name]={name,id:'',tours:[],codes:[]};
-    const d=map[name];
-    if(iId>=0&&!d.id)d.id=String(r[iId]||'').trim();
-    if(iTour>=0){const t=String(r[iTour]||'').trim();if(t&&!d.tours.includes(t))d.tours.push(t);}
-    if(iCodes>=0){const c=String(r[iCodes]||'').trim();if(c&&!d.codes.includes(c))d.codes.push(c);}
+    const tourRaw=String(r[iTour]||'').trim();
+    if(!tourRaw)continue;
+    if(!tourMap[tourRaw])tourMap[tourRaw]={tourRaw,tourNum:parseInt(tourRaw)||0,company:'',id:'',rows:[]};
+    const t=tourMap[tourRaw];
+    if(iComp>=0&&!t.company)t.company=String(r[iComp]||'').trim();
+    if(iId>=0&&!t.id)t.id=String(r[iId]||'').trim();
+    const code=iCode>=0?String(r[iCode]||'').trim():'';
+    const plz =iPlz>=0?String(r[iPlz]||'').trim():'';
+    if(code||plz)t.rows.push({code,plz});
   }
-  const list=Object.values(map).filter(d=>d.name);
-  if(!list.length){toast('لم يتم العثور على بيانات','error');return;}
-  list.forEach(d=>{
-    const nums=d.tours.map(t=>parseInt(t)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
-    const uniq=[...new Set(nums)];
-    if(uniq.length){
-      const ranges=[];let s=uniq[0],e=uniq[0];
-      for(let i=1;i<uniq.length;i++){
-        if(uniq[i]===e+1)e=uniq[i];
-        else{ranges.push(s===e?`${s}`:`${s}-${e}`);s=e=uniq[i];}
-      }
-      ranges.push(s===e?`${s}`:`${s}-${e}`);
-      d.toursStr=ranges.join(', ');
-    }else d.toursStr=d.tours.join(', ');
-    if(d.id){const n=parseInt(d.id);d.outApp=isNaN(n)?d.id:'D'+String(n).padStart(3,'0');}else d.outApp='—';
-  });
-  _sortData={list,total:list.length};
+  const tours=Object.values(tourMap).filter(t=>t.rows.length>0||t.id);
+  tours.sort((a,b)=>a.tourNum-b.tourNum);
+  if(!tours.length){toast('لم يتم العثور على بيانات','error');return;}
+  tours.forEach(t=>{if(t.id){const n=parseInt(t.id);t.outApp=isNaN(n)?t.id:'D'+String(n).padStart(3,'0');}else t.outApp='—';});
+  _sortData={tours,total:tours.length};
   $('sort-mapper').classList.add('hidden');
-  _renderDispatchPlan();
+  _renderSortierkarten();
 }
 
 function _fmtDate(v){
   if(!v)return new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const[y,m,d]=v.split('-');return`${d}/${m}/${y}`;
+  const[y,m,d]=v.split('-');return`${d}.${m}.${y}`;
 }
 
-function _renderDispatchPlan(){
+function _buildSgLabel(slice){
+  const groups=[];let cur=null;
+  for(const t of slice){
+    const co=t.company||'—';
+    if(!cur||cur.company!==co){if(cur)groups.push(cur);cur={company:co,tours:[t]};}
+    else cur.tours.push(t);
+  }
+  if(cur)groups.push(cur);
+  if(groups.length===1){
+    const g=groups[0];
+    return`${g.company} &mdash; ${g.tours.map(t=>'T'+t.tourRaw).join(' &middot; ')}`;
+  }
+  return groups.map(g=>`${g.company} ${g.tours.map(t=>'T'+t.tourRaw).join(' &middot; ')}`).join(' &nbsp;/&nbsp; ');
+}
+
+function _renderSortierkarten(){
   if(!_sortData)return;
-  const{list,total}=_sortData;
+  const{tours,total}=_sortData;
   const date=$('sort-date').value;
-  const loc=($('sort-loc').value.trim())||'DE05005 Duisburg';
-  const PER=8,pages=Math.ceil(total/PER);
+  const loc=($('sort-loc').value.trim())||'Z&Z GmbH &middot; NRW';
+  const PER=6;const pages=Math.ceil(total/PER);
+  const dateStr=_fmtDate(date);
   let html='';
   for(let p=0;p<pages;p++){
-    const slice=list.slice(p*PER,(p+1)*PER);
-    const from=p*PER+1,to=Math.min((p+1)*PER,total);
-    html+=`<div class="dp-page">
-      <div class="dp-header"><div class="dp-title">حطة التوزيع اليومية — ${_fmtDate(date)}</div></div>
-      <div class="dp-subhdr">Daily Dispatch Plan &bull; ${total} Drivers &bull; ${loc} &bull; Page ${p+1} of ${pages} &bull; Drivers ${from}&ndash;${to}</div>
-      <table class="dp-tbl">
-        <thead><tr>
-          <th style="width:40px">رقم<br><small>#</small></th>
-          <th style="width:72px">اوت آب<br><small>OUT-APP</small></th>
-          <th>السائق<br><small>Driver</small></th>
-          <th style="width:110px">الأكواد<br><small>Codes</small></th>
-          <th>البريد<br><small>PLZ</small></th>
-          <th style="width:78px">المخطط<br><small>Planned</small></th>
-          <th style="width:78px">الفعلي<br><small>Actual</small></th>
-          <th style="width:88px">المسؤول<br><small>Manager</small></th>
-          <th style="width:130px">ملاحظات<br><small>Notes</small></th>
-        </tr></thead>
-        <tbody>${slice.map((d,i)=>`<tr>
-          <td class="dp-num">${p*PER+i+1}</td>
-          <td class="dp-id">${d.outApp}</td>
-          <td><div class="dp-driver-name">${d.name}</div>${d.comp?`<div style="font-size:11px;color:#888">${d.comp}</div>`:''}</td>
-          <td class="dp-codes">${d.toursStr||'—'}</td>
-          <td class="dp-plz">${d.codes.join(' ')}</td>
-          <td><input class="dp-inp" type="text" placeholder="—"></td>
-          <td><input class="dp-inp" type="text" placeholder="—"></td>
-          <td><input class="dp-inp" type="text" placeholder="—"></td>
-          <td><input class="dp-inp" type="text" placeholder="ملاحظة..."></td>
-        </tr>`).join('')}</tbody>
-      </table>
-      <div class="dp-footer">مجموع الطرود في هذه الصفحة: — &bull; Page total: — &bull; Drivers: ${slice.length}</div>
-    </div>`;
+    const slice=tours.slice(p*PER,(p+1)*PER);
+    const sgLabel=_buildSgLabel(slice);
+    const cards=slice.map(t=>{
+      const rows=t.rows.map(r=>`<tr><td class="sk-cd">${r.code}</td><td class="sk-pz">${r.plz}</td></tr>`).join('');
+      return`<div class="sk-card"><div class="sk-ch"><div class="sk-ct">T${t.tourRaw}</div><div class="sk-cm"><span class="sk-cm-sub">${t.company||'—'}</span><span class="sk-cm-id">${t.outApp}</span></div></div><div class="sk-cb"><table><tr><th>CODE</th><th>PLZ</th></tr>${rows}</table></div></div>`;
+    }).join('');
+    html+=`<div class="sk-page"><div class="sk-ph"><span class="sk-ph-title">SORTIERKARTEN &ndash; ${dateStr}</span><span class="sk-ph-meta">${loc}</span></div><div class="sk-sg">${sgLabel}</div><div class="sk-grid">${cards}</div></div>`;
   }
   $('dp-pages').innerHTML=html;
-  $('sort-upload-panel').classList.add('hidden');
   $('sort-result').classList.remove('hidden');
 }
 
