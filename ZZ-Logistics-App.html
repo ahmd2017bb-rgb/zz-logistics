@@ -2128,6 +2128,7 @@ function showStaffTab(tab,btn){
   $('stab-'+tab).classList.remove('hidden');
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  if(tab==='employees')updateStaffStats();
   if(tab==='attendance')renderAttendance();
   if(tab==='salary')renderSalaryReport();
   if(tab==='sheet'){initSheetMonth();renderSheet();}
@@ -2144,21 +2145,34 @@ function updateStaffStats(){
   const{start,end}=getWeekRange();
   const weekAtt=attendance.filter(a=>a.date>=start&&a.date<=end);
   let totH=0,totS=0;
-  weekAtt.forEach(a=>{
-    const h=calcHours(a.start,a.end,a.break);
-    const s=staff.find(x=>x.id===a.staffId);
-    totH+=h;
-    if(s){const reg=Math.min(h,s.weekHours/5);totS+=reg*s.rate+Math.max(0,h-reg)*s.rate*1.5;}
+  staff.forEach(s=>{
+    const sAtt=weekAtt.filter(a=>a.staffId===s.id);
+    const dailyLim=s.weekHours/5;
+    sAtt.forEach(a=>{
+      const h=calcHours(a.start,a.end,a.break);
+      totH+=h;
+      const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);
+      totS+=reg*s.rate+ot*s.rate*1.5;
+    });
   });
   $('st-hours').textContent=formatHours(totH);
   $('st-salary').textContent=totS.toFixed(2)+' €';
 }
 function renderStaffCards(list){
+  const{start,end}=getWeekRange();
   const data=list||staff;
   if(!data.length){$('staff-grid').innerHTML='<p style="color:var(--muted);padding:20px">لا يوجد موظفون — أضف موظفاً جديداً</p>';return;}
   $('staff-grid').innerHTML=data.map(s=>{
-    const att=attendance.filter(a=>a.staffId===s.id);
-    const totH=att.reduce((sum,a)=>sum+calcHours(a.start,a.end,a.break),0);
+    const allAtt=attendance.filter(a=>a.staffId===s.id);
+    const weekAtt=allAtt.filter(a=>a.date>=start&&a.date<=end);
+    const dailyLim=s.weekHours/5;
+    let weekH=0,weekS=0;
+    weekAtt.forEach(a=>{
+      const h=calcHours(a.start,a.end,a.break);
+      weekH+=h;
+      const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);
+      weekS+=reg*s.rate+ot*s.rate*1.5;
+    });
     return`<div class="staff-card">
       <div class="staff-top">
         <div class="staff-av">${s.name[0]}</div>
@@ -2166,8 +2180,9 @@ function renderStaffCards(list){
       </div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px">📞 ${s.phone}</div>
       <div class="staff-stats">
-        <div class="staff-stat"><div class="staff-stat-n">${att.length}</div><div class="staff-stat-l">أيام دوام</div></div>
-        <div class="staff-stat"><div class="staff-stat-n">${formatHours(totH)}</div><div class="staff-stat-l">إجمالي ساعات</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${allAtt.length}</div><div class="staff-stat-l">أيام دوام</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${formatHours(weekH)}</div><div class="staff-stat-l">ساعات الأسبوع</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${weekS.toFixed(0)}€</div><div class="staff-stat-l">راتب الأسبوع</div></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="act-btn act-edit" style="flex:1;text-align:center" onclick="editStaffMember(${s.id})">تعديل</button>
@@ -2263,11 +2278,11 @@ function saveAttendance(){
   const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||30,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
-  closeModal('modal-att');renderAttendance();updateStaffStats();autosave();
+  closeModal('modal-att');renderAttendance();renderStaffPage();autosave();
 }
 function delAttendance(id){
   attendance=attendance.filter(a=>a.id!==id);
-  renderAttendance();updateStaffStats();toast('تم حذف السجل','success');autosave();
+  renderAttendance();renderStaffPage();toast('تم حذف السجل','success');autosave();
 }
 
 // ── SALARY REPORT ────────────────────────────────
