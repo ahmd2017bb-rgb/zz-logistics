@@ -1937,9 +1937,47 @@ function clearSortResult(){
 }
 
 function printSort(){
-  document.body.classList.add('print-sort');
-  window.print();
-  window.addEventListener('afterprint',()=>document.body.classList.remove('print-sort'),{once:true});
+  const content=$('dp-pages').innerHTML;
+  if(!content.trim()){toast('لا يوجد محتوى للطباعة','error');return;}
+  if(!$('dp-pages').querySelector('.sk-page')){
+    document.body.classList.add('print-sort');
+    window.print();
+    window.addEventListener('afterprint',()=>document.body.classList.remove('print-sort'),{once:true});
+    return;
+  }
+  const dateStr=_fmtDate($('sort-date').value);
+  const loc=($('sort-loc').value.trim())||'Z&Z GmbH';
+  const win=window.open('','_blank','width=1100,height=800');
+  win.document.write(`<!DOCTYPE html><html lang="de"><head>
+<meta charset="UTF-8">
+<title>Sortierkarten ${dateStr} – ${loc}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#fff}
+@page{size:A4 landscape;margin:7mm}
+@media print{html,body{margin:0;padding:0;background:#fff}.sk-page{page-break-after:always}.sk-page:last-child{page-break-after:avoid}}
+.sk-page{width:283mm;min-height:196mm;background:#fff;margin:0 auto 10mm;padding:3mm;display:flex;flex-direction:column}
+.sk-ph{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:2mm 4mm;margin-bottom:2mm;border-radius:2px;flex-shrink:0}
+.sk-ph-title{font-size:11pt;font-weight:bold}.sk-ph-meta{font-size:8pt}
+.sk-sg{background:#0E7C3A;color:#fff;font-weight:bold;font-size:8.5pt;padding:1.5mm 3mm;margin-bottom:2mm;border-radius:2px;flex-shrink:0}
+.sk-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3mm;flex:1}
+.sk-card{border:2.5px solid #1F2C5C;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.sk-ch{display:flex;align-items:stretch;flex-shrink:0}
+.sk-ct{background:#C8102E;color:#fff;font-weight:bold;font-size:24pt;display:flex;align-items:center;justify-content:center;min-width:18mm;padding:2mm 3mm;letter-spacing:1px;line-height:1}
+.sk-cm{flex:1;background:#1F2C5C;display:flex;flex-direction:column;justify-content:center;padding:2mm 3mm;gap:1mm}
+.sk-cm-sub{font-size:7pt;color:#aac;text-transform:uppercase;letter-spacing:1px}
+.sk-cm-id{font-size:18pt;font-weight:bold;color:#fff;letter-spacing:2px;line-height:1}
+.sk-cb{flex:1;padding:1.5mm 2mm;background:#fff;overflow:hidden}
+.sk-cb table{width:100%;border-collapse:collapse}
+.sk-cb th{background:#1F2C5C;color:#fff;font-size:7.5pt;font-weight:bold;padding:1mm 2mm;text-align:center}
+.sk-cb td{padding:1.2mm 2mm;border-bottom:1px solid #e8e8e8;vertical-align:middle}
+.sk-cd{background:#C8102E;color:#fff;font-size:16pt;font-weight:bold;text-align:center;width:14mm;padding:1.5mm 2mm;line-height:1}
+.sk-pz{font-size:12pt;font-weight:bold;color:#1F2C5C;letter-spacing:.5px;padding-left:3mm}
+</style></head><body>
+${content}
+<script>window.onload=function(){window.print();window.onafterprint=function(){window.close()};}<\/script>
+</body></html>`);
+  win.document.close();
 }
 
 function handleSortFile(file){
