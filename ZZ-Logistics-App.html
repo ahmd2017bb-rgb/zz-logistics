@@ -2127,6 +2127,7 @@ function getPeriodRange(period){
 
 // ── STAFF TAB SWITCHING ──────────────────────────
 function showStaffTab(tab,btn){
+  if(sheetMonthKey&&tab!=='sheet'&&!$('stab-sheet').classList.contains('hidden')){collectSheetFromDOM();_sheetAutoSave();}
   document.querySelectorAll('.stab-content').forEach(t=>t.classList.add('hidden'));
   $('stab-'+tab).classList.remove('hidden');
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
@@ -2544,12 +2545,16 @@ function sheetTodayKey(){
 }
 
 function _syncSheetStaff(){
+  if(staff.length>0&&sheetEmps.length>0&&sheetEmps.every(e=>!e.staffId))sheetEmps=[];
   staff.forEach(s=>{
     const ex=sheetEmps.find(e=>e.staffId===s.id);
     if(ex){ex.name=s.name;ex.rate=s.rate;}
     else sheetEmps.push({id:sheetNextEId++,staffId:s.id,name:s.name,rate:s.rate});
   });
   sheetEmps=sheetEmps.filter(e=>!e.staffId||staff.find(s=>s.id===e.staffId));
+}
+function _sheetAutoSave(){
+  localStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
 }
 
 function initSheetMonth(){
@@ -2627,7 +2632,7 @@ function renderSheet(){
       h+=`<td class="sh-hrs-cell" id="sh_${emp.id}_${dd}_t">${hrs}</td>`;
     });
     h+=`<td></td>`;
-    h+=`<td class="sh-note-cell"><input type="text" class="sh-note-inp" id="sh_note_${dd}" placeholder="ملاحظة…" value="${sheetNotes[dd]||''}"></td>`;
+    h+=`<td class="sh-note-cell"><input type="text" class="sh-note-inp" id="sh_note_${dd}" placeholder="ملاحظة…" value="${sheetNotes[dd]||''}" oninput="sheetNoteChange('${dd}')"></td>`;
     h+='</tr>';
   }
 
@@ -2690,6 +2695,12 @@ function sheetOnChange(empId,dd){
   const emp=sheetEmps.find(e=>e.id==empId);
   if(totEl)totEl.textContent=totH>0?formatHours(totH):'—';
   if(salEl&&emp)salEl.textContent=totH>0?(totH*emp.rate).toFixed(2)+' €':'—';
+  _sheetAutoSave();
+}
+function sheetNoteChange(dd){
+  const nEl=document.getElementById('sh_note_'+dd);
+  if(nEl)sheetNotes[dd]=nEl.value;
+  _sheetAutoSave();
 }
 
 function sheetChangeMonth(delta){
