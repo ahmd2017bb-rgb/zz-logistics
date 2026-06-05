@@ -1260,7 +1260,7 @@ function loadDay(dateStr){
   return (_sd.days && _sd.days[dateStr]) || {packages:0, delivered:0, returns:[]};
 }
 
-function saveDay(){
+async function saveDay(){
   const rets=[];
   document.querySelectorAll('.ret-row').forEach(tr=>{
     const inps=tr.querySelectorAll('input');
@@ -1269,7 +1269,10 @@ function saveDay(){
   currentDay.returns=rets;
   if(!_sd.days)_sd.days={};
   _sd.days[currentDate]=currentDay;
-  autosave();
+  _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;_sd.attendance=attendance;
+  _sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
+  clearTimeout(_saveTimer);_saveTimer=null;
+  await _pushToServer();
   toast('تم الحفظ بنجاح ✓','success');
   updateReturnCount();
 }
@@ -2421,10 +2424,20 @@ function autosave(){
   _sd.attendance=attendance;
   _sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
   clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(async()=>{
-    try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
-  },800);
+  _saveTimer=setTimeout(()=>_pushToServer(),800);
 }
+
+async function _pushToServer(){
+  try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
+}
+
+// Called before page closes — flushes any pending save immediately
+window.addEventListener('beforeunload',()=>{
+  if(_saveTimer){
+    clearTimeout(_saveTimer);
+    fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
+  }
+});
 
 function showSaveIndicator(){
   const el=document.getElementById('save-indicator');
@@ -2524,11 +2537,14 @@ function collectSheetFromDOM(){
   }
 }
 
-function saveSheet(){
+async function saveSheet(){
   collectSheetFromDOM();
   if(!_sd.sheets)_sd.sheets={};
   _sd.sheets[sheetMonthKey]={emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId};
-  autosave();
+  _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;_sd.attendance=attendance;
+  _sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
+  clearTimeout(_saveTimer);_saveTimer=null;
+  await _pushToServer();
   toast('تم حفظ الجدول ✓','success');
 }
 

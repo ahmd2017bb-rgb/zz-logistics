@@ -1421,7 +1421,7 @@ function checkSession(){
   return null;
 }
 function createSession(acct){
-  const s={id:acct.id,name:acct.name,expires:Date.now()+8*60*60*1000};
+  const s={id:acct.id,name:acct.name,expires:Date.now()+30*24*60*60*1000};
   localStorage.setItem(SESSION_KEY,JSON.stringify(s));
 }
 function clearSession(){localStorage.removeItem(SESSION_KEY);}
@@ -1506,9 +1506,20 @@ function populateSecQuestions(){
 // ── FIRST RUN ──────────────────────────────────
 function checkFirstRun(){
   populateSecQuestions();
+  const accts=loadAccounts();
   const sess=checkSession();
-  if(sess){const acct=loadAccounts().find(a=>a.id===sess.id);if(acct){currentUser=acct;enterApp(acct);return;}}
-  if(!loadAccounts().length){$('loginScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');}
+  if(sess){
+    const acct=accts.find(a=>a.id===sess.id);
+    if(acct){currentUser=acct;enterApp(acct);return;}
+  }
+  // Session expired but accounts exist → show login (NOT setup), data is safe
+  if(!accts.length){
+    $('loginScreen').classList.add('hidden');
+    $('setupScreen').classList.remove('hidden');
+  } else {
+    // Renew session automatically if only one account
+    if(accts.length===1){currentUser=accts[0];createSession(accts[0]);enterApp(accts[0]);}
+  }
 }
 
 // ── SIGNUP ─────────────────────────────────────
