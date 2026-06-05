@@ -276,6 +276,15 @@ button,select,input{font-family:inherit;font-size:inherit}
 .nrw-csp-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #1e1e3e;color:#ccc}
 .nrw-csp-row:last-child{border-bottom:none}
 .nrw-csp-num{font-weight:700;color:#fff}
+/* search input focus */
+#nrw-search:focus{border-color:#5a5aae !important}
+.nrw-sr{display:flex;align-items:center;gap:7px;background:#0f0f1a;border-radius:5px;padding:7px 10px;cursor:pointer;border:1px solid #2a2a4e;color:#fff;font-size:12px}
+.nrw-sr:hover{background:#1e1e3e}
+.nrw-sr-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.nrw-sr-plz{font-weight:700;font-size:12px}
+.nrw-sr-city{font-size:11px;color:#7777aa;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nrw-highlight{animation:nrwFlash 1.2s ease}
+@keyframes nrwFlash{0%,100%{fill-opacity:.65}40%{fill-opacity:1}}
 @media(max-width:800px){.pv-map-full{margin:-16px}.nrw-panel{width:220px}}
 </style>
 </head>
@@ -539,6 +548,14 @@ button,select,input{font-family:inherit;font-size:inherit}
             <div class="nrw-csp-row"><span>NRW-009</span><span class="nrw-csp-num">376</span></div>
             <div class="nrw-csp-row"><span>NRW-010</span><span class="nrw-csp-num">275</span></div>
             <div class="nrw-csp-row"><span>NRW-011</span><span class="nrw-csp-num">549</span></div>
+          </div>
+          <!-- Search -->
+          <div class="nrw-psec">
+            <span class="nrw-plbl">🔍 بحث سريع</span>
+            <input id="nrw-search" type="text" placeholder="اكتب رمز بريدي أو مدينة…"
+              oninput="nrwSearch(this.value)"
+              style="width:100%;padding:8px 10px;background:#0f0f1a;border:1px solid #2a2a4e;border-radius:7px;color:#fff;font-size:12px;outline:none">
+            <div id="nrw-search-results" style="margin-top:6px;display:flex;flex-direction:column;gap:3px"></div>
           </div>
           <!-- Zone list -->
           <div id="nrw-clist-wrap">
@@ -1222,7 +1239,41 @@ function nrwRefreshList(){
 
 function nrwZoomTo(plz){
   const b=nrwZones[plz]?.layer?.getBounds();
-  if(b?.isValid())nrwMap.fitBounds(b,{padding:[40,40]});
+  if(b?.isValid()){
+    nrwMap.fitBounds(b,{padding:[40,40]});
+    // Flash highlight
+    const layer=nrwZones[plz].layer;
+    const origColor=nrwZones[plz].color;
+    let on=true;
+    const flash=setInterval(()=>{
+      layer.setStyle({fillOpacity:on?1:.3});
+      on=!on;
+    },220);
+    setTimeout(()=>{clearInterval(flash);layer.setStyle({fillOpacity:.65});},1400);
+  }
+}
+
+function nrwSearch(q){
+  const res=$('nrw-search-results');
+  const qt=q.trim().toLowerCase();
+  if(!qt){res.innerHTML='';return;}
+  if(!Object.keys(nrwZones).length){
+    res.innerHTML='<div style="font-size:11px;color:#7777aa;padding:4px">الخريطة لم تُحمَّل بعد</div>';
+    return;
+  }
+  const matches=Object.entries(nrwZones)
+    .filter(([plz,z])=>plz.includes(qt)||z.city.toLowerCase().includes(qt))
+    .slice(0,6);
+  if(!matches.length){
+    res.innerHTML='<div style="font-size:11px;color:#7777aa;padding:4px">لا نتائج</div>';
+    return;
+  }
+  res.innerHTML=matches.map(([plz,z])=>`
+    <div class="nrw-sr" onclick="nrwZoomTo('${plz}');$('nrw-search').value='';$('nrw-search-results').innerHTML=''">
+      <div class="nrw-sr-dot" style="background:${z.color}"></div>
+      <span class="nrw-sr-plz">${plz}</span>
+      <span class="nrw-sr-city">${z.city}</span>
+    </div>`).join('');
 }
 </script>
 </body>
