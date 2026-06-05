@@ -2880,13 +2880,59 @@ function saveStaffMember(){
     rate,weekHours:wh};
   if(eid){const i=staff.findIndex(s=>s.id===parseInt(eid));if(i!==-1)staff[i]={...staff[i],...data};delete $('st-name').dataset.eid;toast('تم تحديث الموظف','success');}
   else{staff.push({id:nextStaffId++,...data});toast('تم إضافة الموظف','success');}
-  closeModal('modal-staff');renderStaffPage();autosaveNow();
+  closeModal('modal-staff');
+  if(sheetMonthKey){_syncSheetStaff();_sheetAutoSave();}
+  renderStaffPage();autosaveNow();
 }
 function delStaff(id){
   staff=staff.filter(s=>s.id!==id);
   attendance=attendance.filter(a=>a.staffId!==id);
+  if(sheetMonthKey){_syncSheetStaff();_sheetAutoSave();}
   renderStaffPage();
   toast('تم حذف الموظف','success');autosaveNow();
+}
+
+// ── ATTENDANCE ↔ SHEET SYNC ──────────────────────
+function _syncAttToSheet(att,remove){
+  const attMonth=att.date.substring(0,7);
+  const dd=att.date.substring(8,10);
+  const isCurrent=(sheetMonthKey===attMonth);
+
+  let emps,days,notes,nextId;
+  if(isCurrent){
+    emps=sheetEmps;days=sheetDays;notes=sheetNotes;nextId=sheetNextEId;
+  }else{
+    const raw=localStorage.getItem('zzsheet_'+attMonth);
+    if(raw){
+      try{const d=JSON.parse(raw);emps=d.emps||[];days=d.days||{};notes=d.notes||{};nextId=d.nextId||1;}
+      catch(e){emps=[];days={};notes={};nextId=1;}
+    }else{emps=[];days={};notes={};nextId=1;}
+    staff.forEach(s=>{
+      const ex=emps.find(e=>e.staffId===s.id);
+      if(ex){ex.name=s.name;ex.rate=s.rate;}
+      else emps.push({id:nextId++,staffId:s.id,name:s.name,rate:s.rate});
+    });
+    emps=emps.filter(e=>!e.staffId||staff.find(s=>s.id===e.staffId));
+  }
+
+  const shEmp=emps.find(e=>e.staffId===att.staffId);
+  if(!shEmp)return;
+
+  if(remove){
+    if(days[dd])delete days[dd][shEmp.id];
+  }else{
+    if(!days[dd])days[dd]={};
+    days[dd][shEmp.id]={s:att.start,e:att.end};
+    if(att.notes)notes[dd]=att.notes;
+  }
+
+  if(isCurrent){
+    sheetDays=days;sheetNotes=notes;
+    _sheetAutoSave();
+    if(document.getElementById('sheet-tbl-wrap'))renderSheet();
+  }else{
+    localStorage.setItem('zzsheet_'+attMonth,JSON.stringify({emps,days,notes,nextId}));
+  }
 }
 
 // ── ATTENDANCE ───────────────────────────────────
@@ -2942,9 +2988,12 @@ function saveAttendance(){
   const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||0,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
+  _syncAttToSheet(data);
   closeModal('modal-att');renderStaffPage();autosaveNow();
 }
 function delAttendance(id){
+  const rec=attendance.find(a=>a.id===id);
+  if(rec)_syncAttToSheet(rec,true);
   attendance=attendance.filter(a=>a.id!==id);
   renderStaffPage();toast('تم حذف السجل','success');autosaveNow();
 }
