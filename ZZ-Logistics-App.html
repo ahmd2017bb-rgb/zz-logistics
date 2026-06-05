@@ -2718,8 +2718,7 @@ function renderStaffPage(){
   populateAttStaffFilter();
   if(!$('stab-attendance').classList.contains('hidden')){
     renderAttendance();
-    initSheetMonth();
-    renderSheet();
+    if(sheetMonthKey)renderSheet();
   }
   if(!$('stab-salary').classList.contains('hidden'))renderSalaryReport();
 }
@@ -2839,52 +2838,6 @@ function delStaff(id){
   toast('تم حذف الموظف','success');autosave();
 }
 
-// ── ATTENDANCE ↔ SHEET SYNC ──────────────────────
-// Writes (or removes) one attendance record into the monthly sheet data.
-// Works on the in-memory sheet when the month matches; otherwise touches
-// only that month's localStorage entry so nothing gets lost.
-function _syncAttToSheet(att, remove){
-  const attMonth=att.date.substring(0,7);
-  const dd=att.date.substring(8,10);
-  const isCurrent=(sheetMonthKey===attMonth);
-
-  let emps,days,notes,nextId;
-  if(isCurrent){
-    emps=sheetEmps;days=sheetDays;notes=sheetNotes;nextId=sheetNextEId;
-  }else{
-    const raw=localStorage.getItem('zzsheet_'+attMonth);
-    if(raw){
-      try{const d=JSON.parse(raw);emps=d.emps||[];days=d.days||{};notes=d.notes||{};nextId=d.nextId||1;}
-      catch(e){emps=[];days={};notes={};nextId=1;}
-    }else{emps=[];days={};notes={};nextId=1;}
-    staff.forEach(s=>{
-      const ex=emps.find(e=>e.staffId===s.id);
-      if(ex){ex.name=s.name;ex.rate=s.rate;}
-      else emps.push({id:nextId++,staffId:s.id,name:s.name,rate:s.rate});
-    });
-    emps=emps.filter(e=>!e.staffId||staff.find(s=>s.id===e.staffId));
-  }
-
-  const shEmp=emps.find(e=>e.staffId===att.staffId);
-  if(!shEmp)return;
-
-  if(remove){
-    if(days[dd])delete days[dd][shEmp.id];
-  }else{
-    if(!days[dd])days[dd]={};
-    days[dd][shEmp.id]={s:att.start,e:att.end};
-    if(att.notes)notes[dd]=att.notes;
-  }
-
-  if(isCurrent){
-    sheetDays=days;sheetNotes=notes;
-    _sheetAutoSave();
-    if(document.getElementById('sheet-tbl-wrap'))renderSheet();
-  }else{
-    localStorage.setItem('zzsheet_'+attMonth,JSON.stringify({emps,days,notes,nextId}));
-  }
-}
-
 // ── ATTENDANCE ───────────────────────────────────
 function populateAttStaffFilter(){
   const sel=$('att-staff-f'),cur=sel.value;
@@ -2938,12 +2891,9 @@ function saveAttendance(){
   const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||0,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
-  _syncAttToSheet(data);
   closeModal('modal-att');renderStaffPage();autosave();
 }
 function delAttendance(id){
-  const rec=attendance.find(a=>a.id===id);
-  if(rec)_syncAttToSheet(rec,true);
   attendance=attendance.filter(a=>a.id!==id);
   renderStaffPage();toast('تم حذف السجل','success');autosave();
 }
@@ -3278,14 +3228,22 @@ function renderSheet(){
     h+=`<tr class="${isWknd?'sh-weekend':''}">`;
     h+=`<td class="sh-date-cell"><span class="sh-day-num">${dd}</span><span class="sh-day-name ${isWknd?'sh-wknd-lbl':''}">${DAYS_AR[dow]}</span></td>`;
     sheetEmps.forEach(emp=>{
-      const sv=(sheetDays[dd]&&sheetDays[dd][emp.id])||{};
+      // Manual sheet entry takes priority; fall back to attendance record for the day
+      let sv=sheetDays[dd]&&sheetDays[dd][emp.id];
+      if(!sv&&emp.staffId){
+        const ar=attendance.find(a=>a.staffId===emp.staffId&&a.date===sheetMonthKey+'-'+dd);
+        if(ar)sv={s:ar.start,e:ar.end};
+      }
+      sv=sv||{};
       const hrs=sv.s&&sv.e?sheetCalcDisplay(sv.s,sv.e):'';
       h+=`<td class="sh-time-cell"><input type="time" lang="de" class="sh-inp" id="sh_${emp.id}_${dd}_s" value="${sv.s||''}" onchange="sheetOnChange(${emp.id},'${dd}')"></td>`;
       h+=`<td class="sh-time-cell"><input type="time" lang="de" class="sh-inp" id="sh_${emp.id}_${dd}_e" value="${sv.e||''}" onchange="sheetOnChange(${emp.id},'${dd}')"></td>`;
       h+=`<td class="sh-hrs-cell" id="sh_${emp.id}_${dd}_t">${hrs}</td>`;
     });
     h+=`<td></td>`;
-    h+=`<td class="sh-note-cell"><input type="text" class="sh-note-inp" id="sh_note_${dd}" placeholder="ملاحظة…" value="${sheetNotes[dd]||''}" oninput="sheetNoteChange('${dd}')"></td>`;
+    // Note: show attendance notes for the day as fallback when no manual note
+    const dayNote=sheetNotes[dd]||attendance.filter(a=>a.date===sheetMonthKey+'-'+dd&&a.notes).map(a=>{const s=staff.find(x=>x.id===a.staffId);return(s?s.name:'')+': '+a.notes;}).join(' | ');
+    h+=`<td class="sh-note-cell"><input type="text" class="sh-note-inp" id="sh_note_${dd}" placeholder="ملاحظة…" value="${dayNote}" oninput="sheetNoteChange('${dd}')"></td>`;
     h+='</tr>';
   }
 
@@ -3316,10 +3274,16 @@ function sheetCalcDisplay(s,e){
 
 function sheetCalcTotal(empId,y,m,dim){
   let tot=0;
+  const emp=sheetEmps.find(e=>e.id===empId);
+  const monthKey=y+'-'+pad(m);
   for(let d=1;d<=dim;d++){
     const dd=pad(d);
-    const sv=(sheetDays[dd]&&sheetDays[dd][empId])||{};
-    if(sv.s&&sv.e)tot+=calcHours(sv.s,sv.e,0);
+    let sv=sheetDays[dd]&&sheetDays[dd][empId];
+    if(!sv&&emp&&emp.staffId){
+      const ar=attendance.find(a=>a.staffId===emp.staffId&&a.date===monthKey+'-'+dd);
+      if(ar)sv={s:ar.start,e:ar.end};
+    }
+    if(sv&&sv.s&&sv.e)tot+=calcHours(sv.s,sv.e,0);
   }
   return tot;
 }
