@@ -306,6 +306,43 @@ button,select,input{font-family:inherit;font-size:inherit}
 #excel-drop:hover{border-color:var(--blue) !important}
 .tbl tfoot td{padding:12px 15px;font-size:14px;border-top:2px solid var(--border)}
 
+/* ── MONTHLY SHEET ─────────────────────────── */
+.sheet-nav{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.sheet-month-title{font-size:17px;font-weight:900;color:var(--primary);flex:1;text-align:center}
+.sheet-tbl-wrap{overflow-x:auto}
+.sh-tbl{border-collapse:collapse;min-width:500px;width:100%;font-size:13px}
+.sh-tbl th,.sh-tbl td{border:1px solid #e2e8f0;text-align:center;vertical-align:middle}
+.sh-tbl thead th{padding:8px 10px}
+.sh-date-th{width:130px;background:#f8fafc;text-align:right!important}
+.sh-note-th{width:120px;background:#f8fafc}
+.sh-emp-hd{background:var(--primary);color:#fff;padding:9px 14px;position:relative}
+.sh-emp-hd-name{font-weight:700;font-size:13px}
+.sh-emp-rate-tag{font-size:10px;opacity:.65;margin-right:6px}
+.sh-emp-btns{display:inline-flex;gap:4px;margin-right:6px}
+.sh-edt,.sh-del{background:rgba(255,255,255,.15);border:none;border-radius:4px;color:#fff;padding:2px 6px;font-size:11px;cursor:pointer;line-height:1.4}
+.sh-edt:hover{background:rgba(255,255,255,.3)}.sh-del:hover{background:rgba(239,68,68,.5)}
+.sh-sub-th{background:#f1f5f9;font-size:11px;color:var(--muted);font-weight:600;padding:5px 8px}
+.sh-date-cell{text-align:right!important;background:#fafbfc;white-space:nowrap;padding:6px 10px}
+.sh-day-num{font-weight:700;color:var(--primary);font-size:13px;margin-left:5px}
+.sh-day-name{font-size:11px;color:var(--muted)}
+.sh-wknd-lbl{color:var(--red)!important}
+.sh-weekend .sh-date-cell{background:#fff5f5}
+.sh-weekend td{background:#fffafa}
+.sh-time-cell{padding:4px 3px}
+.sh-inp{border:1.5px solid #e2e8f0;border-radius:8px;padding:5px 4px;font-size:12px;width:90px;text-align:center;outline:none;background:#fff;color:var(--text);cursor:pointer}
+.sh-inp:focus{border-color:var(--blue);background:#eff6ff;box-shadow:0 0 0 2px rgba(26,86,219,.1)}
+.sh-inp:hover{border-color:#93c5fd}
+.sh-hrs-cell{font-weight:700;color:var(--green);font-size:12px;background:#f0fdf4;padding:6px 8px;min-width:58px}
+.sh-note-cell{padding:3px 5px}
+.sh-note-inp{border:1.5px solid #e2e8f0;border-radius:7px;padding:5px 7px;font-size:11px;width:108px;outline:none;color:var(--text)}
+.sh-note-inp:focus{border-color:var(--blue)}
+.sh-total-row td{background:#f1f5f9;font-weight:900;font-size:13px;padding:10px 10px;border-top:2px solid var(--border)}
+.sh-total-hrs{color:var(--primary);font-size:14px}
+.sh-salary-row td{background:#ecfdf5;font-weight:900;padding:10px 10px;border-top:1px solid #a7f3d0}
+.sh-salary-val{color:var(--green);font-size:15px;font-weight:900}
+.sh-add-emp-col{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:none;cursor:pointer;font-size:12px;padding:9px 14px;white-space:nowrap}
+.sh-add-emp-col:hover{background:rgba(255,255,255,.18);color:#fff}
+
 @media(max-width:800px){.pv-map-full{margin:-16px}.nrw-panel{width:220px}}
 </style>
 </head>
@@ -557,6 +594,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <button class="stab" onclick="showStaffTab('attendance',this)">📅 الدوام</button>
           <button class="stab" onclick="showStaffTab('salary',this)">💶 تقرير الراتب</button>
           <button class="stab" onclick="showStaffTab('excel',this)">📊 استيراد Excel</button>
+          <button class="stab" onclick="showStaffTab('sheet',this)">📋 جدول الشهر</button>
         </div>
 
         <!-- Tab: Employees -->
@@ -650,6 +688,22 @@ button,select,input{font-family:inherit;font-size:inherit}
                   <tbody id="excel-preview-tbody"></tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Monthly Sheet -->
+        <div id="stab-sheet" class="stab-content hidden">
+          <div class="sheet-nav">
+            <button class="date-nav-btn" onclick="sheetChangeMonth(-1)">→ الشهر السابق</button>
+            <button class="date-nav-btn date-nav-today" onclick="sheetGoToday()">📅 الشهر الحالي</button>
+            <div class="sheet-month-title" id="sheet-month-label">—</div>
+            <button class="date-nav-btn" onclick="sheetChangeMonth(1)">الشهر التالي ←</button>
+            <button class="date-nav-btn date-nav-save" onclick="saveSheet()">💾 حفظ</button>
+          </div>
+          <div class="card no-pad">
+            <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
+              <div style="padding:40px;text-align:center;color:var(--muted)">جاري تحميل الجدول…</div>
             </div>
           </div>
         </div>
@@ -819,6 +873,21 @@ button,select,input{font-family:inherit;font-size:inherit}
     <div class="modal-ft">
       <button class="btn btn-ghost" onclick="closeModal('modal-att')">إلغاء</button>
       <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveAttendance()">حفظ الدوام</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SHEET EMPLOYEE -->
+<div class="modal-bg hidden" id="modal-sheet-emp">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-top"><h3 id="sh-emp-modal-h">موظف في الجدول</h3><button class="modal-x" onclick="closeModal('modal-sheet-emp')">✕</button></div>
+    <div class="modal-bd">
+      <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="sh-emp-name" placeholder="مثال: طه"></div>
+      <div class="form-group"><label>الأجر بالساعة (€)</label><input type="number" id="sh-emp-rate" placeholder="13.50" step="0.01" min="0" value="13.50"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-sheet-emp')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 28px" onclick="saveSheetEmp()">حفظ</button>
     </div>
   </div>
 </div>
@@ -1497,6 +1566,7 @@ function showStaffTab(tab,btn){
   if(btn)btn.classList.add('active');
   if(tab==='attendance')renderAttendance();
   if(tab==='salary')renderSalaryReport();
+  if(tab==='sheet'){initSheetMonth();renderSheet();}
 }
 
 // ── STAFF PAGE ───────────────────────────────────
@@ -1765,6 +1835,220 @@ function clearExcelPreview(){
   $('excel-preview').classList.add('hidden');
   $('excel-preview-tbody').innerHTML='';
   pendingImport=[];$('excel-file').value='';
+}
+
+// ══════════════════════════════════════════════════
+// MONTHLY SHEET
+// ══════════════════════════════════════════════════
+const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const MONTHS_DE=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+let sheetMonthKey='';    // 'YYYY-MM'
+let sheetEmps=[];        // [{id,name,rate}]
+let sheetDays={};        // {dd:{empId:{s,e}}}
+let sheetNotes={};       // {dd:'text'}
+let sheetNextEId=1;
+let sheetEmpEditId=null;
+
+function sheetTodayKey(){
+  const n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1);
+}
+
+function initSheetMonth(){
+  if(!sheetMonthKey)sheetMonthKey=sheetTodayKey();
+  const raw=localStorage.getItem('zzsheet_'+sheetMonthKey);
+  if(raw){
+    try{const d=JSON.parse(raw);sheetEmps=d.emps||[];sheetDays=d.days||{};sheetNotes=d.notes||{};sheetNextEId=d.nextId||sheetNextEId;return;}catch(e){}
+  }
+  // First time this month: default employees طه/حمزة/ايمن
+  sheetEmps=[
+    {id:sheetNextEId++,name:'طه',rate:13.5},
+    {id:sheetNextEId++,name:'حمزة',rate:13.5},
+    {id:sheetNextEId++,name:'ايمن',rate:13.5},
+  ];
+  sheetDays={};sheetNotes={};
+}
+
+function collectSheetFromDOM(){
+  const[y,m]=sheetMonthKey.split('-').map(Number);
+  const dim=new Date(y,m,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const dd=pad(d);
+    sheetEmps.forEach(emp=>{
+      const sEl=document.getElementById('sh_'+emp.id+'_'+dd+'_s');
+      const eEl=document.getElementById('sh_'+emp.id+'_'+dd+'_e');
+      if(!sEl)return;
+      const s=sEl.value,e=eEl.value;
+      if(s||e){if(!sheetDays[dd])sheetDays[dd]={};sheetDays[dd][emp.id]={s,e};}
+      else if(sheetDays[dd])delete sheetDays[dd][emp.id];
+    });
+    const nEl=document.getElementById('sh_note_'+dd);
+    if(nEl)sheetNotes[dd]=nEl.value;
+  }
+}
+
+function saveSheet(){
+  collectSheetFromDOM();
+  localStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
+  toast('تم حفظ الجدول ✓','success');
+}
+
+function renderSheet(){
+  const[y,m]=sheetMonthKey.split('-').map(Number);
+  const dim=new Date(y,m,0).getDate();
+  $('sheet-month-label').textContent=MONTHS_AR[m-1]+' '+y+' / '+MONTHS_DE[m-1];
+
+  // Build table HTML
+  let h=`<table class="sh-tbl"><thead>`;
+  // Row 1: emp names
+  h+=`<tr><th class="sh-date-th">التاريخ / Datum</th>`;
+  sheetEmps.forEach(emp=>{
+    h+=`<th colspan="3" class="sh-emp-hd">
+      <span class="sh-emp-hd-name">${emp.name}</span>
+      <span class="sh-emp-rate-tag">${emp.rate.toFixed(2)}€/h</span>
+      <span class="sh-emp-btns">
+        <button class="sh-edt" onclick="openSheetEmpEdit(${emp.id})" title="تعديل">✏</button>
+        <button class="sh-del" onclick="sheetDelEmp(${emp.id})" title="حذف">✕</button>
+      </span>
+    </th>`;
+  });
+  h+=`<th class="sh-add-emp-col" onclick="openSheetEmpAdd()">＋ موظف</th>`;
+  h+=`<th class="sh-note-th">ملاحظات</th></tr>`;
+  // Row 2: sub-headers
+  h+=`<tr><th class="sh-date-th"></th>`;
+  sheetEmps.forEach(()=>{h+=`<th class="sh-sub-th">بدء</th><th class="sh-sub-th">نهاية</th><th class="sh-sub-th">ساعات</th>`;});
+  h+=`<th></th><th></th></tr></thead><tbody>`;
+
+  // Day rows
+  for(let d=1;d<=dim;d++){
+    const dd=pad(d);
+    const date=new Date(y,m-1,d);
+    const dow=date.getDay();
+    const isFri=dow===5,isSat=dow===6,isWknd=isFri||isSat;
+    h+=`<tr class="${isWknd?'sh-weekend':''}">`;
+    h+=`<td class="sh-date-cell"><span class="sh-day-num">${dd}</span><span class="sh-day-name ${isWknd?'sh-wknd-lbl':''}">${DAYS_AR[dow]}</span></td>`;
+    sheetEmps.forEach(emp=>{
+      const sv=(sheetDays[dd]&&sheetDays[dd][emp.id])||{};
+      const hrs=sv.s&&sv.e?sheetCalcDisplay(sv.s,sv.e):'';
+      h+=`<td class="sh-time-cell"><input type="time" class="sh-inp" id="sh_${emp.id}_${dd}_s" value="${sv.s||''}" onchange="sheetOnChange(${emp.id},'${dd}')"></td>`;
+      h+=`<td class="sh-time-cell"><input type="time" class="sh-inp" id="sh_${emp.id}_${dd}_e" value="${sv.e||''}" onchange="sheetOnChange(${emp.id},'${dd}')"></td>`;
+      h+=`<td class="sh-hrs-cell" id="sh_${emp.id}_${dd}_t">${hrs}</td>`;
+    });
+    h+=`<td></td>`;
+    h+=`<td class="sh-note-cell"><input type="text" class="sh-note-inp" id="sh_note_${dd}" placeholder="ملاحظة…" value="${sheetNotes[dd]||''}"></td>`;
+    h+='</tr>';
+  }
+
+  // Total row
+  h+='<tr class="sh-total-row"><td style="text-align:right;padding-right:12px;font-size:14px">المجموع الكلي</td>';
+  sheetEmps.forEach(emp=>{
+    const totH=sheetCalcTotal(emp.id,y,m,dim);
+    h+=`<td colspan="2" style="background:#f1f5f9"></td><td class="sh-hrs-cell sh-total-hrs" id="sh_${emp.id}_tot">${totH>0?formatHours(totH):'—'}</td>`;
+  });
+  h+='<td></td><td></td></tr>';
+
+  // Salary row
+  h+='<tr class="sh-salary-row"><td style="text-align:right;padding-right:12px;font-size:14px">💶 الراتب</td>';
+  sheetEmps.forEach(emp=>{
+    const totH=sheetCalcTotal(emp.id,y,m,dim);
+    const sal=totH*emp.rate;
+    h+=`<td colspan="2" style="background:#ecfdf5"></td><td class="sh-salary-val" id="sh_${emp.id}_sal">${sal>0?sal.toFixed(2)+' €':'—'}</td>`;
+  });
+  h+='<td></td><td></td></tr>';
+  h+='</tbody></table>';
+  $('sheet-tbl-wrap').innerHTML=h;
+}
+
+function sheetCalcDisplay(s,e){
+  const h=calcHours(s,e,0);
+  return h>0?formatHours(h):'';
+}
+
+function sheetCalcTotal(empId,y,m,dim){
+  let tot=0;
+  for(let d=1;d<=dim;d++){
+    const dd=pad(d);
+    const sv=(sheetDays[dd]&&sheetDays[dd][empId])||{};
+    if(sv.s&&sv.e)tot+=calcHours(sv.s,sv.e,0);
+  }
+  return tot;
+}
+
+function sheetOnChange(empId,dd){
+  const sEl=document.getElementById('sh_'+empId+'_'+dd+'_s');
+  const eEl=document.getElementById('sh_'+empId+'_'+dd+'_e');
+  const tEl=document.getElementById('sh_'+empId+'_'+dd+'_t');
+  const s=sEl?sEl.value:'',e=eEl?eEl.value:'';
+  let h=0;
+  if(s&&e){
+    h=calcHours(s,e,0);
+    if(tEl)tEl.textContent=h>0?formatHours(h):'';
+    if(!sheetDays[dd])sheetDays[dd]={};
+    sheetDays[dd][empId]={s,e};
+  }else{
+    if(tEl)tEl.textContent='';
+    if(sheetDays[dd])delete sheetDays[dd][empId];
+  }
+  // Update column totals
+  const[y,m]=sheetMonthKey.split('-').map(Number);
+  const dim=new Date(y,m,0).getDate();
+  const totH=sheetCalcTotal(empId,y,m,dim);
+  const totEl=document.getElementById('sh_'+empId+'_tot');
+  const salEl=document.getElementById('sh_'+empId+'_sal');
+  const emp=sheetEmps.find(e=>e.id==empId);
+  if(totEl)totEl.textContent=totH>0?formatHours(totH):'—';
+  if(salEl&&emp)salEl.textContent=totH>0?(totH*emp.rate).toFixed(2)+' €':'—';
+}
+
+function sheetChangeMonth(delta){
+  collectSheetFromDOM();
+  const[y,m]=sheetMonthKey.split('-').map(Number);
+  const d=new Date(y,m-1+delta,1);
+  sheetMonthKey=d.getFullYear()+'-'+pad(d.getMonth()+1);
+  initSheetMonth();
+  renderSheet();
+}
+
+function sheetGoToday(){
+  collectSheetFromDOM();
+  sheetMonthKey=sheetTodayKey();
+  initSheetMonth();
+  renderSheet();
+}
+
+// Sheet employee modal
+function openSheetEmpAdd(){
+  sheetEmpEditId=null;
+  $('sh-emp-name').value='';$('sh-emp-rate').value='13.50';
+  $('sh-emp-modal-h').textContent='إضافة موظف للجدول';
+  openM('modal-sheet-emp');
+}
+function openSheetEmpEdit(id){
+  const emp=sheetEmps.find(e=>e.id===id);if(!emp)return;
+  sheetEmpEditId=id;
+  $('sh-emp-name').value=emp.name;$('sh-emp-rate').value=emp.rate;
+  $('sh-emp-modal-h').textContent='تعديل بيانات الموظف';
+  openM('modal-sheet-emp');
+}
+function saveSheetEmp(){
+  const name=$('sh-emp-name').value.trim();
+  if(!name){toast('يرجى إدخال الاسم','error');return;}
+  const rate=parseFloat($('sh-emp-rate').value)||13.5;
+  if(sheetEmpEditId!==null){
+    const emp=sheetEmps.find(e=>e.id===sheetEmpEditId);
+    if(emp){emp.name=name;emp.rate=rate;}
+  }else{
+    sheetEmps.push({id:sheetNextEId++,name,rate});
+  }
+  closeModal('modal-sheet-emp');
+  renderSheet();
+}
+function sheetDelEmp(id){
+  if(sheetEmps.length<=1){toast('لا يمكن حذف آخر موظف في الجدول','error');return;}
+  sheetEmps=sheetEmps.filter(e=>e.id!==id);
+  Object.keys(sheetDays).forEach(dd=>{if(sheetDays[dd])delete sheetDays[dd][id];});
+  renderSheet();
 }
 
 // Drop zone drag events
