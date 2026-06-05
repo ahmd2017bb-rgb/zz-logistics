@@ -979,8 +979,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
         <div class="stat-row">
           <div class="stat-card c-blue"><div class="sc-ico">👥</div><div class="sc-body"><div class="sc-num" id="st-count">0</div><div class="sc-lbl" data-i18n="staff.count">الموظفون</div></div></div>
-          <div class="stat-card c-green"><div class="sc-ico">⏱</div><div class="sc-body"><div class="sc-num" id="st-hours">0h</div><div class="sc-lbl" data-i18n="staff.week_hours">ساعات هذا الأسبوع</div></div></div>
-          <div class="stat-card c-amber"><div class="sc-ico">💶</div><div class="sc-body"><div class="sc-num" id="st-salary">0 €</div><div class="sc-lbl" data-i18n="staff.week_salary">رواتب هذا الأسبوع</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">⏱</div><div class="sc-body"><div class="sc-num" id="st-hours">—</div><div class="sc-lbl" id="st-hours-lbl" data-i18n="staff.month_hours">ساعات الشهر</div></div></div>
+          <div class="stat-card c-amber"><div class="sc-ico">💶</div><div class="sc-body"><div class="sc-num" id="st-salary">—</div><div class="sc-lbl" data-i18n="staff.month_salary">رواتب الشهر</div></div></div>
         </div>
 
         <div class="staff-tabs">
@@ -1302,7 +1302,7 @@ Object.assign(T.ar,{
   'reports.col_driver':'السائق','reports.col_total':'المجموع','reports.col_success':'ناجح','reports.col_rate':'النسبة',
   'reports.col_area':'المنطقة','reports.col_orders':'الطلبات','reports.col_done':'مكتمل',
   'staff.section':'إدارة الموظفين','staff.count':'الموظفون',
-  'staff.week_hours':'ساعات هذا الأسبوع','staff.week_salary':'رواتب هذا الأسبوع',
+  'staff.month_hours':'ساعات الشهر','staff.month_salary':'رواتب الشهر',
   'staff.tab_emp':'👥 الموظفون','staff.tab_att':'📋 جدول الدوام',
   'staff.tab_sal':'💶 تقرير الراتب','staff.tab_excel':'📊 استيراد Excel',
   'staff.search_ph':'🔍 بحث عن موظف...','staff.new':'＋ موظف جديد','staff.print_list':'🖨 طباعة',
@@ -1417,7 +1417,7 @@ Object.assign(T.de,{
   'reports.col_driver':'Fahrer','reports.col_total':'Gesamt','reports.col_success':'Erfolgreich','reports.col_rate':'Quote',
   'reports.col_area':'Gebiet','reports.col_orders':'Aufträge','reports.col_done':'Abgeschlossen',
   'staff.section':'Mitarbeiterverwaltung','staff.count':'Mitarbeiter',
-  'staff.week_hours':'Stunden diese Woche','staff.week_salary':'Gehälter diese Woche',
+  'staff.month_hours':'Stunden des Monats','staff.month_salary':'Gehälter des Monats',
   'staff.tab_emp':'👥 Mitarbeiter','staff.tab_att':'📋 Monatsplan',
   'staff.tab_sal':'💶 Gehaltsberichte','staff.tab_excel':'📊 Excel-Import',
   'staff.search_ph':'🔍 Mitarbeiter suchen...','staff.new':'＋ Neuer Mitarbeiter','staff.print_list':'🖨 Drucken',
@@ -2669,12 +2669,13 @@ function showStaffTab(tab,btn){
   $('stab-'+tab).classList.remove('hidden');
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  if(tab==='employees')updateStaffStats();
+  if(tab==='employees'){if(!sheetMonthKey)initSheetMonth();updateStaffStats();renderStaffCards();}
   if(tab==='attendance'){initSheetMonth();renderSheet();}
 }
 
 // ── STAFF PAGE ───────────────────────────────────
 function renderStaffPage(){
+  if(!sheetMonthKey)initSheetMonth();
   updateStaffStats();
   renderStaffCards();
   populateAttStaffFilter();
@@ -2702,52 +2703,51 @@ function _sheetWeekStats(staffId,weekStart,weekEnd,weekAtt){
 }
 function updateStaffStats(){
   $('st-count').textContent=staff.length;
-  const{start,end}=getWeekRange();
-  const weekAtt=attendance.filter(a=>a.date>=start&&a.date<=end);
+  if(!sheetMonthKey){$('st-hours').textContent='—';$('st-salary').textContent='—';return;}
+  const[y,m]=sheetMonthKey.split('-').map(Number);
+  const dim=new Date(y,m,0).getDate();
+  const lbl=$('st-hours-lbl');
+  if(lbl)lbl.textContent=MONTHS_AR[m-1]+' '+y;
   let totH=0,totS=0;
   staff.forEach(s=>{
-    const sAtt=weekAtt.filter(a=>a.staffId===s.id);
-    const dailyLim=s.weekHours/5;
-    sAtt.forEach(a=>{
-      const h=calcHours(a.start,a.end,a.break);
-      totH+=h;
-      const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);
-      totS+=reg*s.rate+ot*s.rate*1.5;
-    });
-    const sh=_sheetWeekStats(s.id,start,end,weekAtt);
-    totH+=sh.h;totS+=sh.s;
+    const shEmp=sheetEmps.find(e=>e.staffId===s.id);
+    if(!shEmp)return;
+    const h=sheetCalcTotal(shEmp.id,y,m,dim);
+    totH+=h;totS+=h*s.rate;
   });
-  $('st-hours').textContent=formatHours(totH);
-  $('st-salary').textContent=totS.toFixed(2)+' €';
+  $('st-hours').textContent=totH>0?formatHours(totH):'—';
+  $('st-salary').textContent=totS>0?totS.toFixed(2)+' €':'—';
 }
 function renderStaffCards(list){
-  const{start,end}=getWeekRange();
   const data=list||staff;
   if(!data.length){$('staff-grid').innerHTML='<p style="color:var(--muted);padding:20px">لا يوجد موظفون — أضف موظفاً جديداً</p>';return;}
-  const allWeekAtt=attendance.filter(a=>a.date>=start&&a.date<=end);
+  const[y,m]=sheetMonthKey?sheetMonthKey.split('-').map(Number):[0,0];
+  const dim=y?new Date(y,m,0).getDate():0;
+  const monthLabel=y?(MONTHS_AR[m-1]+' '+y):'';
   $('staff-grid').innerHTML=data.map(s=>{
-    const allAtt=attendance.filter(a=>a.staffId===s.id);
-    const sWeekAtt=allWeekAtt.filter(a=>a.staffId===s.id);
-    const dailyLim=s.weekHours/5;
-    let weekH=0,weekS=0;
-    sWeekAtt.forEach(a=>{
-      const h=calcHours(a.start,a.end,a.break);
-      weekH+=h;
-      const reg=Math.min(h,dailyLim),ot=Math.max(0,h-dailyLim);
-      weekS+=reg*s.rate+ot*s.rate*1.5;
-    });
-    const sh=_sheetWeekStats(s.id,start,end,allWeekAtt);
-    weekH+=sh.h;weekS+=sh.s;
+    const shEmp=sheetEmps.find(e=>e.staffId===s.id);
+    let monthH=0,monthDays=0;
+    if(shEmp&&dim){
+      monthH=sheetCalcTotal(shEmp.id,y,m,dim);
+      for(let d=1;d<=dim;d++){
+        const dd=pad(d);
+        let sv=sheetDays[dd]&&sheetDays[dd][shEmp.id];
+        if(!sv){const ar=attendance.find(a=>a.staffId===s.id&&a.date===sheetMonthKey+'-'+dd);if(ar)sv={s:ar.start,e:ar.end};}
+        if(sv&&sv.s&&sv.e)monthDays++;
+      }
+    }
+    const monthS=monthH*s.rate;
     return`<div class="staff-card">
       <div class="staff-top">
         <div class="staff-av">${s.name[0]}</div>
         <div><div class="staff-name">${s.name}</div><div class="staff-role">${s.role}</div><div class="staff-rate">${s.rate.toFixed(2)} €/h</div></div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">📞 ${s.phone}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">📞 ${s.phone}</div>
+      ${monthLabel?`<div style="font-size:11px;color:var(--primary);font-weight:700;margin-bottom:8px">📅 ${monthLabel}</div>`:''}
       <div class="staff-stats">
-        <div class="staff-stat"><div class="staff-stat-n">${allAtt.length}</div><div class="staff-stat-l">أيام دوام</div></div>
-        <div class="staff-stat"><div class="staff-stat-n">${formatHours(weekH)}</div><div class="staff-stat-l">ساعات الأسبوع</div></div>
-        <div class="staff-stat"><div class="staff-stat-n">${weekS.toFixed(0)}€</div><div class="staff-stat-l">راتب الأسبوع</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${monthDays||'—'}</div><div class="staff-stat-l">أيام دوام</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${monthH?formatHours(monthH):'—'}</div><div class="staff-stat-l">ساعات الشهر</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${monthS>0?monthS.toFixed(0)+'€':'—'}</div><div class="staff-stat-l">راتب الشهر</div></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="act-btn act-edit" style="flex:1;text-align:center" onclick="editStaffMember(${s.id})">تعديل</button>
