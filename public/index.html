@@ -410,6 +410,22 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 .frg-account-badge{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:700;font-size:14px;color:var(--text)}
 .frg-ok-badge{background:#d1fae5;border:1.5px solid var(--green);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:700;font-size:14px;color:#065f46;text-align:center}
 
+/* ── RTL/LTR SUPPORT ─────────────────────────── */
+[dir="ltr"] .sidebar { right: auto; left: 0; }
+[dir="ltr"] .app-main { margin-right: 0; margin-left: var(--sb-w); }
+[dir="ltr"] .nav-item { text-align: left; }
+[dir="ltr"] .nav-badge { margin-right: 0; margin-left: auto; }
+[dir="ltr"] .tbl th, [dir="ltr"] .tbl td { text-align: left; }
+[dir="ltr"] .returns-tbl th { text-align: left; }
+[dir="ltr"] .stat-card { border-right: 4px solid transparent; border-left: 4px solid transparent; }
+[dir="ltr"] .c-blue { border-left-color: var(--blue); border-right-color: transparent; }
+[dir="ltr"] .c-green { border-left-color: var(--green); border-right-color: transparent; }
+[dir="ltr"] .c-purple { border-left-color: var(--purple); border-right-color: transparent; }
+[dir="ltr"] .c-amber { border-left-color: var(--amber); border-right-color: transparent; }
+[dir="ltr"] .sc-edit-btn { left: auto; right: 10px; }
+[dir="ltr"] .notif-dot { left: auto; right: -3px; }
+[dir="ltr"] body { direction: ltr; }
+
 /* ── PRINT ────────────────────────────────────── */
 .print-only{display:none}
 .print-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
@@ -494,9 +510,12 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <!-- ========== LOGIN ========== -->
 <main class="login-screen" id="loginScreen">
   <div class="login-card">
+    <div style="text-align:center;margin-bottom:12px">
+      <button class="lang-sw-btn" onclick="applyLang(_lang==='ar'?'de':'ar')" style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text);transition:all .15s">🇩🇪 Deutsch</button>
+    </div>
     <div class="login-logo">Z&amp;Z</div>
     <h1>Z&amp;Z Logistics</h1>
-    <p class="login-sub">نظام إدارة العمليات اللوجستية — Germany / NRW</p>
+    <p class="login-sub" data-i18n="app.subtitle">نظام إدارة العمليات اللوجستية — Germany / NRW</p>
     <div class="sep"></div>
 
     <div class="id-methods">
@@ -505,25 +524,25 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <button class="id-method" id="m-phone" onclick="switchMethod('phone',this)">📱 هاتف</button>
       <button class="id-method" id="m-apple" onclick="switchMethod('apple',this)"> Apple ID</button>
     </div>
-    <p class="id-hint" id="id-hint">اسم المستخدم</p>
+    <p class="id-hint" id="id-hint" data-i18n="login.username">اسم المستخدم</p>
 
     <div class="form-group">
-      <input id="login-identifier" type="text" placeholder="اسم المستخدم"
+      <input id="login-identifier" type="text" placeholder="اسم المستخدم" data-i18n-ph="login.username"
         onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="form-group">
-      <label>كلمة المرور</label>
-      <input id="login-pass" type="password" placeholder="كلمة المرور"
+      <label data-i18n="login.password">كلمة المرور</label>
+      <input id="login-pass" type="password" placeholder="كلمة المرور" data-i18n-ph="login.password"
         onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="btn btn-primary fw" onclick="doLogin()">دخول إلى النظام ←</button>
+    <button class="btn btn-primary fw" onclick="doLogin()" data-i18n="login.enter">دخول إلى النظام ←</button>
     <p id="msg" class="msg-text"></p>
     <div class="login-note">🔒 كلمة المرور مشفرة — Z&amp;Z Logistics</div>
     <div style="text-align:center;margin-top:10px">
-      <button class="reset-link" onclick="showForgot()">نسيت كلمة المرور؟</button>
+      <button class="reset-link" onclick="showForgot()" data-i18n="login.forgot">نسيت كلمة المرور؟</button>
     </div>
-    <div class="auth-or"><span>أو</span></div>
-    <button class="btn btn-outline-green fw" onclick="showSignup()">＋ إنشاء حساب جديد</button>
+    <div class="auth-or"><span data-i18n="login.or">أو</span></div>
+    <button class="btn btn-outline-green fw" onclick="showSignup()" data-i18n="login.create_account">＋ إنشاء حساب جديد</button>
   </div>
 </main>
 
@@ -531,7 +550,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <main class="setup-screen hidden" id="setupScreen">
   <div class="login-card" style="max-width:520px">
     <div class="login-logo">Z&amp;Z</div>
-    <h1 id="su-title">إنشاء حساب جديد</h1>
+    <h1 id="su-title" data-i18n="signup.title">إنشاء حساب جديد</h1>
     <p class="login-sub" id="su-sub">أدخل بياناتك لإنشاء حساب في النظام</p>
     <div class="sep"></div>
 
@@ -574,11 +593,11 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <input type="text" id="su-sec-a" placeholder="إجابتك السرية"
         onkeydown="if(event.key==='Enter')submitSetup()">
     </div>
-    <button class="btn btn-primary fw" onclick="submitSetup()">إنشاء الحساب والدخول ←</button>
+    <button class="btn btn-primary fw" data-i18n="signup.submit" onclick="submitSetup()">إنشاء الحساب والدخول ←</button>
     <p id="su-msg" class="msg-text"></p>
     <div class="login-note">🔒 كلمة المرور وإجابة الأمان تُحفظ مشفرة</div>
     <div style="text-align:center;margin-top:12px">
-      <button class="reset-link hidden" id="su-back" onclick="backToLogin()">← العودة لتسجيل الدخول</button>
+      <button class="reset-link hidden" id="su-back" data-i18n="signup.back" onclick="backToLogin()">← العودة لتسجيل الدخول</button>
     </div>
   </div>
 </main>
@@ -587,7 +606,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <main class="setup-screen hidden" id="forgotScreen">
   <div class="login-card" style="max-width:460px">
     <div class="login-logo">Z&amp;Z</div>
-    <h1>استرجاع الحساب</h1>
+    <h1 data-i18n="forgot.title">استرجاع الحساب</h1>
     <p class="login-sub">أدخل معرفك ثم أجب على سؤال الأمان أو استقبل كوداً على بريدك الإلكتروني</p>
     <div class="sep"></div>
 
@@ -598,7 +617,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <input type="text" id="frg-id" placeholder="أدخل أي معرف مرتبط بحسابك"
           onkeydown="if(event.key==='Enter')forgotFindAccount()">
       </div>
-      <button class="btn btn-primary fw" onclick="forgotFindAccount()">بحث عن الحساب ←</button>
+      <button class="btn btn-primary fw" data-i18n="forgot.find" onclick="forgotFindAccount()">بحث عن الحساب ←</button>
     </div>
 
     <!-- Step 2: verify identity -->
@@ -612,7 +631,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <input type="text" id="frg-sec-a" placeholder="إجابتك السرية"
             onkeydown="if(event.key==='Enter')forgotVerifyAnswer()">
         </div>
-        <button class="btn btn-primary fw" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
+        <button class="btn btn-primary fw" data-i18n="forgot.verify" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
         <div id="frg-email-opt" class="hidden" style="text-align:center;margin-top:14px">
           <div class="auth-or"><span>أو</span></div>
           <button class="btn btn-outline-green fw" onclick="forgotSendCode()">📧 أرسل كود على البريد الإلكتروني</button>
@@ -650,12 +669,12 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             onkeydown="if(event.key==='Enter')forgotResetPassword()">
         </div>
       </div>
-      <button class="btn btn-primary fw" onclick="forgotResetPassword()">حفظ كلمة المرور الجديدة ←</button>
+      <button class="btn btn-primary fw" data-i18n="forgot.save" onclick="forgotResetPassword()">حفظ كلمة المرور الجديدة ←</button>
     </div>
 
     <p id="frg-msg" class="msg-text"></p>
     <div style="text-align:center;margin-top:12px">
-      <button class="reset-link" onclick="backToLogin()">← العودة لتسجيل الدخول</button>
+      <button class="reset-link" data-i18n="forgot.back" onclick="backToLogin()">← العودة لتسجيل الدخول</button>
     </div>
   </div>
 </main>
@@ -669,23 +688,23 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <div><div class="sb-name">Z&amp;Z Logistics</div><div class="sb-sub">Germany / NRW</div></div>
     </div>
     <nav class="sb-nav">
-      <button class="nav-item active" onclick="goPage('map',this)"><span class="ni">🗺</span><span>خريطة NRW</span></button>
-      <button class="nav-item" onclick="goPage('dashboard',this)"><span class="ni">📊</span><span>لوحة التحكم</span></button>
-      <button class="nav-item" onclick="goPage('orders',this)"><span class="ni">📦</span><span>الطلبات</span><span class="nav-badge hidden" id="nav-badge"></span></button>
-      <button class="nav-item" onclick="goPage('sort',this)"><span class="ni">📋</span><span>فرز</span></button>
-      <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span>المسارات</span></button>
-      <button class="nav-item" onclick="goPage('staff',this)"><span class="ni">👥</span><span>الموظفون</span></button>
-      <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
+      <button class="nav-item active" onclick="goPage('map',this)"><span class="ni">🗺</span><span data-i18n="nav.map">خريطة NRW</span></button>
+      <button class="nav-item" onclick="goPage('dashboard',this)"><span class="ni">📊</span><span data-i18n="nav.dashboard">لوحة التحكم</span></button>
+      <button class="nav-item" onclick="goPage('orders',this)"><span class="ni">📦</span><span data-i18n="nav.orders">الطلبات</span><span class="nav-badge hidden" id="nav-badge"></span></button>
+      <button class="nav-item" onclick="goPage('sort',this)"><span class="ni">📋</span><span data-i18n="nav.sort">فرز</span></button>
+      <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span data-i18n="nav.routes">المسارات</span></button>
+      <button class="nav-item" onclick="goPage('staff',this)"><span class="ni">👥</span><span data-i18n="nav.staff">الموظفون</span></button>
+      <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span data-i18n="nav.reports">التقارير</span></button>
     </nav>
     <div class="sb-footer">
       <div class="sb-user-row" onclick="openProfileModal()" style="cursor:pointer" title="إعدادات الحساب">
         <div class="sb-av" id="sbAv">م</div>
         <div>
           <div class="sb-email" id="sbName">المدير</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.35)">⚙ إعدادات الحساب</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.35)" data-i18n="nav.settings">⚙ إعدادات الحساب</div>
         </div>
       </div>
-      <button class="btn-logout" onclick="doLogout()">⬅ خروج</button>
+      <button class="btn-logout" data-i18n="nav.logout" onclick="doLogout()">⬅ خروج</button>
     </div>
   </aside>
 
@@ -699,12 +718,13 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         </div>
       </div>
       <div class="tb-right">
-        <span class="save-ind hidden" id="save-indicator">💾 محفوظ</span>
-        <div class="tb-data-btn" title="إدارة البيانات" onclick="toggleDataMenu()">⚙</div>
+        <span class="save-ind hidden" id="save-indicator" data-i18n="topbar.saved">💾 محفوظ</span>
+        <button id="lang-switcher" class="lang-sw-btn" onclick="applyLang(_lang==='ar'?'de':'ar')" style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text);transition:all .15s">🇩🇪 Deutsch</button>
+        <div class="tb-data-btn" data-i18n-title="topbar.manage_data" title="إدارة البيانات" onclick="toggleDataMenu()">⚙</div>
         <div class="data-menu hidden" id="data-menu">
-          <button onclick="exportData();toggleDataMenu()">📤 تصدير نسخة احتياطية</button>
-          <button onclick="importData();toggleDataMenu()">📥 استيراد نسخة احتياطية</button>
-          <button onclick="toggleDataMenu();resetAllData()" style="color:var(--red)">🗑 مسح جميع البيانات</button>
+          <button data-i18n="export.backup" onclick="exportData();toggleDataMenu()">📤 تصدير نسخة احتياطية</button>
+          <button data-i18n="import.backup" onclick="importData();toggleDataMenu()">📥 استيراد نسخة احتياطية</button>
+          <button data-i18n="reset.data" onclick="toggleDataMenu();resetAllData()" style="color:var(--red)">🗑 مسح جميع البيانات</button>
         </div>
         <div class="tb-notif">🔔<span class="notif-dot"></span></div>
         <div class="tb-user-box">
@@ -721,12 +741,12 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
         <!-- Date Navigation -->
         <div class="date-nav">
-          <button class="date-nav-btn" onclick="changeDay(-1)">→ اليوم السابق</button>
-          <button class="date-nav-btn date-nav-today" onclick="goToday()">📅 اليوم</button>
+          <button class="date-nav-btn" data-i18n="date.prev" onclick="changeDay(-1)">→ اليوم السابق</button>
+          <button class="date-nav-btn date-nav-today" data-i18n="date.today" onclick="goToday()">📅 اليوم</button>
           <div class="date-nav-title" id="dn-label">...</div>
-          <span id="dn-past-tag" class="date-is-past hidden">عرض سابق (قراءة فقط)</span>
-          <button class="date-nav-btn date-nav-save" onclick="saveDay()">💾 حفظ</button>
-          <button class="date-nav-btn" onclick="changeDay(+1)" id="dn-next-btn">اليوم التالي ←</button>
+          <span id="dn-past-tag" class="date-is-past hidden" data-i18n="date.past_view">عرض سابق (قراءة فقط)</span>
+          <button class="date-nav-btn date-nav-save" data-i18n="date.save" onclick="saveDay()">💾 حفظ</button>
+          <button class="date-nav-btn" data-i18n="date.next" onclick="changeDay(+1)" id="dn-next-btn">اليوم التالي ←</button>
         </div>
 
         <!-- Stat Cards -->
@@ -737,7 +757,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <div class="sc-ico">📦</div>
             <div class="sc-body">
               <div class="sc-num" id="sc-packages">0</div>
-              <div class="sc-lbl">كمية الطرود</div>
+              <div class="sc-lbl" data-i18n="dash.packages">كمية الطرود</div>
               <div class="sc-edit-wrap hidden" id="pkg-edit-wrap">
                 <input type="number" class="sc-edit-inp" id="pkg-inp" min="0" placeholder="0">
                 <button class="sc-edit-ok" onclick="applyEdit('packages')">✓</button>
@@ -751,7 +771,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <div class="sc-ico">✅</div>
             <div class="sc-body">
               <div class="sc-num" id="sc-delivered">0</div>
-              <div class="sc-lbl">تم التسليم</div>
+              <div class="sc-lbl" data-i18n="dash.delivered">تم التسليم</div>
               <div class="sc-edit-wrap hidden" id="del-edit-wrap">
                 <input type="number" class="sc-edit-inp" id="del-inp" min="0" placeholder="0">
                 <button class="sc-edit-ok" onclick="applyEdit('delivered')">✓</button>
@@ -765,7 +785,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <div class="sc-ico">↩️</div>
             <div class="sc-body">
               <div class="sc-num" id="sc-returns">0</div>
-              <div class="sc-lbl">مسترجع</div>
+              <div class="sc-lbl" data-i18n="dash.returns">مسترجع</div>
             </div>
           </div>
 
@@ -774,8 +794,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <!-- Two-col: recent orders + drivers -->
         <div class="two-col">
           <div class="card">
-            <div class="card-top"><h3 class="card-title">آخر الطلبات</h3><button class="ghost-btn" onclick="goPage('orders',null)">عرض الكل ←</button></div>
-            <table class="tbl"><thead><tr><th>#</th><th>العميل</th><th>السائق</th><th>الحالة</th></tr></thead><tbody id="db-orders"></tbody></table>
+            <div class="card-top"><h3 class="card-title" data-i18n="dash.recent_orders">آخر الطلبات</h3><button class="ghost-btn" data-i18n="dash.view_all" onclick="goPage('orders',null)">عرض الكل ←</button></div>
+            <table class="tbl"><thead><tr><th>#</th><th data-i18n="dash.tbl_customer">العميل</th><th data-i18n="dash.tbl_driver">السائق</th><th data-i18n="dash.tbl_status">الحالة</th></tr></thead><tbody id="db-orders"></tbody></table>
           </div>
         </div>
 
@@ -784,12 +804,12 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="returns-card">
             <div class="returns-header">
               <div>
-                <div class="returns-title">↩ جدول المسترجعات</div>
+                <div class="returns-title" data-i18n="dash.returns_title">↩ جدول المسترجعات</div>
                 <div style="font-size:13px;color:var(--muted);margin-top:3px">الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ</div>
               </div>
               <div style="display:flex;gap:10px;align-items:center">
                 <span class="returns-date-tag" id="ret-date-tag"></span>
-                <button class="returns-add-btn" id="ret-add-btn" onclick="addReturnRow()">＋ إضافة صف</button>
+                <button class="returns-add-btn" id="ret-add-btn" data-i18n="dash.ret_add" onclick="addReturnRow()">＋ إضافة صف</button>
               </div>
             </div>
             <div class="returns-tbl-wrap">
@@ -797,16 +817,16 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
                 <thead>
                   <tr>
                     <th style="width:50px">#</th>
-                    <th>الكمية</th>
-                    <th>اسم الشفير</th>
-                    <th>التور</th>
+                    <th data-i18n="dash.ret_qty">الكمية</th>
+                    <th data-i18n="dash.ret_driver">اسم الشفير</th>
+                    <th data-i18n="dash.ret_tour">التور</th>
                     <th style="width:50px"></th>
                   </tr>
                 </thead>
                 <tbody id="ret-tbody"></tbody>
               </table>
             </div>
-            <div id="ret-empty" class="returns-empty hidden">لا توجد مسترجعات لهذا اليوم</div>
+            <div id="ret-empty" class="returns-empty hidden" data-i18n="dash.ret_empty">لا توجد مسترجعات لهذا اليوم</div>
           </div>
         </div>
 
@@ -815,20 +835,20 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <!-- ====== ORDERS ====== -->
       <section class="pv hidden" id="pv-orders">
         <div class="toolbar">
-          <input class="tb-inp" type="text" placeholder="🔍 بحث..." oninput="filterOrders(this.value)">
+          <input class="tb-inp" type="text" data-i18n-ph="orders.search_ph" placeholder="🔍 بحث..." oninput="filterOrders(this.value)">
           <select class="tb-sel" onchange="filterByStatus(this.value)">
-            <option value="">كل الحالات</option>
-            <option value="pending">قيد الانتظار</option>
-            <option value="in_transit">في الطريق</option>
-            <option value="delivered">تم التسليم</option>
-            <option value="failed">فشل التسليم</option>
+            <option value="" data-i18n="orders.all_status">كل الحالات</option>
+            <option value="pending" data-i18n="orders.pending">قيد الانتظار</option>
+            <option value="in_transit" data-i18n="orders.in_transit">في الطريق</option>
+            <option value="delivered" data-i18n="orders.delivered">تم التسليم</option>
+            <option value="failed" data-i18n="orders.failed">فشل التسليم</option>
           </select>
-          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openOrderModal()">＋ طلب جديد</button>
+          <button class="btn btn-primary" style="width:auto;padding:10px 22px" data-i18n="orders.new" onclick="openOrderModal()">＋ طلب جديد</button>
         </div>
         <div class="card no-pad">
           <div class="tbl-wrap">
             <table class="tbl full-tbl">
-              <thead><tr><th>رقم الطلب</th><th>العميل</th><th>العنوان</th><th>السائق</th><th>الحالة</th><th>الوقت</th><th>إجراءات</th></tr></thead>
+              <thead><tr><th data-i18n="orders.col_num">رقم الطلب</th><th data-i18n="orders.col_customer">العميل</th><th data-i18n="orders.col_address">العنوان</th><th data-i18n="orders.col_driver">السائق</th><th data-i18n="orders.col_status">الحالة</th><th data-i18n="orders.col_time">الوقت</th><th data-i18n="orders.col_actions">إجراءات</th></tr></thead>
               <tbody id="ord-tbody"></tbody>
             </table>
           </div>
@@ -839,21 +859,21 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <section class="pv hidden" id="pv-sort">
         <div id="sort-upload-panel">
           <div class="card sort-upload-card">
-            <h3 class="card-title" style="margin-bottom:16px">📋 فرز حطة التوزيع اليومية</h3>
+            <h3 class="card-title" style="margin-bottom:16px" data-i18n="sort.title">📋 فرز حطة التوزيع اليومية</h3>
             <div class="frow" style="margin-bottom:14px">
               <div class="form-group">
-                <label>التاريخ</label>
+                <label data-i18n="sort.date_lbl">التاريخ</label>
                 <input type="date" id="sort-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px">
               </div>
               <div class="form-group">
-                <label>الموقع / Location</label>
-                <input type="text" id="sort-loc" placeholder="مثال: DE05005 Duisburg" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px">
+                <label data-i18n="sort.location_lbl">الموقع / Location</label>
+                <input type="text" id="sort-loc" data-i18n-ph="sort.location_ph" placeholder="مثال: DE05005 Duisburg" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px">
               </div>
             </div>
             <div class="sort-drop-zone" id="sort-drop" onclick="$('sort-file-inp').click()" ondragover="event.preventDefault()" ondrop="sortDropHandler(event)">
               <div style="font-size:36px;margin-bottom:8px">📂</div>
-              <div style="font-weight:700;font-size:15px;margin-bottom:4px">اسحب الملف هنا أو اضغط للاختيار</div>
-              <div style="font-size:13px;color:var(--muted)">.xlsx / .xls / .pdf / صورة</div>
+              <div style="font-weight:700;font-size:15px;margin-bottom:4px" data-i18n="sort.drop_title">اسحب الملف هنا أو اضغط للاختيار</div>
+              <div style="font-size:13px;color:var(--muted)" data-i18n="sort.drop_sub">.xlsx / .xls / .pdf / صورة</div>
               <input type="file" id="sort-file-inp" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp" style="display:none" onchange="handleSortFile(this.files[0])">
             </div>
           </div>
@@ -863,46 +883,46 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <div id="sort-mapper" class="hidden">
   <div class="card" style="max-width:720px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <h3 class="card-title">⚙️ تعيين الأعمدة</h3>
-      <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:13px" onclick="clearSortResult()">↩ إلغاء</button>
+      <h3 class="card-title" data-i18n="sort.mapper_title">⚙️ تعيين الأعمدة</h3>
+      <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:13px" data-i18n="sort.cancel_mapper" onclick="clearSortResult()">↩ إلغاء</button>
     </div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px">معاينة أول صفوف من الملف — اختر الأعمدة الصحيحة لكل حقل:</div>
     <div id="sort-preview" style="overflow-x:auto;margin-bottom:18px;border:1px solid var(--border);border-radius:6px;font-size:11px"></div>
     <div class="frow">
       <div class="form-group">
-        <label>📌 رقم التور TOUR NO *</label>
+        <label data-i18n="sort.tour_col">📌 رقم التور TOUR NO *</label>
         <select id="sm-tour" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
       </div>
       <div class="form-group">
-        <label>🔢 الكود CODE *</label>
+        <label data-i18n="sort.code_col">🔢 الكود CODE *</label>
         <select id="sm-code" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
       </div>
     </div>
     <div class="frow">
       <div class="form-group">
-        <label>📮 البريد PLZ *</label>
+        <label data-i18n="sort.plz_col">📮 البريد PLZ *</label>
         <select id="sm-plz" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
       </div>
       <div class="form-group">
-        <label>🏢 الشركة COMPANY</label>
+        <label data-i18n="sort.company_col">🏢 الشركة COMPANY</label>
         <select id="sm-comp" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
       </div>
     </div>
     <div class="frow">
       <div class="form-group" style="max-width:50%">
-        <label>🪪 رقم التعريف ID</label>
+        <label data-i18n="sort.id_col">🪪 رقم التعريف ID</label>
         <select id="sm-id" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select>
       </div>
     </div>
-    <button class="btn btn-primary" style="margin-top:10px" onclick="_buildFromMapper()">✓ إنشاء بطاقات الفرز</button>
+    <button class="btn btn-primary" style="margin-top:10px" data-i18n="sort.create_cards" onclick="_buildFromMapper()">✓ إنشاء بطاقات الفرز</button>
   </div>
 </div>
 
         <div id="sort-result" class="hidden">
           <div class="toolbar no-print" style="margin-bottom:20px">
-            <button class="btn btn-ghost" style="width:auto;padding:10px 20px" onclick="clearSortResult()">↩ استيراد جديد</button>
+            <button class="btn btn-ghost" style="width:auto;padding:10px 20px" data-i18n="sort.new_import" onclick="clearSortResult()">↩ استيراد جديد</button>
             <div style="flex:1"></div>
-            <button class="btn btn-primary" style="width:auto;padding:10px 24px" onclick="printSort()">🖨 طباعة</button>
+            <button class="btn btn-primary" style="width:auto;padding:10px 24px" data-i18n="sort.print" onclick="printSort()">🖨 طباعة</button>
           </div>
           <div id="dp-pages"></div>
         </div>
@@ -911,10 +931,10 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <!-- ====== ROUTES ====== -->
       <section class="pv hidden" id="pv-routes">
         <div class="card no-pad">
-          <div class="card-top" style="padding:20px 22px 0"><h3 class="card-title">مسارات اليوم</h3><span class="info-tag" id="routes-date"></span></div>
+          <div class="card-top" style="padding:20px 22px 0"><h3 class="card-title" data-i18n="routes.today">مسارات اليوم</h3><span class="info-tag" id="routes-date"></span></div>
           <div class="tbl-wrap">
             <table class="tbl full-tbl">
-              <thead><tr><th>المنطقة / Route</th><th>السائق</th><th>المحطات</th><th>مكتمل</th><th>التقدم</th><th>الحالة</th></tr></thead>
+              <thead><tr><th data-i18n="routes.col_route">المنطقة / Route</th><th data-i18n="routes.col_driver">السائق</th><th data-i18n="routes.col_stops">المحطات</th><th data-i18n="routes.col_done">مكتمل</th><th data-i18n="routes.col_progress">التقدم</th><th data-i18n="routes.col_status">الحالة</th></tr></thead>
               <tbody id="rts-tbody"></tbody>
             </table>
           </div>
@@ -924,18 +944,18 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <!-- ====== REPORTS ====== -->
       <section class="pv hidden" id="pv-reports">
         <div class="stat-row">
-          <div class="stat-card c-blue"><div class="sc-ico">📊</div><div class="sc-body"><div class="sc-num" id="rp-total">0</div><div class="sc-lbl">طلبات الأسبوع</div></div></div>
-          <div class="stat-card c-green"><div class="sc-ico">📈</div><div class="sc-body"><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl">معدل التسليم</div></div></div>
+          <div class="stat-card c-blue"><div class="sc-ico">📊</div><div class="sc-body"><div class="sc-num" id="rp-total">0</div><div class="sc-lbl" data-i18n="reports.week_orders">طلبات الأسبوع</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">📈</div><div class="sc-body"><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl" data-i18n="reports.delivery_rate">معدل التسليم</div></div></div>
           <div class="stat-card c-purple"><div class="sc-ico">↩️</div><div class="sc-body"><div class="sc-num" id="rp-returns">0</div><div class="sc-lbl">مسترجع</div></div></div>
         </div>
         <div class="two-col">
           <div class="card">
-            <div class="card-top"><h3 class="card-title">أداء السائقين</h3></div>
-            <table class="tbl full-tbl"><thead><tr><th>السائق</th><th>المجموع</th><th>ناجح</th><th>النسبة</th></tr></thead><tbody id="rp-drv"></tbody></table>
+            <div class="card-top"><h3 class="card-title" data-i18n="reports.driver_perf">أداء السائقين</h3></div>
+            <table class="tbl full-tbl"><thead><tr><th data-i18n="reports.col_driver">السائق</th><th data-i18n="reports.col_total">المجموع</th><th data-i18n="reports.col_success">ناجح</th><th data-i18n="reports.col_rate">النسبة</th></tr></thead><tbody id="rp-drv"></tbody></table>
           </div>
           <div class="card">
-            <div class="card-top"><h3 class="card-title">توزيع المناطق</h3></div>
-            <table class="tbl full-tbl"><thead><tr><th>المنطقة</th><th>الطلبات</th><th>مكتمل</th></tr></thead><tbody id="rp-area"></tbody></table>
+            <div class="card-top"><h3 class="card-title" data-i18n="reports.area_dist">توزيع المناطق</h3></div>
+            <table class="tbl full-tbl"><thead><tr><th data-i18n="reports.col_area">المنطقة</th><th data-i18n="reports.col_orders">الطلبات</th><th data-i18n="reports.col_done">مكتمل</th></tr></thead><tbody id="rp-area"></tbody></table>
           </div>
         </div>
       </section>
@@ -958,25 +978,25 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         </div>
 
         <div class="stat-row">
-          <div class="stat-card c-blue"><div class="sc-ico">👥</div><div class="sc-body"><div class="sc-num" id="st-count">0</div><div class="sc-lbl">الموظفون</div></div></div>
-          <div class="stat-card c-green"><div class="sc-ico">⏱</div><div class="sc-body"><div class="sc-num" id="st-hours">0h</div><div class="sc-lbl">ساعات هذا الأسبوع</div></div></div>
-          <div class="stat-card c-amber"><div class="sc-ico">💶</div><div class="sc-body"><div class="sc-num" id="st-salary">0 €</div><div class="sc-lbl">رواتب هذا الأسبوع</div></div></div>
+          <div class="stat-card c-blue"><div class="sc-ico">👥</div><div class="sc-body"><div class="sc-num" id="st-count">0</div><div class="sc-lbl" data-i18n="staff.count">الموظفون</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">⏱</div><div class="sc-body"><div class="sc-num" id="st-hours">0h</div><div class="sc-lbl" data-i18n="staff.week_hours">ساعات هذا الأسبوع</div></div></div>
+          <div class="stat-card c-amber"><div class="sc-ico">💶</div><div class="sc-body"><div class="sc-num" id="st-salary">0 €</div><div class="sc-lbl" data-i18n="staff.week_salary">رواتب هذا الأسبوع</div></div></div>
         </div>
 
         <div class="staff-tabs">
-          <button class="stab active" onclick="showStaffTab('employees',this)">👥 الموظفون</button>
-          <button class="stab" onclick="showStaffTab('attendance',this)">📅 الدوام</button>
-          <button class="stab" onclick="showStaffTab('salary',this)">💶 تقرير الراتب</button>
-          <button class="stab" onclick="showStaffTab('excel',this)">📊 استيراد Excel</button>
-          <button class="stab" onclick="showStaffTab('sheet',this)">📋 جدول الشهر</button>
+          <button class="stab active" data-i18n="staff.tab_emp" onclick="showStaffTab('employees',this)">👥 الموظفون</button>
+          <button class="stab" data-i18n="staff.tab_att" onclick="showStaffTab('attendance',this)">📅 الدوام</button>
+          <button class="stab" data-i18n="staff.tab_sal" onclick="showStaffTab('salary',this)">💶 تقرير الراتب</button>
+          <button class="stab" data-i18n="staff.tab_excel" onclick="showStaffTab('excel',this)">📊 استيراد Excel</button>
+          <button class="stab" data-i18n="staff.tab_sheet" onclick="showStaffTab('sheet',this)">📋 جدول الشهر</button>
         </div>
 
         <!-- Tab: Employees -->
         <div id="stab-employees" class="stab-content">
           <div class="toolbar">
-            <input class="tb-inp" type="text" placeholder="🔍 بحث عن موظف..." oninput="filterStaff(this.value)">
-            <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openStaffModal()">＋ موظف جديد</button>
-            <button class="print-btn" onclick="doPrint('قائمة الموظفين','employees')">🖨 طباعة</button>
+            <input class="tb-inp" type="text" data-i18n-ph="staff.search_ph" placeholder="🔍 بحث عن موظف..." oninput="filterStaff(this.value)">
+            <button class="btn btn-primary" style="width:auto;padding:10px 22px" data-i18n="staff.new" onclick="openStaffModal()">＋ موظف جديد</button>
+            <button class="print-btn" data-i18n="staff.print_list" onclick="doPrint('قائمة الموظفين','employees')">🖨 طباعة</button>
           </div>
           <div class="staff-grid" id="staff-grid"></div>
         </div>
@@ -986,15 +1006,15 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="toolbar">
             <input class="tb-inp" type="date" id="att-date-f" onchange="attDateFilter=this.value;renderAttendance()">
             <select class="tb-sel" id="att-staff-f" onchange="attStaffFilter=this.value;renderAttendance()">
-              <option value="">كل الموظفين</option>
+              <option value="" data-i18n="staff.all_employees">كل الموظفين</option>
             </select>
-            <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openAttModal()">＋ إضافة دوام</button>
-            <button class="print-btn" onclick="doPrint('سجل الدوام','attendance')">🖨 طباعة</button>
+            <button class="btn btn-primary" style="width:auto;padding:10px 22px" data-i18n="staff.add_att" onclick="openAttModal()">＋ إضافة دوام</button>
+            <button class="print-btn" data-i18n="staff.print_att" onclick="doPrint('سجل الدوام','attendance')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
             <div class="tbl-wrap">
               <table class="tbl full-tbl">
-                <thead><tr><th>الموظف</th><th>التاريخ</th><th>بداية</th><th>نهاية</th><th>استراحة</th><th>الساعات</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
+                <thead><tr><th data-i18n="staff.att_emp">الموظف</th><th data-i18n="staff.att_date">التاريخ</th><th data-i18n="staff.att_start">بداية</th><th data-i18n="staff.att_end">نهاية</th><th data-i18n="staff.att_break">استراحة</th><th data-i18n="staff.att_hours">الساعات</th><th data-i18n="staff.att_notes">ملاحظات</th><th data-i18n="staff.att_actions">إجراءات</th></tr></thead>
                 <tbody id="att-tbody"></tbody>
               </table>
             </div>
@@ -1005,17 +1025,17 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <div id="stab-salary" class="stab-content hidden">
           <div class="toolbar">
             <select class="tb-sel" onchange="currentSalaryPeriod=this.value;renderSalaryReport()">
-              <option value="week">هذا الأسبوع</option>
-              <option value="month">هذا الشهر</option>
-              <option value="all">كل الفترات</option>
+              <option value="week" data-i18n="staff.sal_week">هذا الأسبوع</option>
+              <option value="month" data-i18n="staff.sal_month">هذا الشهر</option>
+              <option value="all" data-i18n="staff.sal_all">كل الفترات</option>
             </select>
             <span id="salary-period-label" style="font-size:13px;color:var(--muted);font-weight:700"></span>
-            <button class="print-btn" onclick="doPrint('تقرير الرواتب','salary')">🖨 طباعة</button>
+            <button class="print-btn" data-i18n="staff.print_sal" onclick="doPrint('تقرير الرواتب','salary')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
             <div class="tbl-wrap">
               <table class="tbl full-tbl">
-                <thead><tr><th>الموظف</th><th>الساعات العادية</th><th>ساعات إضافية</th><th>الراتب الأساسي</th><th>بدل إضافي (×1.5)</th><th>الإجمالي</th></tr></thead>
+                <thead><tr><th data-i18n="staff.sal_emp">الموظف</th><th data-i18n="staff.sal_reg">الساعات العادية</th><th data-i18n="staff.sal_ot">ساعات إضافية</th><th data-i18n="staff.sal_base">الراتب الأساسي</th><th data-i18n="staff.sal_ot_pay">بدل إضافي (×1.5)</th><th data-i18n="staff.sal_total">الإجمالي</th></tr></thead>
                 <tbody id="salary-tbody"></tbody>
                 <tfoot><tr style="font-weight:900;background:#f8fafc">
                   <td>الإجمالي</td><td id="s-tot-h">—</td><td id="s-tot-ot">—</td>
@@ -1030,11 +1050,11 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <!-- Tab: Excel Import -->
         <div id="stab-excel" class="stab-content hidden">
           <div class="card" style="margin-bottom:18px">
-            <h3 class="card-title" style="margin-bottom:10px">📋 تنسيق ملف Excel المطلوب</h3>
+            <h3 class="card-title" style="margin-bottom:10px" data-i18n="excel.format_title">📋 تنسيق ملف Excel المطلوب</h3>
             <p style="font-size:13px;color:var(--muted);margin-bottom:10px">الصف الأول يجب أن يحتوي على العناوين التالية:</p>
             <div style="overflow-x:auto">
               <table class="tbl" style="font-size:13px">
-                <thead><tr><th>اسم الموظف</th><th>التاريخ</th><th>بداية العمل</th><th>نهاية العمل</th><th>استراحة (دقيقة)</th></tr></thead>
+                <thead><tr><th data-i18n="excel.col_name">اسم الموظف</th><th data-i18n="excel.col_date">التاريخ</th><th data-i18n="excel.col_start">بداية العمل</th><th data-i18n="excel.col_end">نهاية العمل</th><th data-i18n="excel.col_break">استراحة (دقيقة)</th></tr></thead>
                 <tbody>
                   <tr><td>أحمد الريفاي</td><td>15.01.2025</td><td>07:00</td><td>16:00</td><td>30</td></tr>
                   <tr><td>عمر حسن</td><td>15.01.2025</td><td>07:30</td><td>16:30</td><td>30</td></tr>
@@ -1046,22 +1066,22 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div id="excel-drop" onclick="$('excel-file').click()"
             style="border:2.5px dashed var(--border);border-radius:18px;padding:50px 20px;text-align:center;cursor:pointer;background:var(--white);transition:border-color .2s">
             <div style="font-size:48px;margin-bottom:14px">📊</div>
-            <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:6px">اسحب ملف Excel هنا أو اضغط للاختيار</div>
+            <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:6px" data-i18n="excel.drop_title">اسحب ملف Excel هنا أو اضغط للاختيار</div>
             <div style="font-size:13px;color:var(--muted)">.xlsx / .xls</div>
             <input type="file" id="excel-file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(this)">
           </div>
           <div id="excel-preview" class="hidden" style="margin-top:18px">
             <div class="card no-pad">
               <div class="card-top" style="padding:16px 20px 0">
-                <h3 class="card-title" id="excel-preview-title">معاينة البيانات</h3>
+                <h3 class="card-title" id="excel-preview-title" data-i18n="excel.preview_title">معاينة البيانات</h3>
                 <div style="display:flex;gap:10px">
-                  <button class="btn btn-ghost" style="padding:8px 16px;font-size:13px;width:auto" onclick="clearExcelPreview()">إلغاء</button>
-                  <button class="btn btn-primary" style="width:auto;padding:8px 22px;font-size:13px" onclick="importExcelData()">✓ استيراد</button>
+                  <button class="btn btn-ghost" style="padding:8px 16px;font-size:13px;width:auto" data-i18n="excel.cancel" onclick="clearExcelPreview()">إلغاء</button>
+                  <button class="btn btn-primary" style="width:auto;padding:8px 22px;font-size:13px" data-i18n="excel.import" onclick="importExcelData()">✓ استيراد</button>
                 </div>
               </div>
               <div class="tbl-wrap" style="margin-top:14px">
                 <table class="tbl full-tbl" style="font-size:13px">
-                  <thead><tr><th>#</th><th>الموظف</th><th>التاريخ</th><th>البداية</th><th>النهاية</th><th>استراحة</th><th>الساعات</th><th>حالة</th></tr></thead>
+                  <thead><tr><th data-i18n="excel.prev_num">#</th><th data-i18n="excel.prev_emp">الموظف</th><th data-i18n="excel.prev_date">التاريخ</th><th data-i18n="excel.prev_start">البداية</th><th data-i18n="excel.prev_end">النهاية</th><th data-i18n="excel.prev_break">استراحة</th><th data-i18n="excel.prev_hours">الساعات</th><th data-i18n="excel.prev_status">حالة</th></tr></thead>
                   <tbody id="excel-preview-tbody"></tbody>
                 </table>
               </div>
@@ -1072,12 +1092,12 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <!-- Tab: Monthly Sheet -->
         <div id="stab-sheet" class="stab-content hidden">
           <div class="sheet-nav">
-            <button class="date-nav-btn" onclick="sheetChangeMonth(-1)">→ الشهر السابق</button>
-            <button class="date-nav-btn date-nav-today" onclick="sheetGoToday()">📅 الشهر الحالي</button>
+            <button class="date-nav-btn" data-i18n="sheet.prev" onclick="sheetChangeMonth(-1)">→ الشهر السابق</button>
+            <button class="date-nav-btn date-nav-today" data-i18n="sheet.today" onclick="sheetGoToday()">📅 الشهر الحالي</button>
             <div class="sheet-month-title" id="sheet-month-label">—</div>
-            <button class="date-nav-btn" onclick="sheetChangeMonth(1)">الشهر التالي ←</button>
-            <button class="date-nav-btn date-nav-save" onclick="saveSheet()">💾 حفظ</button>
-            <button class="print-btn" onclick="doPrint('جدول الدوام الشهري','sheet')">🖨 طباعة</button>
+            <button class="date-nav-btn" data-i18n="sheet.next" onclick="sheetChangeMonth(1)">الشهر التالي ←</button>
+            <button class="date-nav-btn date-nav-save" data-i18n="sheet.save" onclick="saveSheet()">💾 حفظ</button>
+            <button class="print-btn" data-i18n="sheet.print" onclick="doPrint('جدول الدوام الشهري','sheet')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
             <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
@@ -1103,7 +1123,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           </div>
           <!-- CSP Stats -->
           <div id="nrw-csp-wrap">
-            <span class="nrw-plbl">CSP — إجمالي الطلبات</span>
+            <span class="nrw-plbl" data-i18n="nrw.csp">CSP — إجمالي الطلبات</span>
             <div class="nrw-csp-row"><span>NRW-001</span><span class="nrw-csp-num">411</span></div>
             <div class="nrw-csp-row"><span>NRW-002</span><span class="nrw-csp-num">75</span></div>
             <div class="nrw-csp-row"><span>NRW-003</span><span class="nrw-csp-num">540</span></div>
@@ -1180,11 +1200,11 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <!-- MODAL: CONFIRM -->
 <div class="modal-bg hidden" id="modal-confirm">
   <div class="modal" style="max-width:380px">
-    <div class="modal-top"><h3>تأكيد الحذف</h3><button class="modal-x" onclick="closeModal('modal-confirm')">✕</button></div>
+    <div class="modal-top"><h3 data-i18n="modal.delete_confirm">تأكيد الحذف</h3><button class="modal-x" onclick="closeModal('modal-confirm')">✕</button></div>
     <div class="modal-bd"><p id="confirm-msg" style="color:#374151;font-size:15px;margin:0"></p></div>
     <div class="modal-ft">
-      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">إلغاء</button>
-      <button class="btn btn-danger" style="width:auto;padding:11px 28px" id="confirm-ok">حذف</button>
+      <button class="btn btn-ghost" data-i18n="modal.cancel" onclick="closeModal('modal-confirm')">إلغاء</button>
+      <button class="btn btn-danger" style="width:auto;padding:11px 28px" data-i18n="modal.delete" id="confirm-ok">حذف</button>
     </div>
   </div>
 </div>
@@ -1322,6 +1342,274 @@ function _doLogoutUI() {
   $('mainApp').classList.add('hidden');
   $('loginScreen').classList.remove('hidden');
   $('login-identifier').value = ''; $('login-pass').value = ''; $('msg').textContent = '⚠️ انتهت الجلسة — يرجى تسجيل الدخول مجدداً';
+}
+
+// ══════════════════════════════════════════════════
+// i18n — BILINGUAL ARABIC / GERMAN
+// ══════════════════════════════════════════════════
+const LANGS={ar:{dir:'rtl',flag:'🇩🇪',next:'Deutsch'},de:{dir:'ltr',flag:'🇸🇦',next:'العربية'}};
+let _lang=localStorage.getItem('zzlg_lang')||'ar';
+const T={ar:{},de:{}};
+
+// Arabic strings
+Object.assign(T.ar,{
+  'app.subtitle':'نظام إدارة العمليات اللوجستية — Germany / NRW',
+  'login.username':'اسم المستخدم','login.password':'كلمة المرور',
+  'login.enter':'دخول إلى النظام ←','login.or':'أو',
+  'login.create_account':'＋ إنشاء حساب جديد','login.forgot':'نسيت كلمة المرور؟',
+  'nav.map':'خريطة NRW','nav.dashboard':'لوحة التحكم','nav.orders':'الطلبات',
+  'nav.sort':'فرز','nav.routes':'المسارات','nav.staff':'الموظفون','nav.reports':'التقارير',
+  'nav.logout':'⬅ خروج','nav.settings':'⚙ إعدادات الحساب',
+  'topbar.saved':'💾 محفوظ','topbar.manage_data':'إدارة البيانات',
+  'date.prev':'→ اليوم السابق','date.today':'📅 اليوم','date.save':'💾 حفظ',
+  'date.next':'اليوم التالي ←','date.past_view':'عرض سابق (قراءة فقط)',
+  'dash.packages':'كمية الطرود','dash.delivered':'تم التسليم','dash.returns':'مسترجع',
+  'dash.recent_orders':'آخر الطلبات','dash.view_all':'عرض الكل ←',
+  'dash.returns_title':'↩ جدول المسترجعات',
+  'dash.returns_sub':'الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ',
+  'dash.ret_add':'＋ إضافة صف','dash.ret_empty':'لا توجد مسترجعات لهذا اليوم',
+  'dash.ret_qty':'الكمية','dash.ret_driver':'اسم الشفير','dash.ret_tour':'التور',
+  'orders.search_ph':'🔍 بحث...','orders.all_status':'كل الحالات',
+  'orders.pending':'قيد الانتظار','orders.in_transit':'في الطريق',
+  'orders.delivered':'تم التسليم','orders.failed':'فشل التسليم',
+  'orders.new':'＋ طلب جديد',
+  'orders.col_num':'رقم الطلب','orders.col_customer':'العميل','orders.col_address':'العنوان',
+  'orders.col_driver':'السائق','orders.col_status':'الحالة','orders.col_time':'الوقت','orders.col_actions':'إجراءات',
+  'dash.tbl_customer':'العميل','dash.tbl_driver':'السائق','dash.tbl_status':'الحالة',
+  'sort.title':'📋 فرز حطة التوزيع اليومية','sort.date_lbl':'التاريخ',
+  'sort.location_lbl':'الموقع / Location','sort.location_ph':'مثال: DE05005 Duisburg',
+  'sort.drop_title':'اسحب الملف هنا أو اضغط للاختيار','sort.drop_sub':'.xlsx / .xls / .pdf / صورة',
+  'sort.mapper_title':'⚙️ تعيين الأعمدة','sort.mapper_hint':'معاينة أول صفوف من الملف — اختر الأعمدة الصحيحة لكل حقل:',
+  'sort.cancel_mapper':'↩ إلغاء','sort.tour_col':'📌 رقم التور TOUR NO *',
+  'sort.code_col':'🔢 الكود CODE *','sort.plz_col':'📮 البريد PLZ *',
+  'sort.company_col':'🏢 الشركة COMPANY','sort.id_col':'🪪 رقم التعريف ID',
+  'sort.create_cards':'✓ إنشاء بطاقات الفرز','sort.new_import':'↩ استيراد جديد','sort.print':'🖨 طباعة',
+  'routes.today':'مسارات اليوم',
+  'routes.col_route':'المنطقة / Route','routes.col_driver':'السائق','routes.col_stops':'المحطات',
+  'routes.col_done':'مكتمل','routes.col_progress':'التقدم','routes.col_status':'الحالة',
+  'reports.week_orders':'طلبات الأسبوع','reports.delivery_rate':'معدل التسليم','reports.returned':'مسترجع',
+  'reports.driver_perf':'أداء السائقين','reports.area_dist':'توزيع المناطق',
+  'reports.col_driver':'السائق','reports.col_total':'المجموع','reports.col_success':'ناجح','reports.col_rate':'النسبة',
+  'reports.col_area':'المنطقة','reports.col_orders':'الطلبات','reports.col_done':'مكتمل',
+  'staff.section':'إدارة الموظفين','staff.count':'الموظفون',
+  'staff.week_hours':'ساعات هذا الأسبوع','staff.week_salary':'رواتب هذا الأسبوع',
+  'staff.tab_emp':'👥 الموظفون','staff.tab_att':'📅 الدوام',
+  'staff.tab_sal':'💶 تقرير الراتب','staff.tab_excel':'📊 استيراد Excel','staff.tab_sheet':'📋 جدول الشهر',
+  'staff.search_ph':'🔍 بحث عن موظف...','staff.new':'＋ موظف جديد','staff.print_list':'🖨 طباعة',
+  'staff.all_employees':'كل الموظفين','staff.add_att':'＋ إضافة دوام','staff.print_att':'🖨 طباعة',
+  'staff.att_emp':'الموظف','staff.att_date':'التاريخ','staff.att_start':'بداية',
+  'staff.att_end':'نهاية','staff.att_break':'استراحة','staff.att_hours':'الساعات',
+  'staff.att_notes':'ملاحظات','staff.att_actions':'إجراءات',
+  'staff.sal_week':'هذا الأسبوع','staff.sal_month':'هذا الشهر','staff.sal_all':'كل الفترات',
+  'staff.print_sal':'🖨 طباعة',
+  'staff.sal_emp':'الموظف','staff.sal_reg':'الساعات العادية','staff.sal_ot':'ساعات إضافية',
+  'staff.sal_base':'الراتب الأساسي','staff.sal_ot_pay':'بدل إضافي (×1.5)','staff.sal_total':'الإجمالي',
+  'staff.sal_grand':'الإجمالي',
+  'excel.format_title':'📋 تنسيق ملف Excel المطلوب',
+  'excel.format_hint':'الصف الأول يجب أن يحتوي على العناوين التالية:',
+  'excel.col_name':'اسم الموظف','excel.col_date':'التاريخ','excel.col_start':'بداية العمل',
+  'excel.col_end':'نهاية العمل','excel.col_break':'استراحة (دقيقة)',
+  'excel.drop_title':'اسحب ملف Excel هنا أو اضغط للاختيار',
+  'excel.preview_title':'معاينة البيانات','excel.cancel':'إلغاء','excel.import':'✓ استيراد',
+  'excel.prev_num':'#','excel.prev_emp':'الموظف','excel.prev_date':'التاريخ',
+  'excel.prev_start':'البداية','excel.prev_end':'النهاية','excel.prev_break':'استراحة',
+  'excel.prev_hours':'الساعات','excel.prev_status':'حالة',
+  'sheet.prev':'→ الشهر السابق','sheet.today':'📅 الشهر الحالي',
+  'sheet.next':'الشهر التالي ←','sheet.save':'💾 حفظ','sheet.print':'🖨 طباعة',
+  'sheet.loading':'جاري تحميل الجدول…',
+  'nrw.color':'Farbe wählen / اختر لوناً','nrw.csp':'CSP — إجمالي الطلبات',
+  'nrw.search':'🔍 بحث سريع','nrw.search_ph':'اكتب رمز بريدي أو مدينة…',
+  'nrw.zones':'PLZ-Gebiete','nrw.map_not_loaded':'الخريطة لم تُفتح بعد',
+  'nrw.load_hint':'⏳ اضغط "تحميل الخريطة" للبدء',
+  'nrw.load_btn':'▶ تحميل','nrw.overlay_title':'🗺 خريطة NRW — Lieferzonen',
+  'modal.cancel':'إلغاء','modal.delete_confirm':'تأكيد الحذف','modal.delete':'حذف',
+  'ord.title_new':'طلب جديد','ord.title_edit':'تعديل الطلب',
+  'ord.customer':'اسم العميل *','ord.customer_ph':'الاسم الكامل',
+  'ord.tracking':'رقم التتبع','ord.tracking_ph':'ZZ-00000',
+  'ord.address':'العنوان *','ord.address_ph':'الشارع، المدينة، الرمز البريدي',
+  'ord.driver':'السائق','ord.status':'الحالة','ord.notes':'ملاحظات',
+  'ord.notes_ph':'أي تعليمات إضافية...','ord.save':'حفظ الطلب',
+  'stf.title_new':'موظف جديد','stf.title_edit':'تعديل الموظف',
+  'stf.name':'الاسم الكامل *','stf.name_ph':'اسم الموظف',
+  'stf.role':'المسمى الوظيفي','stf.role_ph':'مثال: سائق، مساعد',
+  'stf.phone':'رقم الهاتف','stf.phone_ph':'+49 xxxxxxxx',
+  'stf.rate':'الأجر بالساعة (€)','stf.whours':'ساعات العمل الأسبوعية','stf.save':'حفظ الموظف',
+  'att.title_new':'إضافة دوام','att.title_edit':'تعديل الدوام',
+  'att.employee':'الموظف *','att.date':'التاريخ *','att.break':'استراحة (دقيقة)',
+  'att.start':'بداية العمل *','att.end':'نهاية العمل *',
+  'att.notes':'ملاحظات','att.notes_ph':'ملاحظات اختيارية...','att.save':'حفظ الدوام',
+  'prof.title':'👤 إعدادات الحساب','prof.username':'اسم المستخدم *',
+  'prof.email':'📧 بريد Gmail / iCloud','prof.phone':'📱 رقم الهاتف',
+  'prof.phone_ph':'+49 176...','prof.apple':' Apple ID',
+  'prof.hint':'💡 يمكنك تسجيل الدخول بأي من هذه المعرفات + كلمة المرور',
+  'prof.change_pw':'تغيير كلمة المرور','prof.new_pw':'كلمة المرور الجديدة',
+  'prof.new_pw_ph':'اتركها فارغة للإبقاء على الحالية',
+  'prof.confirm_pw':'تأكيد كلمة المرور','prof.confirm_pw_ph':'أعد الكتابة',
+  'prof.save':'حفظ التغييرات',
+  'shemp.title':'موظف في الجدول','shemp.name':'الاسم الكامل *','shemp.name_ph':'مثال: طه',
+  'shemp.rate':'الأجر بالساعة (€)','shemp.save':'حفظ',
+  'sc.week_hours':'ساعات الأسبوع','sc.week_salary':'راتب الأسبوع',
+  'btn.edit':'تعديل','btn.delete':'حذف',
+  'signup.title':'إنشاء حساب جديد','signup.username':'اسم المستخدم *',
+  'signup.email':'📧 بريد Gmail / iCloud','signup.phone':'📱 رقم الهاتف',
+  'signup.apple':' Apple ID (iCloud)','signup.password':'كلمة المرور *',
+  'signup.confirm_pw':'تأكيد كلمة المرور *',
+  'signup.sec_q':'سؤال الأمان (لاسترجاع الحساب) *','signup.sec_a':'إجابة سؤال الأمان *',
+  'signup.sec_a_ph':'إجابتك السرية','signup.submit':'إنشاء الحساب والدخول ←',
+  'signup.back':'← العودة لتسجيل الدخول',
+  'forgot.title':'استرجاع الحساب','forgot.id_lbl':'المعرف (اسم / بريد / هاتف / Apple ID)',
+  'forgot.id_ph':'أدخل أي معرف مرتبط بحسابك','forgot.find':'بحث عن الحساب ←',
+  'forgot.sec_a_ph':'إجابتك السرية','forgot.verify':'تحقق من الإجابة ←',
+  'forgot.new_pw':'كلمة المرور الجديدة *','forgot.confirm_pw':'تأكيد كلمة المرور *',
+  'forgot.save':'حفظ كلمة المرور الجديدة ←','forgot.back':'← العودة لتسجيل الدخول',
+  'export.backup':'📤 تصدير نسخة احتياطية','import.backup':'📥 استيراد نسخة احتياطية',
+  'reset.data':'🗑 مسح جميع البيانات',
+});
+
+// German strings
+Object.assign(T.de,{
+  'app.subtitle':'Logistik-Management-System — Deutschland / NRW',
+  'login.username':'Benutzername','login.password':'Passwort',
+  'login.enter':'Anmelden →','login.or':'oder',
+  'login.create_account':'＋ Neues Konto erstellen','login.forgot':'Passwort vergessen?',
+  'nav.map':'NRW-Karte','nav.dashboard':'Dashboard','nav.orders':'Aufträge',
+  'nav.sort':'Sortierung','nav.routes':'Routen','nav.staff':'Mitarbeiter','nav.reports':'Berichte',
+  'nav.logout':'⬅ Abmelden','nav.settings':'⚙ Kontoeinstellungen',
+  'topbar.saved':'💾 Gespeichert','topbar.manage_data':'Datenverwaltung',
+  'date.prev':'→ Vorheriger Tag','date.today':'📅 Heute','date.save':'💾 Speichern',
+  'date.next':'Nächster Tag ←','date.past_view':'Vergangenheitsansicht (nur lesen)',
+  'dash.packages':'Pakete','dash.delivered':'Zugestellt','dash.returns':'Retouren',
+  'dash.recent_orders':'Letzte Aufträge','dash.view_all':'Alle anzeigen ←',
+  'dash.returns_title':'↩ Retourentabelle',
+  'dash.returns_sub':'Zurückgegebene Pakete — wird automatisch beim Speichern gespeichert',
+  'dash.ret_add':'＋ Zeile hinzufügen','dash.ret_empty':'Keine Retouren für diesen Tag',
+  'dash.ret_qty':'Menge','dash.ret_driver':'Fahrername','dash.ret_tour':'Tour',
+  'orders.search_ph':'🔍 Suchen...','orders.all_status':'Alle Status',
+  'orders.pending':'Ausstehend','orders.in_transit':'Unterwegs',
+  'orders.delivered':'Zugestellt','orders.failed':'Fehlgeschlagen',
+  'orders.new':'＋ Neuer Auftrag',
+  'orders.col_num':'Auftragsnr.','orders.col_customer':'Kunde','orders.col_address':'Adresse',
+  'orders.col_driver':'Fahrer','orders.col_status':'Status','orders.col_time':'Zeit','orders.col_actions':'Aktionen',
+  'dash.tbl_customer':'Kunde','dash.tbl_driver':'Fahrer','dash.tbl_status':'Status',
+  'sort.title':'📋 Sortierung Tagesverteilungsstation','sort.date_lbl':'Datum',
+  'sort.location_lbl':'Standort / Location','sort.location_ph':'z.B.: DE05005 Duisburg',
+  'sort.drop_title':'Datei hier ablegen oder klicken','sort.drop_sub':'.xlsx / .xls / .pdf / Bild',
+  'sort.mapper_title':'⚙️ Spalten zuweisen','sort.mapper_hint':'Vorschau der ersten Zeilen — wählen Sie die richtigen Spalten:',
+  'sort.cancel_mapper':'↩ Abbrechen','sort.tour_col':'📌 Tour-Nummer TOUR NO *',
+  'sort.code_col':'🔢 Code CODE *','sort.plz_col':'📮 Postleitzahl PLZ *',
+  'sort.company_col':'🏢 Unternehmen COMPANY','sort.id_col':'🪪 Kennnummer ID',
+  'sort.create_cards':'✓ Sortierkarten erstellen','sort.new_import':'↩ Neuer Import','sort.print':'🖨 Drucken',
+  'routes.today':'Heutige Routen',
+  'routes.col_route':'Gebiet / Route','routes.col_driver':'Fahrer','routes.col_stops':'Stopps',
+  'routes.col_done':'Abgeschlossen','routes.col_progress':'Fortschritt','routes.col_status':'Status',
+  'reports.week_orders':'Wochenaufträge','reports.delivery_rate':'Lieferquote','reports.returned':'Retouren',
+  'reports.driver_perf':'Fahrerleistung','reports.area_dist':'Gebietsverteilung',
+  'reports.col_driver':'Fahrer','reports.col_total':'Gesamt','reports.col_success':'Erfolgreich','reports.col_rate':'Quote',
+  'reports.col_area':'Gebiet','reports.col_orders':'Aufträge','reports.col_done':'Abgeschlossen',
+  'staff.section':'Mitarbeiterverwaltung','staff.count':'Mitarbeiter',
+  'staff.week_hours':'Stunden diese Woche','staff.week_salary':'Gehälter diese Woche',
+  'staff.tab_emp':'👥 Mitarbeiter','staff.tab_att':'📅 Anwesenheit',
+  'staff.tab_sal':'💶 Gehaltsberichte','staff.tab_excel':'📊 Excel-Import','staff.tab_sheet':'📋 Monatsplan',
+  'staff.search_ph':'🔍 Mitarbeiter suchen...','staff.new':'＋ Neuer Mitarbeiter','staff.print_list':'🖨 Drucken',
+  'staff.all_employees':'Alle Mitarbeiter','staff.add_att':'＋ Anwesenheit hinzufügen','staff.print_att':'🖨 Drucken',
+  'staff.att_emp':'Mitarbeiter','staff.att_date':'Datum','staff.att_start':'Beginn',
+  'staff.att_end':'Ende','staff.att_break':'Pause','staff.att_hours':'Stunden',
+  'staff.att_notes':'Notizen','staff.att_actions':'Aktionen',
+  'staff.sal_week':'Diese Woche','staff.sal_month':'Diesen Monat','staff.sal_all':'Alle Zeiträume',
+  'staff.print_sal':'🖨 Drucken',
+  'staff.sal_emp':'Mitarbeiter','staff.sal_reg':'Reguläre Stunden','staff.sal_ot':'Überstunden',
+  'staff.sal_base':'Grundgehalt','staff.sal_ot_pay':'Überstundenzuschlag (×1.5)','staff.sal_total':'Gesamt',
+  'staff.sal_grand':'Gesamt',
+  'excel.format_title':'📋 Erforderliches Excel-Dateiformat',
+  'excel.format_hint':'Die erste Zeile muss folgende Überschriften enthalten:',
+  'excel.col_name':'Mitarbeitername','excel.col_date':'Datum','excel.col_start':'Arbeitsbeginn',
+  'excel.col_end':'Arbeitsende','excel.col_break':'Pause (Minuten)',
+  'excel.drop_title':'Excel-Datei hier ablegen oder klicken',
+  'excel.preview_title':'Datenvorschau','excel.cancel':'Abbrechen','excel.import':'✓ Importieren',
+  'excel.prev_num':'#','excel.prev_emp':'Mitarbeiter','excel.prev_date':'Datum',
+  'excel.prev_start':'Beginn','excel.prev_end':'Ende','excel.prev_break':'Pause',
+  'excel.prev_hours':'Stunden','excel.prev_status':'Status',
+  'sheet.prev':'→ Vorheriger Monat','sheet.today':'📅 Aktueller Monat',
+  'sheet.next':'Nächster Monat ←','sheet.save':'💾 Speichern','sheet.print':'🖨 Drucken',
+  'sheet.loading':'Tabelle wird geladen…',
+  'nrw.color':'Farbe wählen / اختر لوناً','nrw.csp':'CSP — Gesamtaufträge',
+  'nrw.search':'🔍 Schnellsuche','nrw.search_ph':'PLZ oder Stadt eingeben…',
+  'nrw.zones':'PLZ-Gebiete','nrw.map_not_loaded':'Karte noch nicht geöffnet',
+  'nrw.load_hint':'⏳ Auf "Karte laden" drücken','nrw.load_btn':'▶ Laden',
+  'nrw.overlay_title':'🗺 NRW-Karte — Lieferzonen',
+  'modal.cancel':'Abbrechen','modal.delete_confirm':'Löschen bestätigen','modal.delete':'Löschen',
+  'ord.title_new':'Neuer Auftrag','ord.title_edit':'Auftrag bearbeiten',
+  'ord.customer':'Kundenname *','ord.customer_ph':'Vollständiger Name',
+  'ord.tracking':'Sendungsnummer','ord.tracking_ph':'ZZ-00000',
+  'ord.address':'Adresse *','ord.address_ph':'Straße, Stadt, PLZ',
+  'ord.driver':'Fahrer','ord.status':'Status','ord.notes':'Notizen',
+  'ord.notes_ph':'Zusätzliche Anweisungen...','ord.save':'Auftrag speichern',
+  'stf.title_new':'Neuer Mitarbeiter','stf.title_edit':'Mitarbeiter bearbeiten',
+  'stf.name':'Vollständiger Name *','stf.name_ph':'Mitarbeitername',
+  'stf.role':'Berufsbezeichnung','stf.role_ph':'z.B.: Fahrer, Assistent',
+  'stf.phone':'Telefonnummer','stf.phone_ph':'+49 xxxxxxxx',
+  'stf.rate':'Stundenlohn (€)','stf.whours':'Wöchentliche Arbeitsstunden','stf.save':'Mitarbeiter speichern',
+  'att.title_new':'Anwesenheit hinzufügen','att.title_edit':'Anwesenheit bearbeiten',
+  'att.employee':'Mitarbeiter *','att.date':'Datum *','att.break':'Pause (Minuten)',
+  'att.start':'Arbeitsbeginn *','att.end':'Arbeitsende *',
+  'att.notes':'Notizen','att.notes_ph':'Optionale Notizen...','att.save':'Anwesenheit speichern',
+  'prof.title':'👤 Kontoeinstellungen','prof.username':'Benutzername *',
+  'prof.email':'📧 Gmail / iCloud E-Mail','prof.phone':'📱 Telefonnummer',
+  'prof.phone_ph':'+49 176...','prof.apple':' Apple ID',
+  'prof.hint':'💡 Sie können sich mit einer dieser Kennungen + Passwort anmelden',
+  'prof.change_pw':'Passwort ändern','prof.new_pw':'Neues Passwort',
+  'prof.new_pw_ph':'Leer lassen für aktuelles Passwort',
+  'prof.confirm_pw':'Passwort bestätigen','prof.confirm_pw_ph':'Erneut eingeben',
+  'prof.save':'Änderungen speichern',
+  'shemp.title':'Mitarbeiter im Plan','shemp.name':'Vollständiger Name *','shemp.name_ph':'z.B.: Taha',
+  'shemp.rate':'Stundenlohn (€)','shemp.save':'Speichern',
+  'sc.week_hours':'Wochenstunden','sc.week_salary':'Wochengehalt',
+  'btn.edit':'Bearbeiten','btn.delete':'Löschen',
+  'signup.title':'Neues Konto erstellen','signup.username':'Benutzername *',
+  'signup.email':'📧 Gmail / iCloud E-Mail','signup.phone':'📱 Telefonnummer',
+  'signup.apple':' Apple ID (iCloud)','signup.password':'Passwort *',
+  'signup.confirm_pw':'Passwort bestätigen *',
+  'signup.sec_q':'Sicherheitsfrage (für Kontowiederherstellung) *','signup.sec_a':'Antwort auf Sicherheitsfrage *',
+  'signup.sec_a_ph':'Ihre geheime Antwort','signup.submit':'Konto erstellen und anmelden →',
+  'signup.back':'← Zurück zur Anmeldung',
+  'forgot.title':'Konto wiederherstellen','forgot.id_lbl':'Kennung (Name / E-Mail / Telefon / Apple ID)',
+  'forgot.id_ph':'Beliebige mit dem Konto verknüpfte Kennung eingeben','forgot.find':'Konto suchen →',
+  'forgot.sec_a_ph':'Ihre geheime Antwort','forgot.verify':'Antwort überprüfen →',
+  'forgot.new_pw':'Neues Passwort *','forgot.confirm_pw':'Passwort bestätigen *',
+  'forgot.save':'Neues Passwort speichern →','forgot.back':'← Zurück zur Anmeldung',
+  'export.backup':'📤 Backup exportieren','import.backup':'📥 Backup importieren',
+  'reset.data':'🗑 Alle Daten löschen',
+});
+
+function t(k){return (T[_lang]&&T[_lang][k])||T.ar[k]||k;}
+
+function applyLang(lang){
+  _lang=lang;
+  localStorage.setItem('zzlg_lang',lang);
+  const info=LANGS[lang];
+  document.documentElement.lang=lang;
+  document.documentElement.dir=info.dir;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent=t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    el.placeholder=t(el.getAttribute('data-i18n-ph'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+    el.title=t(el.getAttribute('data-i18n-title'));
+  });
+  // Update all language switcher buttons
+  document.querySelectorAll('.lang-sw-btn').forEach(btn=>{
+    btn.textContent=info.flag+' '+info.next;
+  });
+  // Re-render dynamic sections
+  if(typeof renderOrders==='function') renderOrders();
+  if(typeof renderAttendance==='function') renderAttendance();
+  if(typeof renderSalaryReport==='function') renderSalaryReport();
+  if(typeof renderStaffCards==='function') renderStaffCards();
+  if(typeof renderRoutes==='function') renderRoutes();
+  if(typeof renderReports==='function') renderReports();
+  if(typeof renderDashboard==='function') renderDashboard();
 }
 
 // ══════════════════════════════════════════════════
@@ -1566,7 +1854,8 @@ function enterApp(acct){
   const now=new Date();
   $('routes-date').textContent=now.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
   loadDayUI(todayStr());updateBadge();
-  $('pageTitle').textContent=titles['map'];
+  applyLang(_lang);
+  $('pageTitle').textContent=titles['map']();
   $('pageDate').textContent=now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   initNRWMapPage();
   setTimeout(()=>{if(nrwLeafletReady&&!Object.keys(nrwZones).length)startNRWLoad();},1200);
@@ -1805,12 +2094,16 @@ async function saveProfile(){
 // ══════════════════════════════════════════════════
 // NAV
 // ══════════════════════════════════════════════════
-const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',sort:'فرز الجدول اليومي',routes:'المسارات',reports:'التقارير',map:'خريطة NRW — مناطق التوصيل',staff:'إدارة الموظفين'};
+const titles={
+  dashboard:()=>t('nav.dashboard'),orders:()=>t('nav.orders'),sort:()=>t('nav.sort'),
+  routes:()=>t('nav.routes'),reports:()=>t('nav.reports'),
+  map:()=>t('nav.map'),staff:()=>t('nav.staff')
+};
 function goPage(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
   if(btn){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));btn.classList.add('active')}
-  $('pageTitle').textContent=titles[name]||name;
+  $('pageTitle').textContent=(titles[name]?titles[name]():name);
   if(name==='dashboard')renderDashboard();
   if(name==='orders')renderOrders();
   if(name==='sort'){}
@@ -3166,6 +3459,9 @@ function nrwSearch(q){
       <span class="nrw-sr-city">${z.city}</span>
     </div>`).join('');
 }
+
+// Apply saved language on initial page load (login screen)
+applyLang(_lang);
 </script>
 </body>
 </html>
