@@ -9,6 +9,7 @@
   --primary:#0b1f3a;--blue:#1a56db;--amber:#f59e0b;
   --green:#10b981;--red:#ef4444;--bg:#f1f5f9;
   --white:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
+  --purple:#7c3aed;
   --sb-w:252px;--r:14px;--sh:0 2px 10px rgba(0,0,0,.07);
   --shlg:0 20px 60px rgba(0,0,0,.22);
 }
@@ -77,15 +78,48 @@ button,select,input{font-family:inherit;font-size:inherit}
 .tb-user-box{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--text)}
 .tb-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--blue));color:var(--white);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
 .page-area{padding:26px 28px;flex:1}
-.pv{}
+
+/* DATE NAV BAR */
+.date-nav{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+  background:var(--white);border-radius:var(--r);padding:14px 18px;
+  box-shadow:var(--sh);flex-wrap:wrap;
+}
+.date-nav-title{font-weight:900;color:var(--primary);font-size:16px;flex:1;text-align:center}
+.date-nav-btn{
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:10px;padding:8px 14px;font-weight:700;
+  cursor:pointer;font-size:13px;color:var(--text);transition:all .18s;
+}
+.date-nav-btn:hover{background:var(--border)}
+.date-nav-today{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.date-nav-today:hover{opacity:.88}
+.date-nav-save{background:var(--green);color:var(--white);border-color:var(--green)}
+.date-nav-save:hover{opacity:.88}
+.date-is-past{color:var(--red);font-size:12px;font-weight:700;background:#fee2e2;padding:4px 10px;border-radius:8px}
 
 /* STATS */
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
-.stat-card{background:var(--white);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh);border-right:4px solid transparent}
-.c-blue{border-right-color:var(--blue)}.c-green{border-right-color:var(--green)}.c-amber{border-right-color:var(--amber)}.c-red{border-right-color:var(--red)}
-.sc-ico{font-size:30px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+.stat-card{background:var(--white);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh);border-right:4px solid transparent;position:relative}
+.c-blue{border-right-color:var(--blue)}.c-green{border-right-color:var(--green)}.c-purple{border-right-color:var(--purple)}
+.sc-ico{font-size:30px;flex-shrink:0}
+.sc-body{flex:1}
 .sc-num{font-size:30px;font-weight:900;color:var(--primary);line-height:1}
 .sc-lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.sc-edit-btn{
+  position:absolute;top:10px;left:10px;
+  background:var(--bg);border:none;border-radius:8px;
+  padding:4px 8px;font-size:13px;cursor:pointer;color:var(--blue);
+  transition:background .15s;
+}
+.sc-edit-btn:hover{background:#dbeafe}
+.sc-edit-wrap{margin-top:10px;display:flex;gap:6px;align-items:center}
+.sc-edit-inp{
+  width:100px;padding:7px 10px;border:1.5px solid var(--blue);
+  border-radius:8px;font-size:16px;font-weight:700;color:var(--primary);
+  outline:none;text-align:center;
+}
+.sc-edit-ok{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-size:13px}
 
 /* LAYOUT */
 .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
@@ -96,6 +130,33 @@ button,select,input{font-family:inherit;font-size:inherit}
 .ghost-btn{background:none;border:none;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:8px}
 .ghost-btn:hover{background:#eff6ff}
 .info-tag{background:#eff6ff;color:var(--blue);padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700}
+
+/* RETURNS TABLE */
+.returns-section{margin-top:22px}
+.returns-card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh)}
+.returns-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;
+}
+.returns-title{font-size:17px;font-weight:900;color:var(--primary)}
+.returns-date-tag{background:#f3e8ff;color:var(--purple);padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700}
+.returns-add-btn{background:var(--purple);color:var(--white);border:none;border-radius:10px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:13px}
+.returns-add-btn:hover{opacity:.88}
+.returns-tbl-wrap{overflow-x:auto}
+.returns-tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:400px}
+.returns-tbl th{text-align:right;padding:10px 16px;color:var(--muted);font-size:12px;font-weight:700;border-bottom:1px solid var(--border)}
+.returns-tbl td{padding:10px 12px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+.returns-tbl tr:last-child td{border-bottom:none}
+.r-inp{
+  width:100%;padding:7px 10px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:13px;color:var(--text);background:var(--white);outline:none;
+  transition:border-color .15s;
+}
+.r-inp:focus{border-color:var(--purple)}
+.r-del{background:#fee2e2;color:#991b1b;border:none;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:13px}
+.r-del:hover{opacity:.8}
+.returns-empty{text-align:center;padding:28px;color:var(--muted);font-size:14px}
+.returns-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
 
 /* TABLES */
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
@@ -115,6 +176,7 @@ button,select,input{font-family:inherit;font-size:inherit}
 .b-available{background:#d1fae5;color:#065f46}
 .b-on_route{background:#dbeafe;color:#1e40af}
 .b-off{background:#f3f4f6;color:#6b7280}
+.b-return{background:#f3e8ff;color:#6d28d9}
 
 /* PROGRESS */
 .prog-wrap{background:#f1f5f9;border-radius:999px;height:7px;min-width:80px;overflow:hidden}
@@ -190,14 +252,8 @@ button,select,input{font-family:inherit;font-size:inherit}
     <div class="login-logo">Z&amp;Z</div>
     <h1>Z&amp;Z Logistics</h1>
     <p class="login-sub">نظام إدارة العمليات اللوجستية — Germany / NRW</p>
-
     <div class="sep"></div>
-
-    <div class="login-demo-box">
-      لعرض النظام — أدخل أي كلمة مرور
-      <b>0000</b>
-    </div>
-
+    <div class="login-demo-box">أدخل أي كلمة مرور للدخول<b>0000</b></div>
     <div class="form-group" style="margin-top:20px">
       <label>اسم المستخدم</label>
       <input id="login-user" type="text" value="المدير">
@@ -256,14 +312,62 @@ button,select,input{font-family:inherit;font-size:inherit}
 
     <div class="page-area">
 
-      <!-- DASHBOARD -->
+      <!-- ====== DASHBOARD ====== -->
       <section class="pv" id="pv-dashboard">
-        <div class="stat-row">
-          <div class="stat-card c-blue"><div class="sc-ico">📦</div><div><div class="sc-num" id="sc-total">0</div><div class="sc-lbl">طلبات اليوم</div></div></div>
-          <div class="stat-card c-green"><div class="sc-ico">✅</div><div><div class="sc-num" id="sc-delivered">0</div><div class="sc-lbl">تم التسليم</div></div></div>
-          <div class="stat-card c-amber"><div class="sc-ico">🚚</div><div><div class="sc-num" id="sc-transit">0</div><div class="sc-lbl">في الطريق</div></div></div>
-          <div class="stat-card c-red"><div class="sc-ico">⏳</div><div><div class="sc-num" id="sc-pending">0</div><div class="sc-lbl">قيد الانتظار</div></div></div>
+
+        <!-- Date Navigation -->
+        <div class="date-nav">
+          <button class="date-nav-btn" onclick="changeDay(-1)">→ اليوم السابق</button>
+          <button class="date-nav-btn date-nav-today" onclick="goToday()">📅 اليوم</button>
+          <div class="date-nav-title" id="dn-label">...</div>
+          <span id="dn-past-tag" class="date-is-past hidden">عرض سابق (قراءة فقط)</span>
+          <button class="date-nav-btn date-nav-save" onclick="saveDay()">💾 حفظ</button>
+          <button class="date-nav-btn" onclick="changeDay(+1)" id="dn-next-btn">اليوم التالي ←</button>
         </div>
+
+        <!-- Stat Cards -->
+        <div class="stat-row">
+
+          <!-- كمية الطرود -->
+          <div class="stat-card c-blue">
+            <div class="sc-ico">📦</div>
+            <div class="sc-body">
+              <div class="sc-num" id="sc-packages">0</div>
+              <div class="sc-lbl">كمية الطرود</div>
+              <div class="sc-edit-wrap hidden" id="pkg-edit-wrap">
+                <input type="number" class="sc-edit-inp" id="pkg-inp" min="0" placeholder="0">
+                <button class="sc-edit-ok" onclick="applyEdit('packages')">✓</button>
+              </div>
+            </div>
+            <button class="sc-edit-btn" id="pkg-edit-btn" onclick="toggleEdit('packages')" title="تعديل">✏</button>
+          </div>
+
+          <!-- تم التسليم -->
+          <div class="stat-card c-green">
+            <div class="sc-ico">✅</div>
+            <div class="sc-body">
+              <div class="sc-num" id="sc-delivered">0</div>
+              <div class="sc-lbl">تم التسليم</div>
+              <div class="sc-edit-wrap hidden" id="del-edit-wrap">
+                <input type="number" class="sc-edit-inp" id="del-inp" min="0" placeholder="0">
+                <button class="sc-edit-ok" onclick="applyEdit('delivered')">✓</button>
+              </div>
+            </div>
+            <button class="sc-edit-btn" id="del-edit-btn" onclick="toggleEdit('delivered')" title="تعديل">✏</button>
+          </div>
+
+          <!-- مسترجع -->
+          <div class="stat-card c-purple">
+            <div class="sc-ico">↩️</div>
+            <div class="sc-body">
+              <div class="sc-num" id="sc-returns">0</div>
+              <div class="sc-lbl">مسترجع</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Two-col: recent orders + drivers -->
         <div class="two-col">
           <div class="card">
             <div class="card-top"><h3 class="card-title">آخر الطلبات</h3><button class="ghost-btn" onclick="goPage('orders',null)">عرض الكل ←</button></div>
@@ -274,9 +378,41 @@ button,select,input{font-family:inherit;font-size:inherit}
             <div id="db-drivers"></div>
           </div>
         </div>
+
+        <!-- Returns Table -->
+        <div class="returns-section">
+          <div class="returns-card">
+            <div class="returns-header">
+              <div>
+                <div class="returns-title">↩ جدول المسترجعات</div>
+                <div style="font-size:13px;color:var(--muted);margin-top:3px">الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="returns-date-tag" id="ret-date-tag"></span>
+                <button class="returns-add-btn" id="ret-add-btn" onclick="addReturnRow()">＋ إضافة صف</button>
+              </div>
+            </div>
+            <div class="returns-tbl-wrap">
+              <table class="returns-tbl">
+                <thead>
+                  <tr>
+                    <th style="width:50px">#</th>
+                    <th>الكمية</th>
+                    <th>اسم الشفير</th>
+                    <th>التور</th>
+                    <th style="width:50px"></th>
+                  </tr>
+                </thead>
+                <tbody id="ret-tbody"></tbody>
+              </table>
+            </div>
+            <div id="ret-empty" class="returns-empty hidden">لا توجد مسترجعات لهذا اليوم</div>
+          </div>
+        </div>
+
       </section>
 
-      <!-- ORDERS -->
+      <!-- ====== ORDERS ====== -->
       <section class="pv hidden" id="pv-orders">
         <div class="toolbar">
           <input class="tb-inp" type="text" placeholder="🔍 بحث..." oninput="filterOrders(this.value)">
@@ -299,7 +435,7 @@ button,select,input{font-family:inherit;font-size:inherit}
         </div>
       </section>
 
-      <!-- DRIVERS -->
+      <!-- ====== DRIVERS ====== -->
       <section class="pv hidden" id="pv-drivers">
         <div class="toolbar">
           <input class="tb-inp" type="text" placeholder="🔍 بحث عن سائق..." oninput="filterDrivers(this.value)">
@@ -308,7 +444,7 @@ button,select,input{font-family:inherit;font-size:inherit}
         <div class="drivers-grid" id="drv-grid"></div>
       </section>
 
-      <!-- ROUTES -->
+      <!-- ====== ROUTES ====== -->
       <section class="pv hidden" id="pv-routes">
         <div class="card no-pad">
           <div class="card-top" style="padding:20px 22px 0"><h3 class="card-title">مسارات اليوم</h3><span class="info-tag" id="routes-date"></span></div>
@@ -321,13 +457,12 @@ button,select,input{font-family:inherit;font-size:inherit}
         </div>
       </section>
 
-      <!-- REPORTS -->
+      <!-- ====== REPORTS ====== -->
       <section class="pv hidden" id="pv-reports">
         <div class="stat-row">
-          <div class="stat-card c-blue"><div class="sc-ico">📊</div><div><div class="sc-num" id="rp-total">0</div><div class="sc-lbl">طلبات الأسبوع</div></div></div>
-          <div class="stat-card c-green"><div class="sc-ico">📈</div><div><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl">معدل التسليم</div></div></div>
-          <div class="stat-card c-amber"><div class="sc-ico">🚗</div><div><div class="sc-num" id="rp-drivers">0</div><div class="sc-lbl">سائقون نشطون</div></div></div>
-          <div class="stat-card c-red"><div class="sc-ico">❌</div><div><div class="sc-num" id="rp-failed">0</div><div class="sc-lbl">طلبات فاشلة</div></div></div>
+          <div class="stat-card c-blue"><div class="sc-ico">📊</div><div class="sc-body"><div class="sc-num" id="rp-total">0</div><div class="sc-lbl">طلبات الأسبوع</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">📈</div><div class="sc-body"><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl">معدل التسليم</div></div></div>
+          <div class="stat-card c-purple"><div class="sc-ico">↩️</div><div class="sc-body"><div class="sc-num" id="rp-returns">0</div><div class="sc-lbl">مسترجع</div></div></div>
         </div>
         <div class="two-col">
           <div class="card">
@@ -341,9 +476,9 @@ button,select,input{font-family:inherit;font-size:inherit}
         </div>
       </section>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /page-area -->
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
 
 <!-- MODAL: ORDER -->
 <div class="modal-bg hidden" id="modal-order">
@@ -405,51 +540,239 @@ button,select,input{font-family:inherit;font-size:inherit}
 <div class="toast hidden" id="toast"></div>
 
 <script>
-// ── DATA ──────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// SAMPLE DATA (orders/drivers)
+// ══════════════════════════════════════════════════
 let drivers = [
-  {id:1,name:'أحمد الريفاي',  phone:'+49 176 11223344',area:'Köln Nord',  status:'on_route', orders:28,delivered:25},
-  {id:2,name:'عمر حسن',       phone:'+49 176 22334455',area:'Köln Süd',   status:'on_route', orders:31,delivered:29},
-  {id:3,name:'مصطفى يلماز',  phone:'+49 176 33445566',area:'Düsseldorf', status:'available',orders:22,delivered:20},
-  {id:4,name:'بيتر شميدت',   phone:'+49 176 44556677',area:'Bonn',        status:'on_route', orders:19,delivered:17},
-  {id:5,name:'علي كريمي',    phone:'+49 176 55667788',area:'Aachen',      status:'off',      orders:14,delivered:13},
+  {id:1,name:'أحمد الريفاي', phone:'+49 176 11223344',area:'Köln Nord',  status:'on_route'},
+  {id:2,name:'عمر حسن',      phone:'+49 176 22334455',area:'Köln Süd',   status:'on_route'},
+  {id:3,name:'مصطفى يلماز', phone:'+49 176 33445566',area:'Düsseldorf', status:'available'},
+  {id:4,name:'بيتر شميدت',  phone:'+49 176 44556677',area:'Bonn',        status:'on_route'},
+  {id:5,name:'علي كريمي',   phone:'+49 176 55667788',area:'Aachen',      status:'off'},
 ];
 let orders = [
-  {id:1, tracking:'ZZ-10241',customer:'Klaus Müller',      address:'Aachener Str. 45, Köln 50674',      driver:1,status:'delivered', time:'08:12',notes:''},
-  {id:2, tracking:'ZZ-10242',customer:'Fatima Al-Hassan',  address:'Venloer Str. 12, Köln 50672',       driver:1,status:'delivered', time:'08:45',notes:'الباب الخلفي'},
-  {id:3, tracking:'ZZ-10243',customer:'Thomas Wagner',     address:'Sülzgürtel 88, Köln 50937',         driver:2,status:'in_transit',time:'09:00',notes:''},
-  {id:4, tracking:'ZZ-10244',customer:'Selin Yilmaz',      address:'Ehrenfelder Gürtel 7, Köln 50823',  driver:2,status:'delivered', time:'09:30',notes:''},
-  {id:5, tracking:'ZZ-10245',customer:'Hamid Karimi',      address:'Gladbacher Str. 55, Düsseldorf',    driver:3,status:'pending',   time:'10:00',notes:'اتصل قبل الوصول'},
-  {id:6, tracking:'ZZ-10246',customer:'Anna Schmidt',      address:'Breite Str. 22, Bonn 53111',        driver:4,status:'in_transit',time:'09:15',notes:''},
-  {id:7, tracking:'ZZ-10247',customer:'Mohammed Saleh',    address:'Elisenstr. 3, Aachen 52062',        driver:5,status:'delivered', time:'07:55',notes:''},
-  {id:8, tracking:'ZZ-10248',customer:'Laura Braun',       address:'Friedrich-Ebert-Str. 9, Bonn 53113',driver:4,status:'failed',    time:'10:20',notes:'لم يُرَد عليه'},
-  {id:9, tracking:'ZZ-10249',customer:'Yusuf Demir',       address:'Neumarkt 18, Köln 50667',           driver:1,status:'in_transit',time:'10:35',notes:''},
-  {id:10,tracking:'ZZ-10250',customer:'Sandra Koch',       address:'Brehmstr. 41, Düsseldorf 40239',    driver:3,status:'pending',   time:'11:00',notes:''},
-  {id:11,tracking:'ZZ-10251',customer:'Khalid Mansour',    address:'Hohenzollernring 4, Köln 50672',    driver:2,status:'delivered', time:'11:15',notes:''},
-  {id:12,tracking:'ZZ-10252',customer:'Maria Fischer',     address:'Kölner Str. 77, Bonn 53111',        driver:4,status:'pending',   time:'11:30',notes:'صندوق ثقيل'},
+  {id:1, tracking:'ZZ-10241',customer:'Klaus Müller',    address:'Aachener Str. 45, Köln',      driver:1,status:'delivered', time:'08:12',notes:''},
+  {id:2, tracking:'ZZ-10242',customer:'Fatima Hassan',   address:'Venloer Str. 12, Köln',       driver:1,status:'delivered', time:'08:45',notes:''},
+  {id:3, tracking:'ZZ-10243',customer:'Thomas Wagner',   address:'Sülzgürtel 88, Köln',         driver:2,status:'in_transit',time:'09:00',notes:''},
+  {id:4, tracking:'ZZ-10244',customer:'Selin Yilmaz',    address:'Ehrenfelder Str. 7, Köln',    driver:2,status:'delivered', time:'09:30',notes:''},
+  {id:5, tracking:'ZZ-10245',customer:'Hamid Karimi',    address:'Gladbacher Str. 55, Düss.',   driver:3,status:'pending',   time:'10:00',notes:''},
+  {id:6, tracking:'ZZ-10246',customer:'Anna Schmidt',    address:'Breite Str. 22, Bonn',        driver:4,status:'in_transit',time:'09:15',notes:''},
+  {id:7, tracking:'ZZ-10247',customer:'Mohammed Saleh',  address:'Elisenstr. 3, Aachen',        driver:5,status:'delivered', time:'07:55',notes:''},
+  {id:8, tracking:'ZZ-10248',customer:'Laura Braun',     address:'Friedrich-Str. 9, Bonn',      driver:4,status:'failed',    time:'10:20',notes:''},
+  {id:9, tracking:'ZZ-10249',customer:'Yusuf Demir',     address:'Neumarkt 18, Köln',           driver:1,status:'in_transit',time:'10:35',notes:''},
+  {id:10,tracking:'ZZ-10250',customer:'Sandra Koch',     address:'Brehmstr. 41, Düsseldorf',    driver:3,status:'pending',   time:'11:00',notes:''},
+  {id:11,tracking:'ZZ-10251',customer:'Khalid Mansour',  address:'Hohenzollernring 4, Köln',    driver:2,status:'delivered', time:'11:15',notes:''},
+  {id:12,tracking:'ZZ-10252',customer:'Maria Fischer',   address:'Kölner Str. 77, Bonn',        driver:4,status:'pending',   time:'11:30',notes:''},
 ];
 let nextOId=13, nextDId=6;
 let fq='', fst='';
 
-// ── AUTH ──────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// DAILY DATA (localStorage)
+// Structure: { packages: 0, delivered: 0, returns: [{qty,driver,tour},...] }
+// Key: "zzlg_YYYY-MM-DD"
+// ══════════════════════════════════════════════════
+let currentDate = todayStr();   // "YYYY-MM-DD"
+let currentDay  = {};           // loaded daily data
+let returnRows  = [];           // [{id,qty,driver,tour}] live rows
+
+function todayStr(){
+  const d=new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function pad(n){return String(n).padStart(2,'0')}
+function dateKey(s){return 'zzlg_'+s}
+
+function loadDay(dateStr){
+  const raw=localStorage.getItem(dateKey(dateStr));
+  if(raw){
+    try{return JSON.parse(raw)}catch(e){}
+  }
+  return {packages:0, delivered:0, returns:[]};
+}
+
+function saveDay(){
+  // Collect return rows from DOM
+  const rets=[];
+  document.querySelectorAll('.ret-row').forEach(tr=>{
+    const inps=tr.querySelectorAll('input');
+    rets.push({qty:inps[0].value.trim()||'0', driver:inps[1].value.trim(), tour:inps[2].value.trim()});
+  });
+  currentDay.returns=rets;
+  localStorage.setItem(dateKey(currentDate),JSON.stringify(currentDay));
+  toast('تم الحفظ بنجاح ✓','success');
+  updateReturnCount();
+}
+
+function loadDayUI(dateStr){
+  currentDate=dateStr;
+  currentDay=loadDay(dateStr);
+  returnRows=[...currentDay.returns];
+
+  const isPast=(dateStr<todayStr());
+  const isFuture=(dateStr>todayStr());
+
+  // Update date nav label
+  const d=new Date(dateStr+'T00:00:00');
+  $('dn-label').textContent=d.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  $('dn-past-tag').classList.toggle('hidden',!isPast);
+  $('dn-next-btn').disabled=(dateStr>=todayStr());
+  $('dn-next-btn').style.opacity=(dateStr>=todayStr())?'0.4':'1';
+
+  // Update topbar date
+  $('pageDate').textContent=d.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  // Stats
+  $('sc-packages').textContent=currentDay.packages||0;
+  $('sc-delivered').textContent=currentDay.delivered||0;
+
+  // Disable editing for past? No — user can still edit any day
+  const editBtns=document.querySelectorAll('.sc-edit-btn');
+  editBtns.forEach(b=>b.style.display='flex');
+
+  // Render returns
+  renderReturnRows();
+  updateReturnCount();
+
+  // Returns date tag
+  $('ret-date-tag').textContent=d.toLocaleDateString('ar-EG',{day:'numeric',month:'long'});
+}
+
+function changeDay(delta){
+  const d=new Date(currentDate+'T00:00:00');
+  d.setDate(d.getDate()+delta);
+  const newDate=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  loadDayUI(newDate);
+}
+function goToday(){loadDayUI(todayStr())}
+
+// ══════════════════════════════════════════════════
+// STAT CARD EDITING
+// ══════════════════════════════════════════════════
+function toggleEdit(field){
+  const isPackages=(field==='packages');
+  const wrapId=isPackages?'pkg-edit-wrap':'del-edit-wrap';
+  const inpId =isPackages?'pkg-inp':'del-inp';
+  const wrap=$(wrapId);
+  const numEl=$(isPackages?'sc-packages':'sc-delivered');
+  const isHidden=wrap.classList.contains('hidden');
+  if(isHidden){
+    wrap.classList.remove('hidden');
+    $(inpId).value=numEl.textContent;
+    $(inpId).focus();
+    $(inpId).select();
+  }else{
+    wrap.classList.add('hidden');
+  }
+}
+
+function applyEdit(field){
+  const isPackages=(field==='packages');
+  const inpId=isPackages?'pkg-inp':'del-inp';
+  const numEl=$(isPackages?'sc-packages':'sc-delivered');
+  const wrapId=isPackages?'pkg-edit-wrap':'del-edit-wrap';
+  const val=parseInt($(inpId).value)||0;
+  numEl.textContent=val;
+  currentDay[field]=val;
+  $(wrapId).classList.add('hidden');
+  toast('تم التحديث — لا تنس الحفظ 💾');
+}
+
+// Enter key in edit inputs
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    if(document.activeElement.id==='pkg-inp')applyEdit('packages');
+    if(document.activeElement.id==='del-inp')applyEdit('delivered');
+  }
+});
+
+// ══════════════════════════════════════════════════
+// RETURN ROWS
+// ══════════════════════════════════════════════════
+let retRowId=1;
+
+function addReturnRow(data){
+  const id=retRowId++;
+  const qty=data?data.qty:'';
+  const drv=data?data.driver:'';
+  const tour=data?data.tour:'';
+  const tbody=$('ret-tbody');
+  const tr=document.createElement('tr');
+  tr.className='ret-row';
+  tr.dataset.id=id;
+  tr.innerHTML=`
+    <td style="color:var(--muted);font-weight:700;font-size:13px;text-align:center">${tbody.children.length+1}</td>
+    <td><input class="r-inp" type="number" placeholder="0" value="${qty}" min="0" style="width:80px"></td>
+    <td><input class="r-inp" type="text"   placeholder="اسم الشفير" value="${drv}"></td>
+    <td><input class="r-inp" type="text"   placeholder="Tour 1" value="${tour}"></td>
+    <td><button class="r-del" onclick="delReturnRow(this)">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  $('ret-empty').classList.add('hidden');
+  updateReturnCount();
+  // focus qty
+  tr.querySelector('input').focus();
+}
+
+function delReturnRow(btn){
+  btn.closest('tr').remove();
+  reIndexRows();
+  updateReturnCount();
+}
+
+function reIndexRows(){
+  document.querySelectorAll('.ret-row').forEach((tr,i)=>{
+    tr.cells[0].textContent=i+1;
+  });
+  const count=$('ret-tbody').children.length;
+  $('ret-empty').classList.toggle('hidden',count>0);
+}
+
+function renderReturnRows(){
+  $('ret-tbody').innerHTML='';
+  retRowId=1;
+  if(returnRows.length===0){
+    $('ret-empty').classList.remove('hidden');
+  }else{
+    $('ret-empty').classList.add('hidden');
+    returnRows.forEach(r=>addReturnRow(r));
+  }
+}
+
+function updateReturnCount(){
+  const count=$('ret-tbody').children.length;
+  $('sc-returns').textContent=count;
+}
+
+// ══════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════
 function doLogin(){
   const u=$('login-user').value.trim()||'المدير';
   const p=$('login-pass').value.trim();
-  const msg=$('msg');
-  if(!p){msg.textContent='يرجى إدخال كلمة المرور';return}
-  msg.textContent='';
+  if(!p){$('msg').textContent='يرجى إدخال كلمة المرور';return}
+  $('msg').textContent='';
   $('loginScreen').classList.add('hidden');
   $('mainApp').classList.remove('hidden');
   const av=u[0].toUpperCase();
-  $('sbAv').textContent=av; $('tbAv').textContent=av;
-  $('sbName').textContent=u; $('tbName').textContent=u;
+  $('sbAv').textContent=av;$('tbAv').textContent=av;
+  $('sbName').textContent=u;$('tbName').textContent=u;
   const now=new Date();
-  $('pageDate').textContent=now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   $('routes-date').textContent=now.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
-  renderDashboard(); updateBadge();
+  // Load today's daily data
+  loadDayUI(todayStr());
+  renderDashboard();
+  updateBadge();
 }
-function doLogout(){$('mainApp').classList.add('hidden');$('loginScreen').classList.remove('hidden');$('login-pass').value='';$('msg').textContent=''}
+function doLogout(){
+  $('mainApp').classList.add('hidden');
+  $('loginScreen').classList.remove('hidden');
+  $('login-pass').value='';$('msg').textContent='';
+}
 
-// ── NAV ───────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════
 const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير'};
 function goPage(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
@@ -465,20 +788,21 @@ function goPage(name,btn){
 }
 function toggleSidebar(){$('sidebar').classList.toggle('open')}
 
-// ── DASHBOARD ─────────────────────────────────────
+// ══════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════
 function renderDashboard(){
-  const d=orders.filter(o=>o.status==='delivered').length;
-  const t=orders.filter(o=>o.status==='in_transit').length;
-  const p=orders.filter(o=>o.status==='pending').length;
-  $('sc-total').textContent=orders.length;
-  $('sc-delivered').textContent=d;
-  $('sc-transit').textContent=t;
-  $('sc-pending').textContent=p;
-  $('db-orders').innerHTML=[...orders].reverse().slice(0,5).map(o=>`<tr><td><small style="color:var(--muted)">${o.tracking}</small></td><td>${o.customer}</td><td>${dName(o.driver)}</td><td>${badge(o.status)}</td></tr>`).join('');
-  $('db-drivers').innerHTML=drivers.map(d=>`<div class="db-drv-row"><div class="db-drv-info"><div class="db-av">${d.name[0]}</div><div><div class="db-drv-name">${d.name}</div><div class="db-drv-area">${d.area}</div></div></div>${badge(d.status,'d')}</div>`).join('');
+  $('db-orders').innerHTML=[...orders].reverse().slice(0,5).map(o=>
+    `<tr><td><small style="color:var(--muted)">${o.tracking}</small></td><td>${o.customer}</td><td>${dName(o.driver)}</td><td>${badge(o.status)}</td></tr>`
+  ).join('');
+  $('db-drivers').innerHTML=drivers.map(d=>
+    `<div class="db-drv-row"><div class="db-drv-info"><div class="db-av">${d.name[0]}</div><div><div class="db-drv-name">${d.name}</div><div class="db-drv-area">${d.area}</div></div></div>${badge(d.status,'d')}</div>`
+  ).join('');
 }
 
-// ── ORDERS ────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// ORDERS
+// ══════════════════════════════════════════════════
 function renderOrders(list){
   const data=list||filtered();
   $('ord-tbody').innerHTML=data.length===0
@@ -496,32 +820,23 @@ function renderOrders(list){
 }
 function filtered(){
   return orders.filter(o=>{
-    const mq=!fq||o.customer.toLowerCase().includes(fq)||o.tracking.toLowerCase().includes(fq)||o.address.toLowerCase().includes(fq);
+    const mq=!fq||o.customer.toLowerCase().includes(fq)||o.tracking.toLowerCase().includes(fq);
     return mq&&(!fst||o.status===fst);
   });
 }
 function filterOrders(q){fq=q.toLowerCase();renderOrders()}
 function filterByStatus(s){fst=s;renderOrders()}
-
 function openOrderModal(o){
   $('ord-driver-sel').innerHTML=drivers.map(d=>`<option value="${d.id}">${d.name} — ${d.area}</option>`).join('');
   if(o){
     $('modal-order-h').textContent='تعديل الطلب';
-    $('ord-edit-id').value=o.id;
-    $('ord-customer').value=o.customer;
-    $('ord-tracking').value=o.tracking;
-    $('ord-address').value=o.address;
-    $('ord-driver-sel').value=o.driver;
-    $('ord-status-sel').value=o.status;
-    $('ord-notes').value=o.notes;
+    $('ord-edit-id').value=o.id;$('ord-customer').value=o.customer;
+    $('ord-tracking').value=o.tracking;$('ord-address').value=o.address;
+    $('ord-driver-sel').value=o.driver;$('ord-status-sel').value=o.status;$('ord-notes').value=o.notes;
   }else{
-    $('modal-order-h').textContent='طلب جديد';
-    $('ord-edit-id').value='';
-    $('ord-customer').value='';
-    $('ord-tracking').value='ZZ-'+(10240+nextOId);
-    $('ord-address').value='';
-    $('ord-notes').value='';
-    $('ord-status-sel').value='pending';
+    $('modal-order-h').textContent='طلب جديد';$('ord-edit-id').value='';
+    $('ord-customer').value='';$('ord-tracking').value='ZZ-'+(10240+nextOId);
+    $('ord-address').value='';$('ord-notes').value='';$('ord-status-sel').value='pending';
   }
   openM('modal-order');
 }
@@ -539,7 +854,9 @@ function saveOrder(){
 }
 function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success')}
 
-// ── DRIVERS ───────────────────────────────────────
+// ══════════════════════════════════════════════════
+// DRIVERS
+// ══════════════════════════════════════════════════
 function renderDrivers(list){
   const data=list||drivers;
   $('drv-grid').innerHTML=data.length===0?'<p style="color:var(--muted)">لا يوجد سائقون</p>':data.map(d=>{
@@ -549,7 +866,7 @@ function renderDrivers(list){
     return`<div class="drv-card">
       <div class="drv-top"><div class="drv-av">${d.name[0]}</div><div><div class="drv-name">${d.name}</div><div class="drv-phone">${d.phone}</div></div></div>
       <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700;color:var(--muted)">${d.area}</span>${badge(d.status,'d')}</div>
-      <div class="drv-stats"><div class="drv-stat"><div class="drv-stat-n">${do_.length}</div><div class="drv-stat-l">طلبات اليوم</div></div><div class="drv-stat"><div class="drv-stat-n">${rt}%</div><div class="drv-stat-l">معدل التسليم</div></div></div>
+      <div class="drv-stats"><div class="drv-stat"><div class="drv-stat-n">${do_.length}</div><div class="drv-stat-l">طلبات</div></div><div class="drv-stat"><div class="drv-stat-n">${rt}%</div><div class="drv-stat-l">معدل التسليم</div></div></div>
       <div class="drv-actions"><button class="act-btn act-edit" onclick="editDriver(${d.id})">تعديل</button><button class="act-btn act-delete" onclick="askDelete('driver',${d.id})">حذف</button></div>
     </div>`;
   }).join('');
@@ -566,12 +883,14 @@ function saveDriver(){
   const eid=$('drv-name').dataset.eid;
   const data={name:n,phone:$('drv-phone').value.trim()||'—',area:$('drv-area').value.trim()||'—',status:$('drv-status-sel').value};
   if(eid){const i=drivers.findIndex(d=>d.id===parseInt(eid));if(i!==-1)drivers[i]={...drivers[i],...data};delete $('drv-name').dataset.eid;toast('تم تحديث السائق','success')}
-  else{drivers.push({id:nextDId++,orders:0,delivered:0,...data});toast('تم إضافة السائق','success')}
+  else{drivers.push({id:nextDId++,...data});toast('تم إضافة السائق','success')}
   closeModal('modal-driver');renderDrivers();
 }
 function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success')}
 
-// ── ROUTES ────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// ROUTES
+// ══════════════════════════════════════════════════
 function renderRoutes(){
   $('rts-tbody').innerHTML=drivers.map(d=>{
     const do_=orders.filter(o=>o.driver===d.id);
@@ -584,13 +903,21 @@ function renderRoutes(){
   }).join('');
 }
 
-// ── REPORTS ───────────────────────────────────────
+// ══════════════════════════════════════════════════
+// REPORTS
+// ══════════════════════════════════════════════════
 function renderReports(){
   const tot=orders.length,del=orders.filter(o=>o.status==='delivered').length,
-        fail=orders.filter(o=>o.status==='failed').length,
-        actD=drivers.filter(d=>d.status!=='off').length,
         rate=tot?Math.round(del/tot*100):0;
-  $('rp-total').textContent=tot;$('rp-rate').textContent=rate+'%';$('rp-drivers').textContent=actD;$('rp-failed').textContent=fail;
+  // Count all returns across all saved days
+  let totalReturns=0;
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('zzlg_')){
+      try{const d=JSON.parse(localStorage.getItem(k));totalReturns+=(d.returns||[]).length}catch(e){}
+    }
+  }
+  $('rp-total').textContent=tot;$('rp-rate').textContent=rate+'%';$('rp-returns').textContent=totalReturns;
   $('rp-drv').innerHTML=drivers.map(d=>{
     const dt=orders.filter(o=>o.driver===d.id).length;
     const dd=orders.filter(o=>o.driver===d.id&&o.status==='delivered').length;
@@ -602,7 +929,9 @@ function renderReports(){
   $('rp-area').innerHTML=Object.entries(areas).map(([a,s])=>`<tr><td>${a}</td><td>${s.t}</td><td>${s.d}</td></tr>`).join('');
 }
 
-// ── CONFIRM DELETE ────────────────────────────────
+// ══════════════════════════════════════════════════
+// CONFIRM DELETE
+// ══════════════════════════════════════════════════
 function askDelete(type,id){
   const item=type==='order'?orders.find(o=>o.id===id):drivers.find(d=>d.id===id);
   if(!item)return;
@@ -611,14 +940,16 @@ function askDelete(type,id){
   openM('modal-confirm');
 }
 
-// ── HELPERS ───────────────────────────────────────
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
 function dName(id){const d=drivers.find(x=>x.id===id);return d?d.name:'—'}
 const BL={delivered:'تم التسليم',in_transit:'في الطريق',pending:'قيد الانتظار',failed:'فشل التسليم',available:'متاح',on_route:'في المسار',off:'غير متاح'};
 function badge(s){return`<span class="badge b-${s}">${BL[s]||s}</span>`}
 function updateBadge(){const c=orders.filter(o=>o.status==='pending').length;const b=$('nav-badge');b.textContent=c;c>0?b.classList.remove('hidden'):b.classList.add('hidden')}
 function openM(id){$(id).classList.remove('hidden')}
 function closeModal(id){$(id).classList.add('hidden')}
-function toast(msg,type){const e=$('toast');e.textContent=msg;e.className='toast '+(type||'');e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),3000)}
+function toast(msg,type){const e=$('toast');e.textContent=msg;e.className='toast '+(type||'');e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),3200)}
 function $(id){return document.getElementById(id)}
 </script>
 </body>
