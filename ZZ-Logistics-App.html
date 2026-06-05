@@ -101,7 +101,7 @@ button,select,input{font-family:inherit;font-size:inherit}
 /* STATS */
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
 .stat-card{background:var(--white);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh);border-right:4px solid transparent;position:relative}
-.c-blue{border-right-color:var(--blue)}.c-green{border-right-color:var(--green)}.c-purple{border-right-color:var(--purple)}
+.c-blue{border-right-color:var(--blue)}.c-green{border-right-color:var(--green)}.c-purple{border-right-color:var(--purple)}.c-amber{border-right-color:var(--amber)}
 .sc-ico{font-size:30px;flex-shrink:0}
 .sc-body{flex:1}
 .sc-num{font-size:30px;font-weight:900;color:var(--primary);line-height:1}
@@ -285,6 +285,27 @@ button,select,input{font-family:inherit;font-size:inherit}
 .nrw-sr-city{font-size:11px;color:#7777aa;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nrw-highlight{animation:nrwFlash 1.2s ease}
 @keyframes nrwFlash{0%,100%{fill-opacity:.65}40%{fill-opacity:1}}
+
+/* ── STAFF PAGE ─────────────────────────────────── */
+.staff-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.stab{padding:9px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;transition:all .18s}
+.stab:hover{background:var(--bg)}.stab.active{background:var(--primary);color:var(--white);border-color:var(--primary)}
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.staff-card{background:var(--white);border-radius:var(--r);padding:20px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s}
+.staff-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.staff-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.staff-av{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--blue));color:var(--white);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.staff-name{font-size:15px;font-weight:700;color:var(--primary)}
+.staff-role{font-size:12px;color:var(--muted)}
+.staff-rate{font-size:13px;font-weight:700;color:var(--green);margin-top:2px}
+.staff-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.staff-stat{background:var(--bg);border-radius:9px;padding:9px;text-align:center}
+.staff-stat-n{font-size:18px;font-weight:900;color:var(--primary)}
+.staff-stat-l{font-size:11px;color:var(--muted)}
+/* excel drop */
+#excel-drop:hover{border-color:var(--blue) !important}
+.tbl tfoot td{padding:12px 15px;font-size:14px;border-top:2px solid var(--border)}
+
 @media(max-width:800px){.pv-map-full{margin:-16px}.nrw-panel{width:220px}}
 </style>
 </head>
@@ -326,6 +347,7 @@ button,select,input{font-family:inherit;font-size:inherit}
       <button class="nav-item" onclick="goPage('orders',this)"><span class="ni">📦</span><span>الطلبات</span><span class="nav-badge hidden" id="nav-badge"></span></button>
       <button class="nav-item" onclick="goPage('drivers',this)"><span class="ni">🚗</span><span>السائقون</span></button>
       <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span>المسارات</span></button>
+      <button class="nav-item" onclick="goPage('staff',this)"><span class="ni">👥</span><span>الموظفون</span></button>
       <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
     </nav>
     <div class="sb-footer">
@@ -521,6 +543,119 @@ button,select,input{font-family:inherit;font-size:inherit}
         </div>
       </section>
 
+      <!-- ====== STAFF ====== -->
+      <section class="pv hidden" id="pv-staff">
+
+        <div class="stat-row">
+          <div class="stat-card c-blue"><div class="sc-ico">👥</div><div class="sc-body"><div class="sc-num" id="st-count">0</div><div class="sc-lbl">الموظفون</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">⏱</div><div class="sc-body"><div class="sc-num" id="st-hours">0h</div><div class="sc-lbl">ساعات هذا الأسبوع</div></div></div>
+          <div class="stat-card c-amber"><div class="sc-ico">💶</div><div class="sc-body"><div class="sc-num" id="st-salary">0 €</div><div class="sc-lbl">رواتب هذا الأسبوع</div></div></div>
+        </div>
+
+        <div class="staff-tabs">
+          <button class="stab active" onclick="showStaffTab('employees',this)">👥 الموظفون</button>
+          <button class="stab" onclick="showStaffTab('attendance',this)">📅 الدوام</button>
+          <button class="stab" onclick="showStaffTab('salary',this)">💶 تقرير الراتب</button>
+          <button class="stab" onclick="showStaffTab('excel',this)">📊 استيراد Excel</button>
+        </div>
+
+        <!-- Tab: Employees -->
+        <div id="stab-employees" class="stab-content">
+          <div class="toolbar">
+            <input class="tb-inp" type="text" placeholder="🔍 بحث عن موظف..." oninput="filterStaff(this.value)">
+            <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openStaffModal()">＋ موظف جديد</button>
+          </div>
+          <div class="staff-grid" id="staff-grid"></div>
+        </div>
+
+        <!-- Tab: Attendance -->
+        <div id="stab-attendance" class="stab-content hidden">
+          <div class="toolbar">
+            <input class="tb-inp" type="date" id="att-date-f" onchange="attDateFilter=this.value;renderAttendance()">
+            <select class="tb-sel" id="att-staff-f" onchange="attStaffFilter=this.value;renderAttendance()">
+              <option value="">كل الموظفين</option>
+            </select>
+            <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openAttModal()">＋ إضافة دوام</button>
+          </div>
+          <div class="card no-pad">
+            <div class="tbl-wrap">
+              <table class="tbl full-tbl">
+                <thead><tr><th>الموظف</th><th>التاريخ</th><th>بداية</th><th>نهاية</th><th>استراحة</th><th>الساعات</th><th>ملاحظات</th><th>إجراءات</th></tr></thead>
+                <tbody id="att-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Salary Report -->
+        <div id="stab-salary" class="stab-content hidden">
+          <div class="toolbar">
+            <select class="tb-sel" onchange="currentSalaryPeriod=this.value;renderSalaryReport()">
+              <option value="week">هذا الأسبوع</option>
+              <option value="month">هذا الشهر</option>
+              <option value="all">كل الفترات</option>
+            </select>
+            <span id="salary-period-label" style="font-size:13px;color:var(--muted);font-weight:700"></span>
+          </div>
+          <div class="card no-pad">
+            <div class="tbl-wrap">
+              <table class="tbl full-tbl">
+                <thead><tr><th>الموظف</th><th>الساعات العادية</th><th>ساعات إضافية</th><th>الراتب الأساسي</th><th>بدل إضافي (×1.5)</th><th>الإجمالي</th></tr></thead>
+                <tbody id="salary-tbody"></tbody>
+                <tfoot><tr style="font-weight:900;background:#f8fafc">
+                  <td>الإجمالي</td><td id="s-tot-h">—</td><td id="s-tot-ot">—</td>
+                  <td id="s-tot-base">—</td><td id="s-tot-extra">—</td>
+                  <td id="s-tot-all" style="color:var(--green)">—</td>
+                </tr></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Excel Import -->
+        <div id="stab-excel" class="stab-content hidden">
+          <div class="card" style="margin-bottom:18px">
+            <h3 class="card-title" style="margin-bottom:10px">📋 تنسيق ملف Excel المطلوب</h3>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px">الصف الأول يجب أن يحتوي على العناوين التالية:</p>
+            <div style="overflow-x:auto">
+              <table class="tbl" style="font-size:13px">
+                <thead><tr><th>اسم الموظف</th><th>التاريخ</th><th>بداية العمل</th><th>نهاية العمل</th><th>استراحة (دقيقة)</th></tr></thead>
+                <tbody>
+                  <tr><td>أحمد الريفاي</td><td>15.01.2025</td><td>07:00</td><td>16:00</td><td>30</td></tr>
+                  <tr><td>عمر حسن</td><td>15.01.2025</td><td>07:30</td><td>16:30</td><td>30</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-top:10px">💡 التاريخ يقبل: DD.MM.YYYY أو YYYY-MM-DD — عمود الاستراحة اختياري (الافتراضي 30 دقيقة)</p>
+          </div>
+          <div id="excel-drop" onclick="$('excel-file').click()"
+            style="border:2.5px dashed var(--border);border-radius:18px;padding:50px 20px;text-align:center;cursor:pointer;background:var(--white);transition:border-color .2s">
+            <div style="font-size:48px;margin-bottom:14px">📊</div>
+            <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:6px">اسحب ملف Excel هنا أو اضغط للاختيار</div>
+            <div style="font-size:13px;color:var(--muted)">.xlsx / .xls</div>
+            <input type="file" id="excel-file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(this)">
+          </div>
+          <div id="excel-preview" class="hidden" style="margin-top:18px">
+            <div class="card no-pad">
+              <div class="card-top" style="padding:16px 20px 0">
+                <h3 class="card-title" id="excel-preview-title">معاينة البيانات</h3>
+                <div style="display:flex;gap:10px">
+                  <button class="btn btn-ghost" style="padding:8px 16px;font-size:13px;width:auto" onclick="clearExcelPreview()">إلغاء</button>
+                  <button class="btn btn-primary" style="width:auto;padding:8px 22px;font-size:13px" onclick="importExcelData()">✓ استيراد</button>
+                </div>
+              </div>
+              <div class="tbl-wrap" style="margin-top:14px">
+                <table class="tbl full-tbl" style="font-size:13px">
+                  <thead><tr><th>#</th><th>الموظف</th><th>التاريخ</th><th>البداية</th><th>النهاية</th><th>استراحة</th><th>الساعات</th><th>حالة</th></tr></thead>
+                  <tbody id="excel-preview-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
       <!-- ====== NRW MAP ====== -->
       <section class="pv pv-map-full" id="pv-map">
         <!-- LEFT PANEL -->
@@ -639,6 +774,51 @@ button,select,input{font-family:inherit;font-size:inherit}
     <div class="modal-ft">
       <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">إلغاء</button>
       <button class="btn btn-danger" style="width:auto;padding:11px 28px" id="confirm-ok">حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: STAFF -->
+<div class="modal-bg hidden" id="modal-staff">
+  <div class="modal">
+    <div class="modal-top"><h3 id="modal-staff-h">موظف جديد</h3><button class="modal-x" onclick="closeModal('modal-staff')">✕</button></div>
+    <div class="modal-bd">
+      <div class="frow">
+        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="st-name" placeholder="اسم الموظف"></div>
+        <div class="form-group"><label>المسمى الوظيفي</label><input type="text" id="st-role" placeholder="مثال: سائق، مساعد"></div>
+      </div>
+      <div class="frow">
+        <div class="form-group"><label>رقم الهاتف</label><input type="text" id="st-phone" placeholder="+49 xxxxxxxx"></div>
+        <div class="form-group"><label>الأجر بالساعة (€)</label><input type="number" id="st-rate" placeholder="13.50" min="0" step="0.01"></div>
+      </div>
+      <div class="form-group"><label>ساعات العمل الأسبوعية</label><input type="number" id="st-whours" placeholder="40" min="1" max="60"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-staff')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveStaffMember()">حفظ الموظف</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ATTENDANCE -->
+<div class="modal-bg hidden" id="modal-att">
+  <div class="modal">
+    <div class="modal-top"><h3 id="modal-att-h">إضافة دوام</h3><button class="modal-x" onclick="closeModal('modal-att')">✕</button></div>
+    <div class="modal-bd">
+      <div class="form-group"><label>الموظف *</label><select id="att-staff-sel"></select></div>
+      <div class="frow">
+        <div class="form-group"><label>التاريخ *</label><input type="date" id="att-date"></div>
+        <div class="form-group"><label>استراحة (دقيقة)</label><input type="number" id="att-break" placeholder="30" min="0" value="30"></div>
+      </div>
+      <div class="frow">
+        <div class="form-group"><label>بداية العمل *</label><input type="time" id="att-start" value="07:00"></div>
+        <div class="form-group"><label>نهاية العمل *</label><input type="time" id="att-end" value="16:00"></div>
+      </div>
+      <div class="form-group"><label>ملاحظات</label><input type="text" id="att-notes" placeholder="ملاحظات اختيارية..."></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-att')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveAttendance()">حفظ الدوام</button>
     </div>
   </div>
 </div>
@@ -884,7 +1064,7 @@ function doLogout(){
 // ══════════════════════════════════════════════════
 // NAV
 // ══════════════════════════════════════════════════
-const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير',map:'خريطة NRW — مناطق التوصيل'};
+const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير',map:'خريطة NRW — مناطق التوصيل',staff:'إدارة الموظفين'};
 function goPage(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
@@ -896,6 +1076,7 @@ function goPage(name,btn){
   if(name==='routes')renderRoutes();
   if(name==='reports')renderReports();
   if(name==='map')initNRWMapPage();
+  if(name==='staff')renderStaffPage();
   if(window.innerWidth<=800)$('sidebar').classList.remove('open');
 }
 function toggleSidebar(){$('sidebar').classList.toggle('open')}
@@ -1045,10 +1226,14 @@ function renderReports(){
 // CONFIRM DELETE
 // ══════════════════════════════════════════════════
 function askDelete(type,id){
-  const item=type==='order'?orders.find(o=>o.id===id):drivers.find(d=>d.id===id);
-  if(!item)return;
-  $('confirm-msg').textContent=`هل تريد حذف "${type==='order'?item.customer+' — '+item.tracking:item.name}" نهائياً؟`;
-  $('confirm-ok').onclick=()=>{closeModal('modal-confirm');type==='order'?delOrder(id):delDriver(id)};
+  let label='', fn;
+  if(type==='order'){const o=orders.find(x=>x.id===id);if(!o)return;label=o.customer+' — '+o.tracking;fn=()=>delOrder(id);}
+  else if(type==='driver'){const d=drivers.find(x=>x.id===id);if(!d)return;label=d.name;fn=()=>delDriver(id);}
+  else if(type==='staff'){const s=staff.find(x=>x.id===id);if(!s)return;label=s.name+' (سيتم حذف سجلات دوامه)';fn=()=>delStaff(id);}
+  else if(type==='att'){const a=attendance.find(x=>x.id===id);if(!a)return;const s=staff.find(x=>x.id===a.staffId);label=(s?s.name:'موظف')+' — '+a.date;fn=()=>delAttendance(id);}
+  else return;
+  $('confirm-msg').textContent=`هل تريد حذف "${label}" نهائياً؟`;
+  $('confirm-ok').onclick=()=>{closeModal('modal-confirm');fn()};
   openM('modal-confirm');
 }
 
@@ -1252,6 +1437,354 @@ function nrwZoomTo(plz){
     setTimeout(()=>{clearInterval(flash);layer.setStyle({fillOpacity:.65});},1400);
   }
 }
+
+// ══════════════════════════════════════════════════
+// STAFF — DATA
+// ══════════════════════════════════════════════════
+let staff=[
+  {id:1,name:'أحمد الريفاي',role:'سائق',phone:'+49 176 11223344',rate:13.5,weekHours:45},
+  {id:2,name:'عمر حسن',role:'سائق',phone:'+49 176 22334455',rate:13.5,weekHours:40},
+  {id:3,name:'مصطفى يلماز',role:'مساعد',phone:'+49 176 33445566',rate:12.0,weekHours:40},
+];
+let attendance=[
+  {id:1,staffId:1,date:'2025-01-15',start:'07:00',end:'16:00',break:30,notes:''},
+  {id:2,staffId:2,date:'2025-01-15',start:'07:30',end:'16:30',break:30,notes:''},
+  {id:3,staffId:1,date:'2025-01-16',start:'07:00',end:'17:00',break:30,notes:'Überstunden'},
+];
+let nextStaffId=4,nextAttId=4;
+let attDateFilter='',attStaffFilter='';
+let currentSalaryPeriod='week';
+let pendingImport=[];
+
+// ── HELPERS ──────────────────────────────────────
+function calcHours(start,end,breakMin){
+  const[sh,sm]=start.split(':').map(Number);
+  const[eh,em]=end.split(':').map(Number);
+  const total=(eh*60+em)-(sh*60+sm)-(parseInt(breakMin)||0);
+  return Math.max(0,total/60);
+}
+function formatHours(h){
+  const hrs=Math.floor(h),min=Math.round((h-hrs)*60);
+  return min?`${hrs}h ${min}m`:`${hrs}h`;
+}
+function formatDate(s){
+  const d=new Date(s+'T00:00:00');
+  return d.toLocaleDateString('ar-EG',{day:'numeric',month:'short',year:'numeric'});
+}
+function getWeekRange(){
+  const t=new Date(),day=t.getDay();
+  const mon=new Date(t);mon.setDate(t.getDate()-(day===0?6:day-1));
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const f=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  return{start:f(mon),end:f(sun)};
+}
+function getPeriodRange(period){
+  if(period==='week')return getWeekRange();
+  if(period==='month'){
+    const t=new Date(),y=t.getFullYear(),m=t.getMonth();
+    const last=new Date(y,m+1,0).getDate();
+    return{start:y+'-'+pad(m+1)+'-01',end:y+'-'+pad(m+1)+'-'+pad(last)};
+  }
+  const dates=attendance.map(a=>a.date).sort();
+  return{start:dates[0]||'',end:dates[dates.length-1]||''};
+}
+
+// ── STAFF TAB SWITCHING ──────────────────────────
+function showStaffTab(tab,btn){
+  document.querySelectorAll('.stab-content').forEach(t=>t.classList.add('hidden'));
+  $('stab-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(tab==='attendance')renderAttendance();
+  if(tab==='salary')renderSalaryReport();
+}
+
+// ── STAFF PAGE ───────────────────────────────────
+function renderStaffPage(){
+  updateStaffStats();
+  renderStaffCards();
+  populateAttStaffFilter();
+}
+function updateStaffStats(){
+  $('st-count').textContent=staff.length;
+  const{start,end}=getWeekRange();
+  const weekAtt=attendance.filter(a=>a.date>=start&&a.date<=end);
+  let totH=0,totS=0;
+  weekAtt.forEach(a=>{
+    const h=calcHours(a.start,a.end,a.break);
+    const s=staff.find(x=>x.id===a.staffId);
+    totH+=h;
+    if(s){const reg=Math.min(h,s.weekHours/5);totS+=reg*s.rate+Math.max(0,h-reg)*s.rate*1.5;}
+  });
+  $('st-hours').textContent=formatHours(totH);
+  $('st-salary').textContent=totS.toFixed(2)+' €';
+}
+function renderStaffCards(list){
+  const data=list||staff;
+  if(!data.length){$('staff-grid').innerHTML='<p style="color:var(--muted);padding:20px">لا يوجد موظفون — أضف موظفاً جديداً</p>';return;}
+  $('staff-grid').innerHTML=data.map(s=>{
+    const att=attendance.filter(a=>a.staffId===s.id);
+    const totH=att.reduce((sum,a)=>sum+calcHours(a.start,a.end,a.break),0);
+    return`<div class="staff-card">
+      <div class="staff-top">
+        <div class="staff-av">${s.name[0]}</div>
+        <div><div class="staff-name">${s.name}</div><div class="staff-role">${s.role}</div><div class="staff-rate">${s.rate.toFixed(2)} €/h</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">📞 ${s.phone}</div>
+      <div class="staff-stats">
+        <div class="staff-stat"><div class="staff-stat-n">${att.length}</div><div class="staff-stat-l">أيام دوام</div></div>
+        <div class="staff-stat"><div class="staff-stat-n">${formatHours(totH)}</div><div class="staff-stat-l">إجمالي ساعات</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="act-btn act-edit" style="flex:1;text-align:center" onclick="editStaffMember(${s.id})">تعديل</button>
+        <button class="act-btn act-delete" style="flex:1;text-align:center" onclick="askDelete('staff',${s.id})">حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterStaff(q){
+  const ql=q.toLowerCase();
+  renderStaffCards(ql?staff.filter(s=>s.name.toLowerCase().includes(ql)||s.role.toLowerCase().includes(ql)):undefined);
+}
+function openStaffModal(){
+  $('st-name').value='';$('st-role').value='';$('st-phone').value='';
+  $('st-rate').value='13.50';$('st-whours').value='40';
+  delete $('st-name').dataset.eid;
+  $('modal-staff-h').textContent='موظف جديد';openM('modal-staff');
+}
+function editStaffMember(id){
+  const s=staff.find(x=>x.id===id);if(!s)return;
+  $('st-name').value=s.name;$('st-role').value=s.role;$('st-phone').value=s.phone;
+  $('st-rate').value=s.rate;$('st-whours').value=s.weekHours;
+  $('st-name').dataset.eid=id;
+  $('modal-staff-h').textContent='تعديل الموظف';openM('modal-staff');
+}
+function saveStaffMember(){
+  const n=$('st-name').value.trim();if(!n){toast('يرجى إدخال اسم الموظف','error');return;}
+  const eid=$('st-name').dataset.eid;
+  const data={name:n,role:$('st-role').value.trim()||'موظف',phone:$('st-phone').value.trim()||'—',
+    rate:parseFloat($('st-rate').value)||13.5,weekHours:parseInt($('st-whours').value)||40};
+  if(eid){const i=staff.findIndex(s=>s.id===parseInt(eid));if(i!==-1)staff[i]={...staff[i],...data};delete $('st-name').dataset.eid;toast('تم تحديث الموظف','success');}
+  else{staff.push({id:nextStaffId++,...data});toast('تم إضافة الموظف','success');}
+  closeModal('modal-staff');renderStaffPage();
+}
+function delStaff(id){
+  staff=staff.filter(s=>s.id!==id);
+  attendance=attendance.filter(a=>a.staffId!==id);
+  renderStaffPage();toast('تم حذف الموظف','success');
+}
+
+// ── ATTENDANCE ───────────────────────────────────
+function populateAttStaffFilter(){
+  const sel=$('att-staff-f'),cur=sel.value;
+  sel.innerHTML='<option value="">كل الموظفين</option>'+staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  sel.value=cur;
+}
+function renderAttendance(){
+  let data=[...attendance].sort((a,b)=>b.date.localeCompare(a.date));
+  if(attDateFilter)data=data.filter(a=>a.date===attDateFilter);
+  if(attStaffFilter)data=data.filter(a=>a.staffId===parseInt(attStaffFilter));
+  $('att-tbody').innerHTML=data.length===0
+    ?'<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">لا توجد سجلات دوام</td></tr>'
+    :data.map(a=>{
+        const s=staff.find(x=>x.id===a.staffId);
+        const h=calcHours(a.start,a.end,a.break);
+        return`<tr>
+          <td><b>${s?s.name:'—'}</b></td>
+          <td>${formatDate(a.date)}</td>
+          <td>${a.start}</td><td>${a.end}</td>
+          <td>${a.break} دق</td>
+          <td><b style="color:var(--green)">${formatHours(h)}</b></td>
+          <td style="color:var(--muted);font-size:12px">${a.notes||'—'}</td>
+          <td>
+            <button class="act-btn act-edit" onclick="editAttendance(${a.id})">تعديل</button>
+            <button class="act-btn act-delete" onclick="askDelete('att',${a.id})">حذف</button>
+          </td>
+        </tr>`;
+      }).join('');
+}
+function openAttModal(){
+  $('att-staff-sel').innerHTML=staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  $('att-date').value=todayStr();$('att-start').value='07:00';$('att-end').value='16:00';
+  $('att-break').value='30';$('att-notes').value='';
+  delete $('att-date').dataset.eid;
+  $('modal-att-h').textContent='إضافة دوام';openM('modal-att');
+}
+function editAttendance(id){
+  const a=attendance.find(x=>x.id===id);if(!a)return;
+  $('att-staff-sel').innerHTML=staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  $('att-staff-sel').value=a.staffId;$('att-date').value=a.date;
+  $('att-start').value=a.start;$('att-end').value=a.end;
+  $('att-break').value=a.break;$('att-notes').value=a.notes;
+  $('att-date').dataset.eid=id;
+  $('modal-att-h').textContent='تعديل الدوام';openM('modal-att');
+}
+function saveAttendance(){
+  const sid=parseInt($('att-staff-sel').value),date=$('att-date').value;
+  const start=$('att-start').value,end=$('att-end').value;
+  if(!sid||!date||!start||!end){toast('يرجى ملء جميع الحقول','error');return;}
+  const eid=$('att-date').dataset.eid;
+  const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||30,notes:$('att-notes').value.trim()};
+  if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
+  else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
+  closeModal('modal-att');renderAttendance();updateStaffStats();
+}
+function delAttendance(id){
+  attendance=attendance.filter(a=>a.id!==id);
+  renderAttendance();updateStaffStats();toast('تم حذف السجل','success');
+}
+
+// ── SALARY REPORT ────────────────────────────────
+function renderSalaryReport(){
+  const{start,end}=getPeriodRange(currentSalaryPeriod);
+  $('salary-period-label').textContent=start?`(${start} → ${end})`:'';
+  const data=attendance.filter(a=>(!start||a.date>=start)&&(!end||a.date<=end));
+  let totH=0,totOT=0,totBase=0,totExtra=0,totAll=0;
+  $('salary-tbody').innerHTML=staff.map(s=>{
+    const att=data.filter(a=>a.staffId===s.id);
+    const dailyLimit=s.weekHours/5;
+    let regH=0,otH=0;
+    att.forEach(a=>{const h=calcHours(a.start,a.end,a.break);const reg=Math.min(h,dailyLimit);regH+=reg;otH+=Math.max(0,h-reg);});
+    const base=regH*s.rate,extra=otH*s.rate*1.5,total=base+extra;
+    totH+=regH;totOT+=otH;totBase+=base;totExtra+=extra;totAll+=total;
+    return`<tr>
+      <td><b>${s.name}</b><br><small style="color:var(--muted)">${s.rate.toFixed(2)} €/h</small></td>
+      <td>${formatHours(regH)}</td>
+      <td>${otH>0?`<span style="color:var(--amber)">${formatHours(otH)}</span>`:'—'}</td>
+      <td>${base.toFixed(2)} €</td>
+      <td>${extra>0?extra.toFixed(2)+' €':'—'}</td>
+      <td><b style="color:var(--green)">${total.toFixed(2)} €</b></td>
+    </tr>`;
+  }).join('');
+  $('s-tot-h').textContent=formatHours(totH);$('s-tot-ot').textContent=formatHours(totOT);
+  $('s-tot-base').textContent=totBase.toFixed(2)+' €';$('s-tot-extra').textContent=totExtra.toFixed(2)+' €';
+  $('s-tot-all').textContent=totAll.toFixed(2)+' €';
+}
+
+// ── EXCEL IMPORT ─────────────────────────────────
+function handleExcelFile(input){
+  const file=input.files[0];if(!file)return;
+  if(!window.XLSX){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>parseExcelFile(file);
+    s.onerror=()=>toast('تعذّر تحميل مكتبة Excel','error');
+    document.head.appendChild(s);
+  }else parseExcelFile(file);
+}
+function parseExcelFile(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(rows.length<2){toast('الملف فارغ أو لا يحتوي على بيانات','error');return;}
+      const header=rows[0].map(h=>String(h).trim());
+      const nc=findCol(header,['اسم الموظف','Name','Mitarbeiter','Employee']);
+      const dc=findCol(header,['التاريخ','Datum','Date']);
+      const sc=findCol(header,['بداية العمل','Beginn','Start','Von','von']);
+      const ec=findCol(header,['نهاية العمل','Ende','End','Bis','bis']);
+      const bc=findCol(header,['استراحة','استراحة (دقيقة)','Pause','Break']);
+      const ntc=findCol(header,['ملاحظات','Bemerkung','Notes']);
+      if(nc===-1||dc===-1||sc===-1||ec===-1){toast('لم يُعثر على أعمدة: الاسم، التاريخ، البداية، النهاية','error');return;}
+      const preview=[];
+      for(let i=1;i<rows.length;i++){
+        const row=rows[i];
+        if(!String(row[nc]||'').trim())continue;
+        const name=String(row[nc]).trim();
+        const dateStr=parseExcelDate(row[dc]);
+        const startStr=parseExcelTime(row[sc]);
+        const endStr=parseExcelTime(row[ec]);
+        const breakMin=bc!==-1?(parseInt(row[bc])||30):30;
+        const notes=ntc!==-1?String(row[ntc]).trim():'';
+        const h=(dateStr&&startStr&&endStr)?calcHours(startStr,endStr,breakMin):0;
+        const valid=!!(dateStr&&startStr&&endStr&&h>0);
+        const sm=staff.find(s=>name.toLowerCase().includes(s.name.toLowerCase())||s.name.toLowerCase().includes(name.toLowerCase()));
+        preview.push({name,date:dateStr||String(row[dc]),start:startStr||String(row[sc]),end:endStr||String(row[ec]),
+          break:breakMin,notes,hours:h,valid,staffId:sm?sm.id:null,staffName:sm?sm.name:name});
+      }
+      if(!preview.length){toast('لا توجد بيانات قابلة للاستيراد','error');return;}
+      pendingImport=preview;
+      $('excel-preview-title').textContent=`معاينة البيانات — ${preview.length} سجل`;
+      $('excel-preview-tbody').innerHTML=preview.map((r,i)=>`<tr style="${r.valid?'':'opacity:.5'}">
+        <td>${i+1}</td>
+        <td>${r.staffName}${!r.staffId?' <span style="color:var(--amber);font-size:11px">(جديد)</span>':''}</td>
+        <td>${r.date}</td><td>${r.start}</td><td>${r.end}</td><td>${r.break} دق</td>
+        <td>${r.valid?'<b style="color:var(--green)">'+formatHours(r.hours)+'</b>':'<span style="color:var(--red)">خطأ</span>'}</td>
+        <td>${r.valid?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--red)">✗</span>'}</td>
+      </tr>`).join('');
+      $('excel-preview').classList.remove('hidden');
+      $('excel-file').value='';
+    }catch(e){toast('خطأ في قراءة الملف: '+e.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function findCol(header,variants){
+  for(const v of variants){const i=header.findIndex(h=>h.toLowerCase()===v.toLowerCase());if(i!==-1)return i;}
+  return-1;
+}
+function parseExcelDate(raw){
+  if(!raw&&raw!==0)return'';
+  if(typeof raw==='number'){
+    try{const d=XLSX.SSF.parse_date_code(raw);if(d)return d.y+'-'+pad(d.m)+'-'+pad(d.d);}catch(e){}
+  }
+  const s=String(raw).trim();
+  const m1=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if(m1)return m1[3]+'-'+pad(parseInt(m1[2]))+'-'+pad(parseInt(m1[1]));
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  return'';
+}
+function parseExcelTime(raw){
+  if(!raw&&raw!==0)return'';
+  if(typeof raw==='number'){const m=Math.round(raw*24*60);return pad(Math.floor(m/60))+':'+pad(m%60);}
+  const m=String(raw).trim().match(/^(\d{1,2}):(\d{2})/);
+  if(m)return pad(parseInt(m[1]))+':'+m[2];
+  return'';
+}
+function importExcelData(){
+  let imported=0,skipped=0;
+  pendingImport.forEach(r=>{
+    if(!r.valid){skipped++;return;}
+    let sid=r.staffId;
+    if(!sid){sid=nextStaffId++;staff.push({id:sid,name:r.staffName,role:'موظف',phone:'—',rate:13.5,weekHours:40});}
+    attendance.push({id:nextAttId++,staffId:sid,date:r.date,start:r.start,end:r.end,break:r.break,notes:r.notes});
+    imported++;
+  });
+  clearExcelPreview();
+  renderStaffPage();
+  // Switch to attendance tab
+  document.querySelectorAll('.stab-content').forEach(t=>t.classList.add('hidden'));
+  $('stab-attendance').classList.remove('hidden');
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.stab')[1].classList.add('active');
+  renderAttendance();
+  toast('تم استيراد '+imported+' سجل'+(skipped?' — تخطي '+skipped:''),'success');
+}
+function clearExcelPreview(){
+  $('excel-preview').classList.add('hidden');
+  $('excel-preview-tbody').innerHTML='';
+  pendingImport=[];$('excel-file').value='';
+}
+
+// Drop zone drag events
+document.addEventListener('DOMContentLoaded',()=>{
+  const drop=$('excel-drop');
+  if(!drop)return;
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.style.borderColor='var(--blue)';});
+  drop.addEventListener('dragleave',()=>{drop.style.borderColor='';});
+  drop.addEventListener('drop',e=>{
+    e.preventDefault();drop.style.borderColor='';
+    const file=e.dataTransfer.files[0];
+    if(file&&(file.name.endsWith('.xlsx')||file.name.endsWith('.xls'))){
+      if(!window.XLSX){
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        s.onload=()=>parseExcelFile(file);document.head.appendChild(s);
+      }else parseExcelFile(file);
+    }else toast('يرجى اختيار ملف .xlsx أو .xls','error');
+  });
+});
 
 function nrwSearch(q){
   const res=$('nrw-search-results');
