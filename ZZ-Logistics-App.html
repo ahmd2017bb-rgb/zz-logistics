@@ -367,6 +367,14 @@ button,select,input{font-family:inherit;font-size:inherit}
 .profile-links{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
 .reset-link{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:0}
 .reset-link:hover{color:var(--red)}
+.auth-or{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--muted);font-size:13px}
+.auth-or::before,.auth-or::after{content:'';flex:1;height:1px;background:var(--border)}
+.btn-outline-green{background:transparent;border:1.5px solid var(--green);color:var(--green);border-radius:12px;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;width:100%}
+.btn-outline-green:hover{background:var(--green);color:#fff}
+.form-select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:14px;direction:rtl}
+.form-select:focus{outline:none;border-color:var(--primary)}
+.frg-account-badge{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:700;font-size:14px;color:var(--text)}
+.frg-ok-badge{background:#d1fae5;border:1.5px solid var(--green);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:700;font-size:14px;color:#065f46;text-align:center}
 
 /* ── PRINT ────────────────────────────────────── */
 .print-only{display:none}
@@ -466,17 +474,19 @@ button,select,input{font-family:inherit;font-size:inherit}
     <p id="msg" class="msg-text"></p>
     <div class="login-note">🔒 كلمة المرور مشفرة — Z&amp;Z Logistics</div>
     <div style="text-align:center;margin-top:10px">
-      <button class="reset-link" onclick="showResetAccount()">نسيت كلمة المرور؟</button>
+      <button class="reset-link" onclick="showForgot()">نسيت كلمة المرور؟</button>
     </div>
+    <div class="auth-or"><span>أو</span></div>
+    <button class="btn btn-outline-green fw" onclick="showSignup()">＋ إنشاء حساب جديد</button>
   </div>
 </main>
 
-<!-- ========== SETUP (first run) ========== -->
+<!-- ========== SETUP / SIGNUP ========== -->
 <main class="setup-screen hidden" id="setupScreen">
   <div class="login-card" style="max-width:520px">
     <div class="login-logo">Z&amp;Z</div>
-    <h1>إنشاء حساب المدير</h1>
-    <p class="login-sub">أول مرة؟ أنشئ حسابك للوصول إلى النظام</p>
+    <h1 id="su-title">إنشاء حساب جديد</h1>
+    <p class="login-sub" id="su-sub">أدخل بياناتك لإنشاء حساب في النظام</p>
     <div class="sep"></div>
 
     <div class="form-group">
@@ -500,18 +510,83 @@ button,select,input{font-family:inherit;font-size:inherit}
     <div class="frow">
       <div class="form-group">
         <label>كلمة المرور *</label>
-        <input type="password" id="su-pass" placeholder="4 أحرف على الأقل"
-          onkeydown="if(event.key==='Enter')submitSetup()">
+        <input type="password" id="su-pass" placeholder="4 أحرف على الأقل">
       </div>
       <div class="form-group">
         <label>تأكيد كلمة المرور *</label>
-        <input type="password" id="su-pass2" placeholder="أعد الكتابة"
-          onkeydown="if(event.key==='Enter')submitSetup()">
+        <input type="password" id="su-pass2" placeholder="أعد الكتابة">
       </div>
+    </div>
+    <div class="form-group">
+      <label>سؤال الأمان (لاسترجاع الحساب) *</label>
+      <select id="su-sec-q" class="form-select">
+        <option value="">— اختر سؤالاً —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>إجابة سؤال الأمان *</label>
+      <input type="text" id="su-sec-a" placeholder="إجابتك السرية"
+        onkeydown="if(event.key==='Enter')submitSetup()">
     </div>
     <button class="btn btn-primary fw" onclick="submitSetup()">إنشاء الحساب والدخول ←</button>
     <p id="su-msg" class="msg-text"></p>
-    <div class="login-note">🔒 كلمة المرور تُحفظ مشفرة — يمكنك تعديل أي معرف لاحقاً من إعدادات الحساب</div>
+    <div class="login-note">🔒 كلمة المرور وإجابة الأمان تُحفظ مشفرة</div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="reset-link hidden" id="su-back" onclick="backToLogin()">← العودة لتسجيل الدخول</button>
+    </div>
+  </div>
+</main>
+
+<!-- ========== FORGOT PASSWORD ========== -->
+<main class="setup-screen hidden" id="forgotScreen">
+  <div class="login-card" style="max-width:460px">
+    <div class="login-logo">Z&amp;Z</div>
+    <h1>استرجاع الحساب</h1>
+    <p class="login-sub">أدخل معرفك ثم أجب على سؤال الأمان لإعادة تعيين كلمة المرور</p>
+    <div class="sep"></div>
+
+    <!-- Step 1: find account -->
+    <div id="frg-step1">
+      <div class="form-group">
+        <label>المعرف (اسم / بريد / هاتف / Apple ID)</label>
+        <input type="text" id="frg-id" placeholder="أدخل أي معرف مرتبط بحسابك"
+          onkeydown="if(event.key==='Enter')forgotFindAccount()">
+      </div>
+      <button class="btn btn-primary fw" onclick="forgotFindAccount()">بحث عن الحساب ←</button>
+    </div>
+
+    <!-- Step 2: security question -->
+    <div id="frg-step2" class="hidden">
+      <div class="frg-account-badge" id="frg-account-name"></div>
+      <div class="form-group">
+        <label id="frg-sec-q-label">سؤال الأمان</label>
+        <input type="text" id="frg-sec-a" placeholder="إجابتك السرية"
+          onkeydown="if(event.key==='Enter')forgotVerifyAnswer()">
+      </div>
+      <button class="btn btn-primary fw" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
+    </div>
+
+    <!-- Step 3: new password -->
+    <div id="frg-step3" class="hidden">
+      <div class="frg-ok-badge">✅ تم التحقق من الهوية</div>
+      <div class="frow">
+        <div class="form-group">
+          <label>كلمة المرور الجديدة *</label>
+          <input type="password" id="frg-pw" placeholder="4 أحرف على الأقل">
+        </div>
+        <div class="form-group">
+          <label>تأكيد كلمة المرور *</label>
+          <input type="password" id="frg-pw2" placeholder="أعد الكتابة"
+            onkeydown="if(event.key==='Enter')forgotResetPassword()">
+        </div>
+      </div>
+      <button class="btn btn-primary fw" onclick="forgotResetPassword()">حفظ كلمة المرور الجديدة ←</button>
+    </div>
+
+    <p id="frg-msg" class="msg-text"></p>
+    <div style="text-align:center;margin-top:12px">
+      <button class="reset-link" onclick="backToLogin()">← العودة لتسجيل الدخول</button>
+    </div>
   </div>
 </main>
 
@@ -1390,6 +1465,7 @@ async function doLogin(){
 function enterApp(acct){
   $('loginScreen').classList.add('hidden');
   $('setupScreen').classList.add('hidden');
+  $('forgotScreen').classList.add('hidden');
   $('mainApp').classList.remove('hidden');
   const av=(acct.name||'م')[0].toUpperCase();
   $('sbAv').textContent=av;$('tbAv').textContent=av;
@@ -1410,28 +1486,133 @@ function doLogout(){
   $('login-identifier').value='';$('login-pass').value='';$('msg').textContent='';
 }
 
+// ── SECURITY QUESTIONS ─────────────────────────
+const SEC_QUESTIONS=[
+  'ما اسم مدينتك التي وُلدت فيها؟',
+  'ما اسم مدرستك الابتدائية؟',
+  'ما اسم أول حيوان أليف امتلكته؟',
+  'ما اسم والدتك قبل الزواج؟',
+  'ما هو طبقك المفضل؟',
+  'ما اسم أفضل صديق لك في الطفولة؟',
+  'ما الاسم الأول لجدّك من جهة الأب؟',
+  'ما هي مدينتك المفضلة في العالم؟'
+];
+function populateSecQuestions(){
+  const sel=$('su-sec-q');
+  if(!sel)return;
+  SEC_QUESTIONS.forEach(q=>{const o=document.createElement('option');o.value=q;o.textContent=q;sel.appendChild(o);});
+}
+
 // ── FIRST RUN ──────────────────────────────────
 function checkFirstRun(){
-  // Try to restore active session
+  populateSecQuestions();
   const sess=checkSession();
   if(sess){const acct=loadAccounts().find(a=>a.id===sess.id);if(acct){currentUser=acct;enterApp(acct);return;}}
-  // No accounts? Show setup
   if(!loadAccounts().length){$('loginScreen').classList.add('hidden');$('setupScreen').classList.remove('hidden');}
+}
+
+// ── SIGNUP ─────────────────────────────────────
+function showSignup(){
+  ['su-name','su-email','su-phone','su-apple','su-pass','su-pass2','su-sec-a'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  const q=$('su-sec-q');if(q)q.selectedIndex=0;
+  $('su-msg').textContent='';
+  $('su-title').textContent='إنشاء حساب جديد';
+  $('su-sub').textContent='أدخل بياناتك لإنشاء حساب في النظام';
+  $('su-back').classList.remove('hidden');
+  $('loginScreen').classList.add('hidden');
+  $('setupScreen').classList.remove('hidden');
+}
+function backToLogin(){
+  $('setupScreen').classList.add('hidden');
+  $('forgotScreen').classList.add('hidden');
+  $('loginScreen').classList.remove('hidden');
+  $('msg').textContent='';
 }
 
 async function submitSetup(){
   const name=$('su-name').value.trim(),email=$('su-email').value.trim();
   const phone=$('su-phone').value.trim(),apple=$('su-apple').value.trim();
   const pw=$('su-pass').value,pw2=$('su-pass2').value;
+  const secQ=$('su-sec-q').value,secA=$('su-sec-a').value.trim();
   $('su-msg').textContent='';
   if(!name){$('su-msg').textContent='يرجى إدخال اسم المستخدم';return;}
   if(!pw){$('su-msg').textContent='يرجى إدخال كلمة المرور';return;}
   if(pw.length<4){$('su-msg').textContent='كلمة المرور قصيرة جداً (4 أحرف على الأقل)';return;}
   if(pw!==pw2){$('su-msg').textContent='كلمتا المرور غير متطابقتين';return;}
+  if(!secQ){$('su-msg').textContent='يرجى اختيار سؤال الأمان';return;}
+  if(!secA){$('su-msg').textContent='يرجى إدخال إجابة سؤال الأمان';return;}
+  // Check name not already taken
+  if(loadAccounts().find(a=>a.name.toLowerCase()===name.toLowerCase())){
+    $('su-msg').textContent='❌ اسم المستخدم مستخدم بالفعل';return;
+  }
   $('su-msg').textContent='⏳ جاري الإنشاء…';
+  const [hash,secHash]=await Promise.all([hashPwd(pw),hashPwd(secA.toLowerCase())]);
+  const acct={id:Date.now(),name,email,phone,apple,passwordHash:hash,secQuestion:secQ,secAnswerHash:secHash,role:'admin'};
+  const accts=loadAccounts();
+  accts.push(acct);
+  saveAccounts(accts);currentUser=acct;createSession(acct);enterApp(acct);
+}
+
+// ── FORGOT PASSWORD ────────────────────────────
+let _forgotAcct=null;
+function showForgot(){
+  _forgotAcct=null;
+  resetForgotSteps();
+  $('frg-id').value='';$('frg-sec-a').value='';
+  $('frg-pw').value='';$('frg-pw2').value='';
+  $('frg-msg').textContent='';
+  $('loginScreen').classList.add('hidden');
+  $('forgotScreen').classList.remove('hidden');
+}
+function resetForgotSteps(){
+  $('frg-step1').classList.remove('hidden');
+  $('frg-step2').classList.add('hidden');
+  $('frg-step3').classList.add('hidden');
+  $('frg-msg').textContent='';
+}
+function forgotFindAccount(){
+  const id=$('frg-id').value.trim();
+  $('frg-msg').textContent='';
+  if(!id){$('frg-msg').textContent='يرجى إدخال المعرف';return;}
+  const acct=findAccount(id);
+  if(!acct){$('frg-msg').textContent='❌ لا يوجد حساب بهذا المعرف';return;}
+  if(!acct.secQuestion){$('frg-msg').textContent='❌ هذا الحساب لا يملك سؤال أمان — تواصل مع المسؤول لإعادة تعيين الحساب';return;}
+  _forgotAcct=acct;
+  $('frg-account-name').textContent='👤 '+acct.name;
+  $('frg-sec-q-label').textContent=acct.secQuestion;
+  $('frg-step1').classList.add('hidden');
+  $('frg-step2').classList.remove('hidden');
+  $('frg-sec-a').focus();
+}
+async function forgotVerifyAnswer(){
+  const ans=$('frg-sec-a').value.trim();
+  $('frg-msg').textContent='';
+  if(!ans){$('frg-msg').textContent='يرجى إدخال الإجابة';return;}
+  $('frg-msg').textContent='⏳ جاري التحقق…';
+  const hash=await hashPwd(ans.toLowerCase());
+  if(hash!==_forgotAcct.secAnswerHash){$('frg-msg').textContent='❌ الإجابة غير صحيحة';return;}
+  $('frg-msg').textContent='';
+  $('frg-step2').classList.add('hidden');
+  $('frg-step3').classList.remove('hidden');
+  $('frg-pw').focus();
+}
+async function forgotResetPassword(){
+  const pw=$('frg-pw').value,pw2=$('frg-pw2').value;
+  $('frg-msg').textContent='';
+  if(!pw){$('frg-msg').textContent='يرجى إدخال كلمة المرور الجديدة';return;}
+  if(pw.length<4){$('frg-msg').textContent='كلمة المرور قصيرة جداً (4 أحرف على الأقل)';return;}
+  if(pw!==pw2){$('frg-msg').textContent='كلمتا المرور غير متطابقتين';return;}
+  $('frg-msg').textContent='⏳ جاري الحفظ…';
   const hash=await hashPwd(pw);
-  const acct={id:Date.now(),name,email,phone,apple,passwordHash:hash,role:'admin'};
-  saveAccounts([acct]);currentUser=acct;createSession(acct);enterApp(acct);
+  const accts=loadAccounts();
+  const idx=accts.findIndex(a=>a.id===_forgotAcct.id);
+  if(idx===-1){$('frg-msg').textContent='❌ خطأ غير متوقع';return;}
+  accts[idx].passwordHash=hash;
+  saveAccounts(accts);
+  _forgotAcct=null;
+  $('frg-msg').textContent='';
+  backToLogin();
+  $('msg').textContent='✅ تم تغيير كلمة المرور — يمكنك تسجيل الدخول الآن';
 }
 
 function showResetAccount(){
