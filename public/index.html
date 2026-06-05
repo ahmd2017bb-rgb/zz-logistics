@@ -544,7 +544,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   <div class="login-card" style="max-width:460px">
     <div class="login-logo">Z&amp;Z</div>
     <h1>استرجاع الحساب</h1>
-    <p class="login-sub">أدخل معرفك ثم أجب على سؤال الأمان لإعادة تعيين كلمة المرور</p>
+    <p class="login-sub">أدخل معرفك ثم أجب على سؤال الأمان أو استقبل كوداً على بريدك الإلكتروني</p>
     <div class="sep"></div>
 
     <!-- Step 1: find account -->
@@ -557,15 +557,39 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <button class="btn btn-primary fw" onclick="forgotFindAccount()">بحث عن الحساب ←</button>
     </div>
 
-    <!-- Step 2: security question -->
+    <!-- Step 2: verify identity -->
     <div id="frg-step2" class="hidden">
       <div class="frg-account-badge" id="frg-account-name"></div>
-      <div class="form-group">
-        <label id="frg-sec-q-label">سؤال الأمان</label>
-        <input type="text" id="frg-sec-a" placeholder="إجابتك السرية"
-          onkeydown="if(event.key==='Enter')forgotVerifyAnswer()">
+
+      <!-- 2A: security question -->
+      <div id="frg-sec-block">
+        <div class="form-group">
+          <label id="frg-sec-q-label">سؤال الأمان</label>
+          <input type="text" id="frg-sec-a" placeholder="إجابتك السرية"
+            onkeydown="if(event.key==='Enter')forgotVerifyAnswer()">
+        </div>
+        <button class="btn btn-primary fw" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
+        <div id="frg-email-opt" class="hidden" style="text-align:center;margin-top:14px">
+          <div class="auth-or"><span>أو</span></div>
+          <button class="btn btn-outline-green fw" onclick="forgotSendCode()">📧 أرسل كود على البريد الإلكتروني</button>
+        </div>
       </div>
-      <button class="btn btn-primary fw" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
+
+      <!-- 2B: email code input (shown after sending) -->
+      <div id="frg-code-block" class="hidden">
+        <div class="frg-ok-badge" id="frg-code-sent-msg">📧 تم إرسال الكود</div>
+        <div class="form-group">
+          <label>أدخل الكود المكوّن من 6 أرقام</label>
+          <input type="text" id="frg-code" placeholder="000000" maxlength="6"
+            style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700"
+            onkeydown="if(event.key==='Enter')forgotVerifyCode()">
+        </div>
+        <button class="btn btn-primary fw" onclick="forgotVerifyCode()">تحقق من الكود ←</button>
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:10px">
+          <button class="reset-link" onclick="forgotSendCode()">⟳ إعادة الإرسال</button>
+          <button class="reset-link" onclick="forgotBackToSecQ()">← سؤال الأمان</button>
+        </div>
+      </div>
     </div>
 
     <!-- Step 3: new password -->
@@ -1561,7 +1585,7 @@ let _frgAccountId=null, _frgToken=null;
 function showForgot(){
   _frgAccountId=null;_frgToken=null;
   resetForgotSteps();
-  $('frg-id').value='';$('frg-sec-a').value='';
+  $('frg-id').value='';$('frg-sec-a').value='';$('frg-code').value='';
   $('frg-pw').value='';$('frg-pw2').value='';
   $('frg-msg').textContent='';
   $('loginScreen').classList.add('hidden');
@@ -1571,6 +1595,14 @@ function resetForgotSteps(){
   $('frg-step1').classList.remove('hidden');
   $('frg-step2').classList.add('hidden');
   $('frg-step3').classList.add('hidden');
+  $('frg-sec-block').classList.remove('hidden');
+  $('frg-code-block').classList.add('hidden');
+  $('frg-email-opt').classList.add('hidden');
+  $('frg-msg').textContent='';
+}
+function forgotBackToSecQ(){
+  $('frg-code-block').classList.add('hidden');
+  $('frg-sec-block').classList.remove('hidden');
   $('frg-msg').textContent='';
 }
 async function forgotFindAccount(){
@@ -1585,10 +1617,38 @@ async function forgotFindAccount(){
     _frgAccountId=data.accountId;
     $('frg-account-name').textContent='👤 '+data.accountName;
     $('frg-sec-q-label').textContent=data.secQuestion;
+    if(data.hasEmail)$('frg-email-opt').classList.remove('hidden');
     $('frg-msg').textContent='';
     $('frg-step1').classList.add('hidden');
     $('frg-step2').classList.remove('hidden');
     $('frg-sec-a').focus();
+  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
+}
+async function forgotSendCode(){
+  $('frg-msg').textContent='⏳ جاري الإرسال…';
+  try{
+    const r=await fetch('/api/auth/forgot/send-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:_frgAccountId}),credentials:'same-origin'});
+    const data=await r.json();
+    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
+    $('frg-code-sent-msg').textContent='📧 تم إرسال الكود على '+data.maskedEmail;
+    $('frg-sec-block').classList.add('hidden');
+    $('frg-code-block').classList.remove('hidden');
+    $('frg-code').value='';$('frg-code').focus();
+    $('frg-msg').textContent='';
+  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
+}
+async function forgotVerifyCode(){
+  const code=$('frg-code').value.trim();
+  if(!code){$('frg-msg').textContent='يرجى إدخال الكود';return;}
+  $('frg-msg').textContent='⏳ جاري التحقق…';
+  try{
+    const r=await fetch('/api/auth/forgot/verify-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:_frgAccountId,code}),credentials:'same-origin'});
+    const data=await r.json();
+    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
+    _frgToken=data.token;
+    $('frg-step2').classList.add('hidden');
+    $('frg-step3').classList.remove('hidden');
+    $('frg-pw').focus();$('frg-msg').textContent='';
   }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
 }
 async function forgotVerifyAnswer(){

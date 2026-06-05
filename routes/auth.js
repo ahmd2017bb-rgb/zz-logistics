@@ -1,10 +1,13 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
+const { sendCodeEmail } = require('./mailer');
 const router = express.Router();
 
 // Recover account tokens (in-memory, 15 min TTL)
 const forgotTokens = new Map();
+// Email OTP codes (in-memory, 10 min TTL)
+const otpCodes = new Map();
 
 function findAccount(identifier) {
   const id = identifier.trim().toLowerCase();
@@ -94,6 +97,12 @@ router.put('/profile', async (req, res) => {
   res.json(acct);
 });
 
+function maskEmail(email) {
+  if (!email) return '';
+  const [local, domain] = email.split('@');
+  return local[0] + '*'.repeat(Math.max(local.length - 1, 3)) + '@' + domain;
+}
+
 // ── FORGOT — step 1: find account ─────────────
 router.post('/forgot/find', (req, res) => {
   const { identifier } = req.body;
@@ -101,7 +110,13 @@ router.post('/forgot/find', (req, res) => {
   const acct = findAccount(identifier);
   if (!acct) return res.status(404).json({ error: 'لا يوجد حساب بهذا المعرف' });
   if (!acct.sec_q) return res.status(400).json({ error: 'هذا الحساب لا يملك سؤال أمان — تواصل مع المسؤول' });
-  res.json({ accountId: acct.id, accountName: acct.name, secQuestion: acct.sec_q });
+  res.json({
+    accountId: acct.id,
+    accountName: acct.name,
+    secQuestion: acct.sec_q,
+    hasEmail: !!acct.email,
+    maskedEmail: maskEmail(acct.email)
+  });
 });
 
 // ── FORGOT — step 2: verify answer ────────────
@@ -130,6 +145,46 @@ router.post('/forgot/reset', async (req, res) => {
   );
   forgotTokens.delete(token);
   res.json({ ok: true });
+});
+
+// ── FORGOT — send OTP code to email ──────────
+router.post('/forgot/send-code', async (req, res) => {
+  const { accountId } = req.body;
+  if (!accountId) return res.status(400).json({ error: 'بيانات ناقصة' });
+  const acct = db.prepare('SELECT * FROM accounts WHERE id=?').get(accountId);
+  if (!acct) return res.status(404).json({ error: 'حساب غير موجود' });
+  if (!acct.email) return res.status(400).json({ error: 'لا يوجد بريد إلكتروني مرتبط بهذا الحساب' });
+
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  otpCodes.set(String(accountId), { code, expires: Date.now() + 10 * 60 * 1000 });
+
+  try {
+    await sendCodeEmail(acct.email, code);
+    res.json({ sent: true, maskedEmail: maskEmail(acct.email) });
+  } catch (e) {
+    if (e.message === 'SMTP_NOT_CONFIGURED') {
+      return res.status(503).json({ error: 'البريد الإلكتروني غير مُهيّأ — يرجى إعداد ملف .env أولاً' });
+    }
+    console.error('Email error:', e.message);
+    res.status(500).json({ error: 'فشل إرسال البريد — تحقق من إعدادات SMTP' });
+  }
+});
+
+// ── FORGOT — verify OTP code ─────────────────
+router.post('/forgot/verify-code', (req, res) => {
+  const { accountId, code } = req.body;
+  if (!accountId || !code) return res.status(400).json({ error: 'بيانات ناقصة' });
+  const entry = otpCodes.get(String(accountId));
+  if (!entry) return res.status(401).json({ error: 'لم يتم إرسال كود لهذا الحساب' });
+  if (Date.now() > entry.expires) {
+    otpCodes.delete(String(accountId));
+    return res.status(401).json({ error: 'انتهت صلاحية الكود — أعد الإرسال' });
+  }
+  if (entry.code !== code.trim()) return res.status(401).json({ error: 'الكود غير صحيح' });
+  otpCodes.delete(String(accountId));
+  const token = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  forgotTokens.set(token, { accountId: parseInt(accountId), expires: Date.now() + 15 * 60 * 1000 });
+  res.json({ token });
 });
 
 module.exports = router;
