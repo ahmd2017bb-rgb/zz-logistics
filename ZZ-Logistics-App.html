@@ -354,6 +354,72 @@ button,select,input{font-family:inherit;font-size:inherit}
 .sh-add-emp-col:hover{background:rgba(255,255,255,.18);color:#fff}
 
 @media(max-width:800px){.pv-map-full{margin:-16px}.nrw-panel{width:220px}}
+
+/* ── PRINT ────────────────────────────────────── */
+.print-only{display:none}
+.print-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;transition:all .15s}
+.print-btn:hover{background:var(--primary);color:var(--white);border-color:var(--primary)}
+.print-hdr{border-bottom:2.5px solid #000;padding-bottom:10px;margin-bottom:18px}
+.print-hdr-top{display:flex;justify-content:space-between;align-items:flex-start}
+.print-hdr-co{font-size:20px;font-weight:900;color:#000}
+.print-hdr-sub{font-size:14px;color:#444;margin-top:4px}
+.print-hdr-date{font-size:12px;color:#444;text-align:left}
+.print-hdr-filters{font-size:11px;color:#666;margin-top:6px}
+
+@media print {
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  @page{size:A4 landscape;margin:12mm}
+
+  /* ── hide all chrome ── */
+  .login-screen,.sidebar,.topbar,.staff-tabs,.modal-bg,
+  #toast,.btn-logout,.sc-edit-btn,.returns-add-btn,
+  .act-btn,.sh-emp-btns,.sh-add-emp-col,.ghost-btn,
+  .tb-data-btn,.data-menu,.save-ind,.print-btn,
+  .stat-row,.toolbar,.date-nav,
+  button.stab { display:none !important }
+
+  /* ── layout reset ── */
+  html,body{background:#fff !important;font-size:11px}
+  .app-shell{display:block !important}
+  .app-main{margin-right:0 !important}
+  .page-area{padding:4mm 0 0 !important}
+
+  /* ── only staff section ── */
+  .pv{display:none !important}
+  #pv-staff{display:block !important}
+  .stab-content{display:none !important}
+  .stab-content:not(.hidden){display:block !important}
+
+  /* ── print-only elements ── */
+  .print-only{display:block !important}
+
+  /* ── cards ── */
+  .card{box-shadow:none !important;border:1px solid #ccc !important;border-radius:4px !important}
+
+  /* ── staff grid → compact 3-col ── */
+  .staff-grid{grid-template-columns:repeat(3,1fr) !important;gap:6px !important}
+  .staff-card{border:1px solid #ccc !important;box-shadow:none !important;page-break-inside:avoid;padding:12px !important}
+
+  /* ── tables ── */
+  .tbl,.sh-tbl{font-size:9.5px !important;width:100% !important}
+  .tbl th,.sh-tbl th{padding:5px 7px !important}
+  .tbl td,.sh-tbl td{padding:4px 7px !important}
+  .full-tbl{min-width:unset !important}
+
+  /* ── sheet inputs look like text ── */
+  .sh-inp{border:1px solid #bbb !important;background:transparent !important;font-size:9px !important;width:72px !important;padding:2px 3px !important}
+  .sh-note-inp{border:none !important;background:transparent !important;font-size:9px !important;width:100px !important}
+  .sh-emp-hd{padding:5px 8px !important;font-size:10px !important}
+  .sh-total-row td,.sh-salary-row td{padding:6px 7px !important}
+
+  /* ── avoid row breaks ── */
+  tr{page-break-inside:avoid}
+  thead{display:table-header-group}
+  tfoot{display:table-footer-group}
+
+  /* ── badges ── */
+  .badge{border:1px solid #999 !important;padding:2px 7px !important}
+}
 </style>
 </head>
 <body>
@@ -600,6 +666,20 @@ button,select,input{font-family:inherit;font-size:inherit}
       <!-- ====== STAFF ====== -->
       <section class="pv hidden" id="pv-staff">
 
+        <!-- PRINT HEADER (hidden on screen, visible when printing) -->
+        <div class="print-only" id="staff-print-hdr">
+          <div class="print-hdr">
+            <div class="print-hdr-top">
+              <div>
+                <div class="print-hdr-co">Z&amp;Z Logistics — Germany / NRW</div>
+                <div class="print-hdr-sub" id="print-sec-name">إدارة الموظفين</div>
+              </div>
+              <div class="print-hdr-date" id="print-date-str"></div>
+            </div>
+            <div class="print-hdr-filters" id="print-filters"></div>
+          </div>
+        </div>
+
         <div class="stat-row">
           <div class="stat-card c-blue"><div class="sc-ico">👥</div><div class="sc-body"><div class="sc-num" id="st-count">0</div><div class="sc-lbl">الموظفون</div></div></div>
           <div class="stat-card c-green"><div class="sc-ico">⏱</div><div class="sc-body"><div class="sc-num" id="st-hours">0h</div><div class="sc-lbl">ساعات هذا الأسبوع</div></div></div>
@@ -619,6 +699,7 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div class="toolbar">
             <input class="tb-inp" type="text" placeholder="🔍 بحث عن موظف..." oninput="filterStaff(this.value)">
             <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openStaffModal()">＋ موظف جديد</button>
+            <button class="print-btn" onclick="doPrint('قائمة الموظفين','employees')">🖨 طباعة</button>
           </div>
           <div class="staff-grid" id="staff-grid"></div>
         </div>
@@ -631,6 +712,7 @@ button,select,input{font-family:inherit;font-size:inherit}
               <option value="">كل الموظفين</option>
             </select>
             <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openAttModal()">＋ إضافة دوام</button>
+            <button class="print-btn" onclick="doPrint('سجل الدوام','attendance')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
             <div class="tbl-wrap">
@@ -651,6 +733,7 @@ button,select,input{font-family:inherit;font-size:inherit}
               <option value="all">كل الفترات</option>
             </select>
             <span id="salary-period-label" style="font-size:13px;color:var(--muted);font-weight:700"></span>
+            <button class="print-btn" onclick="doPrint('تقرير الرواتب','salary')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
             <div class="tbl-wrap">
@@ -717,6 +800,7 @@ button,select,input{font-family:inherit;font-size:inherit}
             <div class="sheet-month-title" id="sheet-month-label">—</div>
             <button class="date-nav-btn" onclick="sheetChangeMonth(1)">الشهر التالي ←</button>
             <button class="date-nav-btn date-nav-save" onclick="saveSheet()">💾 حفظ</button>
+            <button class="print-btn" onclick="doPrint('جدول الدوام الشهري','sheet')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
             <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
@@ -1168,6 +1252,35 @@ function goPage(name,btn){
 function toggleSidebar(){$('sidebar').classList.toggle('open')}
 function toggleDataMenu(){$('data-menu').classList.toggle('hidden')}
 document.addEventListener('click',e=>{const m=$('data-menu');if(m&&!m.classList.contains('hidden')&&!m.contains(e.target)&&!e.target.classList.contains('tb-data-btn'))m.classList.add('hidden');})
+
+// ── PRINT ────────────────────────────────────────
+function doPrint(sectionName, tabId){
+  // Update print header
+  $('print-sec-name').textContent = sectionName || 'إدارة الموظفين';
+  $('print-date-str').textContent = new Date().toLocaleDateString('ar-EG',{
+    weekday:'long',year:'numeric',month:'long',day:'numeric'
+  });
+
+  // Build filter info line
+  let filters = '';
+  if(tabId==='attendance'){
+    const dfl = $('att-date-f').value;
+    const sfl = $('att-staff-f');
+    const sfn = sfl.options[sfl.selectedIndex]?.text || '';
+    if(dfl) filters += 'التاريخ: '+dfl+'  ';
+    if(attStaffFilter) filters += 'الموظف: '+sfn;
+  }
+  if(tabId==='salary'){
+    const lbl = $('salary-period-label').textContent;
+    filters = 'الفترة: '+(currentSalaryPeriod==='week'?'هذا الأسبوع':currentSalaryPeriod==='month'?'هذا الشهر':'كل الفترات')+' '+lbl;
+  }
+  if(tabId==='sheet'){
+    filters = $('sheet-month-label').textContent;
+  }
+  $('print-filters').textContent = filters;
+
+  window.print();
+}
 
 // ══════════════════════════════════════════════════
 // DASHBOARD
