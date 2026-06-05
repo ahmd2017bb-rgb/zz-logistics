@@ -963,8 +963,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <div class="staff-tabs">
           <button class="stab active" data-i18n="staff.tab_emp" onclick="showStaffTab('employees',this)">👥 الموظفون</button>
           <button class="stab" data-i18n="staff.tab_att" onclick="showStaffTab('attendance',this)">📋 جدول الدوام</button>
-          <button class="stab" data-i18n="staff.tab_sal" onclick="showStaffTab('salary',this)">💶 تقرير الراتب</button>
-          <button class="stab" data-i18n="staff.tab_excel" onclick="showStaffTab('excel',this)">📊 استيراد Excel</button>
         </div>
 
         <!-- Tab: Employees -->
@@ -991,74 +989,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="card no-pad">
             <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
               <div style="padding:40px;text-align:center;color:var(--muted)" data-i18n="sheet.loading">جاري تحميل الجدول…</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Salary Report -->
-        <div id="stab-salary" class="stab-content hidden">
-          <div class="toolbar">
-            <select class="tb-sel" onchange="currentSalaryPeriod=this.value;renderSalaryReport()">
-              <option value="week" data-i18n="staff.sal_week">هذا الأسبوع</option>
-              <option value="month" data-i18n="staff.sal_month">هذا الشهر</option>
-              <option value="all" data-i18n="staff.sal_all">كل الفترات</option>
-            </select>
-            <span id="salary-period-label" style="font-size:13px;color:var(--muted);font-weight:700"></span>
-            <button class="print-btn" data-i18n="staff.print_sal" onclick="doPrint('تقرير الرواتب','salary')">🖨 طباعة</button>
-          </div>
-          <div class="card no-pad">
-            <div class="tbl-wrap">
-              <table class="tbl full-tbl">
-                <thead><tr><th data-i18n="staff.sal_emp">الموظف</th><th data-i18n="staff.sal_reg">الساعات العادية</th><th data-i18n="staff.sal_ot">ساعات إضافية</th><th data-i18n="staff.sal_base">الراتب الأساسي</th><th data-i18n="staff.sal_ot_pay">بدل إضافي (×1.5)</th><th data-i18n="staff.sal_total">الإجمالي</th></tr></thead>
-                <tbody id="salary-tbody"></tbody>
-                <tfoot><tr style="font-weight:900;background:#f8fafc">
-                  <td data-i18n="staff.sal_grand">الإجمالي</td><td id="s-tot-h">—</td><td id="s-tot-ot">—</td>
-                  <td id="s-tot-base">—</td><td id="s-tot-extra">—</td>
-                  <td id="s-tot-all" style="color:var(--green)">—</td>
-                </tr></tfoot>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Excel Import -->
-        <div id="stab-excel" class="stab-content hidden">
-          <div class="card" style="margin-bottom:18px">
-            <h3 class="card-title" style="margin-bottom:10px" data-i18n="excel.format_title">📋 تنسيق ملف Excel المطلوب</h3>
-            <p style="font-size:13px;color:var(--muted);margin-bottom:10px" data-i18n="excel.format_hint">الصف الأول يجب أن يحتوي على العناوين التالية:</p>
-            <div style="overflow-x:auto">
-              <table class="tbl" style="font-size:13px">
-                <thead><tr><th data-i18n="excel.col_name">اسم الموظف</th><th data-i18n="excel.col_date">التاريخ</th><th data-i18n="excel.col_start">بداية العمل</th><th data-i18n="excel.col_end">نهاية العمل</th><th data-i18n="excel.col_break">استراحة (دقيقة)</th></tr></thead>
-                <tbody>
-                  <tr><td>أحمد الريفاي</td><td>15.01.2025</td><td>07:00</td><td>16:00</td><td>30</td></tr>
-                  <tr><td>عمر حسن</td><td>15.01.2025</td><td>07:30</td><td>16:30</td><td>30</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p style="font-size:12px;color:var(--muted);margin-top:10px">💡 التاريخ يقبل: DD.MM.YYYY أو YYYY-MM-DD — عمود الاستراحة اختياري (الافتراضي 30 دقيقة)</p>
-          </div>
-          <div id="excel-drop" onclick="$('excel-file').click()"
-            style="border:2.5px dashed var(--border);border-radius:18px;padding:50px 20px;text-align:center;cursor:pointer;background:var(--white);transition:border-color .2s">
-            <div style="font-size:48px;margin-bottom:14px">📊</div>
-            <div style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:6px" data-i18n="excel.drop_title">اسحب ملف Excel هنا أو اضغط للاختيار</div>
-            <div style="font-size:13px;color:var(--muted)">.xlsx / .xls</div>
-            <input type="file" id="excel-file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(this)">
-          </div>
-          <div id="excel-preview" class="hidden" style="margin-top:18px">
-            <div class="card no-pad">
-              <div class="card-top" style="padding:16px 20px 0">
-                <h3 class="card-title" id="excel-preview-title" data-i18n="excel.preview_title">معاينة البيانات</h3>
-                <div style="display:flex;gap:10px">
-                  <button class="btn btn-ghost" style="padding:8px 16px;font-size:13px;width:auto" data-i18n="excel.cancel" onclick="clearExcelPreview()">إلغاء</button>
-                  <button class="btn btn-primary" style="width:auto;padding:8px 22px;font-size:13px" data-i18n="excel.import" onclick="importExcelData()">✓ استيراد</button>
-                </div>
-              </div>
-              <div class="tbl-wrap" style="margin-top:14px">
-                <table class="tbl full-tbl" style="font-size:13px">
-                  <thead><tr><th data-i18n="excel.prev_num">#</th><th data-i18n="excel.prev_emp">الموظف</th><th data-i18n="excel.prev_date">التاريخ</th><th data-i18n="excel.prev_start">البداية</th><th data-i18n="excel.prev_end">النهاية</th><th data-i18n="excel.prev_break">استراحة</th><th data-i18n="excel.prev_hours">الساعات</th><th data-i18n="excel.prev_status">حالة</th></tr></thead>
-                  <tbody id="excel-preview-tbody"></tbody>
-                </table>
-              </div>
             </div>
           </div>
         </div>
@@ -2689,7 +2619,6 @@ function showStaffTab(tab,btn){
   if(btn)btn.classList.add('active');
   if(tab==='employees')updateStaffStats();
   if(tab==='attendance'){initSheetMonth();renderSheet();}
-  if(tab==='salary')renderSalaryReport();
 }
 
 // ── STAFF PAGE ───────────────────────────────────
@@ -2698,7 +2627,6 @@ function renderStaffPage(){
   renderStaffCards();
   populateAttStaffFilter();
   if(!$('stab-attendance').classList.contains('hidden')&&sheetMonthKey)renderSheet();
-  if(!$('stab-salary').classList.contains('hidden'))renderSalaryReport();
 }
 function _sheetWeekStats(staffId,weekStart,weekEnd,weekAtt){
   if(!sheetMonthKey||!sheetEmps.length)return{h:0,s:0};
