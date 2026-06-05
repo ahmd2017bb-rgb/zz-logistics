@@ -312,12 +312,12 @@ button,select,input{font-family:inherit;font-size:inherit}
       <div><div class="sb-name">Z&amp;Z Logistics</div><div class="sb-sub">Germany / NRW</div></div>
     </div>
     <nav class="sb-nav">
-      <button class="nav-item active" onclick="goPage('dashboard',this)"><span class="ni">📊</span><span>لوحة التحكم</span></button>
+      <button class="nav-item active" onclick="goPage('map',this)"><span class="ni">🗺</span><span>خريطة NRW</span></button>
+      <button class="nav-item" onclick="goPage('dashboard',this)"><span class="ni">📊</span><span>لوحة التحكم</span></button>
       <button class="nav-item" onclick="goPage('orders',this)"><span class="ni">📦</span><span>الطلبات</span><span class="nav-badge hidden" id="nav-badge"></span></button>
       <button class="nav-item" onclick="goPage('drivers',this)"><span class="ni">🚗</span><span>السائقون</span></button>
       <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span>المسارات</span></button>
       <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
-      <button class="nav-item" onclick="goPage('map',this)"><span class="ni">🗺</span><span>خريطة NRW</span></button>
     </nav>
     <div class="sb-footer">
       <div class="sb-user-row">
@@ -349,7 +349,7 @@ button,select,input{font-family:inherit;font-size:inherit}
     <div class="page-area">
 
       <!-- ====== DASHBOARD ====== -->
-      <section class="pv" id="pv-dashboard">
+      <section class="pv hidden" id="pv-dashboard">
 
         <!-- Date Navigation -->
         <div class="date-nav">
@@ -513,7 +513,7 @@ button,select,input{font-family:inherit;font-size:inherit}
       </section>
 
       <!-- ====== NRW MAP ====== -->
-      <section class="pv hidden pv-map-full" id="pv-map">
+      <section class="pv pv-map-full" id="pv-map">
         <!-- LEFT PANEL -->
         <div id="nrw-panel">
           <div class="nrw-psec">
@@ -556,10 +556,10 @@ button,select,input{font-family:inherit;font-size:inherit}
           <div id="nrw-overlay">
             <div id="nrw-spin"></div>
             <h2>🗺 خريطة NRW — Lieferzonen</h2>
-            <p id="nrw-otxt" style="font-size:12px;color:#8888bb">اضغط الزر لتحميل الخريطة</p>
+            <p id="nrw-otxt" style="font-size:12px;color:#8888bb">جاري تحضير الخريطة…</p>
             <div id="nrw-obar-w"><div id="nrw-obar"></div></div>
             <p id="nrw-opct" style="font-size:13px;color:#66BB6A;font-weight:700">0 / 85</p>
-            <button onclick="startNRWLoad()" id="nrw-start-btn" style="margin-top:8px;padding:12px 28px;background:#4CAF50;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">▶ تحميل الخريطة</button>
+            <button onclick="startNRWLoad()" id="nrw-start-btn" style="margin-top:8px;padding:12px 28px;background:#4CAF50;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;display:none">▶ تحميل</button>
           </div>
           <div id="nrw-mhint">📍 Lieferzonen — NRW</div>
         </div>
@@ -850,8 +850,13 @@ function doLogin(){
   $('routes-date').textContent=now.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
   // Load today's daily data
   loadDayUI(todayStr());
-  renderDashboard();
   updateBadge();
+  // Open map first and auto-start loading
+  $('pageTitle').textContent=titles['map'];
+  $('pageDate').textContent=now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  initNRWMapPage();
+  // Auto-start map loading after Leaflet is ready
+  setTimeout(()=>{ if(nrwLeafletReady && !Object.keys(nrwZones).length) startNRWLoad(); }, 1200);
 }
 function doLogout(){
   $('mainApp').classList.add('hidden');
@@ -1099,7 +1104,8 @@ function initNRWMapPage(){
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
         attribution:'© OpenStreetMap © CARTO',maxZoom:19
       }).addTo(nrwMap);
-      $('nrw-start-btn').disabled=false;
+      // Auto-start loading PLZ zones
+      startNRWLoad();
     };
     ls.onerror=()=>{ $('nrw-otxt').textContent='❌ تعذّر تحميل مكتبة الخريطة — يرجى الاتصال بالإنترنت'; };
     document.head.appendChild(ls);
