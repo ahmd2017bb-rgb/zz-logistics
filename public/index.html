@@ -1776,9 +1776,9 @@ function saveOrder(){
     notes:$('ord-notes').value.trim(),time:new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})};
   if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث الطلب','success')}
   else{orders.push({id:nextOId++,...data});toast('تم إضافة الطلب','success')}
-  closeModal('modal-order');renderOrders();autosave();
+  closeModal('modal-order');renderOrders();autosaveNow();
 }
-function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success');autosave()}
+function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success');autosaveNow()}
 
 // ══════════════════════════════════════════════════
 // DRIVERS
@@ -1810,9 +1810,9 @@ function saveDriver(){
   const data={name:n,phone:$('drv-phone').value.trim()||'—',area:$('drv-area').value.trim()||'—',status:$('drv-status-sel').value};
   if(eid){const i=drivers.findIndex(d=>d.id===parseInt(eid));if(i!==-1)drivers[i]={...drivers[i],...data};delete $('drv-name').dataset.eid;toast('تم تحديث السائق','success')}
   else{drivers.push({id:nextDId++,...data});toast('تم إضافة السائق','success')}
-  closeModal('modal-driver');renderDrivers();autosave();
+  closeModal('modal-driver');renderDrivers();autosaveNow();
 }
-function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success');autosave()}
+function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success');autosaveNow()}
 
 // ══════════════════════════════════════════════════
 // ROUTES
@@ -2194,12 +2194,14 @@ function saveStaffMember(){
     rate:parseFloat($('st-rate').value)||13.5,weekHours:parseInt($('st-whours').value)||40};
   if(eid){const i=staff.findIndex(s=>s.id===parseInt(eid));if(i!==-1)staff[i]={...staff[i],...data};delete $('st-name').dataset.eid;toast('تم تحديث الموظف','success');}
   else{staff.push({id:nextStaffId++,...data});toast('تم إضافة الموظف','success');}
-  closeModal('modal-staff');renderStaffPage();autosave();
+  closeModal('modal-staff');renderStaffPage();autosaveNow();
 }
 function delStaff(id){
   staff=staff.filter(s=>s.id!==id);
   attendance=attendance.filter(a=>a.staffId!==id);
-  renderStaffPage();toast('تم حذف الموظف','success');autosave();
+  renderStaffPage();
+  setTimeout(updateStaffStats,50);
+  toast('تم حذف الموظف','success');autosaveNow();
 }
 
 // ── ATTENDANCE ───────────────────────────────────
@@ -2255,11 +2257,11 @@ function saveAttendance(){
   const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||30,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
-  closeModal('modal-att');renderAttendance();updateStaffStats();autosave();
+  closeModal('modal-att');renderAttendance();updateStaffStats();autosaveNow();
 }
 function delAttendance(id){
   attendance=attendance.filter(a=>a.id!==id);
-  renderAttendance();updateStaffStats();toast('تم حذف السجل','success');autosave();
+  renderAttendance();updateStaffStats();toast('تم حذف السجل','success');autosaveNow();
 }
 
 // ── SALARY REPORT ────────────────────────────────
@@ -2417,14 +2419,20 @@ async function loadAllData(){
   if(!_sd.orders){autosave();}
 }
 
+function _syncSD(){
+  _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;
+  _sd.attendance=attendance;_sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
+}
 function autosave(){
-  _sd.orders=orders;
-  _sd.drivers=drivers;
-  _sd.staff=staff;
-  _sd.attendance=attendance;
-  _sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
+  _syncSD();
   clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(()=>_pushToServer(),800);
+  _saveTimer=setTimeout(()=>_pushToServer(),200);
+}
+// For CRUD operations — saves immediately, no debounce
+function autosaveNow(){
+  _syncSD();
+  clearTimeout(_saveTimer);_saveTimer=null;
+  _pushToServer();
 }
 
 async function _pushToServer(){

@@ -2205,7 +2205,9 @@ function saveStaffMember(){
 function delStaff(id){
   staff=staff.filter(s=>s.id!==id);
   attendance=attendance.filter(a=>a.staffId!==id);
-  renderStaffPage();toast('تم حذف الموظف','success');autosave();
+  renderStaffPage();
+  setTimeout(updateStaffStats,50);
+  toast('تم حذف الموظف','success');autosave();
 }
 
 // ── ATTENDANCE ───────────────────────────────────
