@@ -820,9 +820,9 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             </div>
             <div class="sort-drop-zone" id="sort-drop" onclick="$('sort-file-inp').click()" ondragover="event.preventDefault()" ondrop="sortDropHandler(event)">
               <div style="font-size:36px;margin-bottom:8px">📂</div>
-              <div style="font-weight:700;font-size:15px;margin-bottom:4px">اسحب ملف Excel هنا أو اضغط للاختيار</div>
-              <div style="font-size:13px;color:var(--muted)">.xlsx / .xls</div>
-              <input type="file" id="sort-file-inp" accept=".xlsx,.xls" style="display:none" onchange="handleSortFile(this.files[0])">
+              <div style="font-weight:700;font-size:15px;margin-bottom:4px">اسحب الملف هنا أو اضغط للاختيار</div>
+              <div style="font-size:13px;color:var(--muted)">.xlsx / .xls / .pdf / صورة</div>
+              <input type="file" id="sort-file-inp" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp" style="display:none" onchange="handleSortFile(this.files[0])">
             </div>
           </div>
         </div>
@@ -1866,11 +1866,57 @@ function clearSortResult(){
 
 function handleSortFile(file){
   if(!file)return;
-  // Auto-fill date from filename e.g. "daily income 29.05.pdf" → 29.05.2026
   if(!$('sort-date').value){
     const dm=file.name.match(/(\d{2})\.(\d{2})\.(\d{4})/)||file.name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);
     if(dm)$('sort-date').value=dm[3]+'-'+dm[2]+'-'+dm[1];
   }
+  const ext=file.name.split('.').pop().toLowerCase();
+  const imgExts=['jpg','jpeg','png','webp','gif','bmp'];
+  if(imgExts.includes(ext)){_handleSortImage(file);return;}
+  if(ext==='pdf'){_handleSortPDF(file);return;}
+  _handleSortExcel(file);
+}
+
+function _handleSortImage(file){
+  const url=URL.createObjectURL(file);
+  $('dp-pages').innerHTML=`<div style="text-align:center;padding:16px">
+    <img src="${url}" style="max-width:100%;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);display:block;margin:0 auto">
+  </div>`;
+  $('sort-upload-panel').classList.add('hidden');
+  $('sort-result').classList.remove('hidden');
+}
+
+async function _handleSortPDF(file){
+  toast('جاري قراءة PDF…','');
+  const loadLib=(src)=>new Promise(res=>{if(document.querySelector(`script[src="${src}"]`)&&window.pdfjsLib)return res();const s=document.createElement('script');s.src=src;s.onload=res;document.head.appendChild(s);});
+  try{
+    await loadLib('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    if(!pdfjsLib.GlobalWorkerOptions.workerSrc)
+      pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    const items=[];
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const tc=await page.getTextContent();
+      tc.items.forEach(it=>{if(it.str&&it.str.trim())items.push({text:it.str.trim(),x:it.transform[4],y:it.transform[5]});});
+    }
+    items.sort((a,b)=>b.y-a.y||a.x-b.x);
+    const rows=[];let cur=[],curY=null;
+    for(const it of items){
+      if(curY===null||Math.abs(it.y-curY)<=4){cur.push(it);if(curY===null)curY=it.y;}
+      else{rows.push(cur.sort((a,b)=>a.x-b.x).map(i=>i.text));cur=[it];curY=it.y;}
+    }
+    if(cur.length)rows.push(cur.sort((a,b)=>a.x-b.x).map(i=>i.text));
+    if(!rows.length){toast('لم يتم استخراج نص من PDF','error');return;}
+    _parseSortRows(rows);
+  }catch(e){
+    console.error(e);
+    toast('تعذّر قراءة PDF — جرّب حفظه كـ Excel أولاً','error');
+  }
+}
+
+function _handleSortExcel(file){
   const doRead=()=>{
     const r=new FileReader();
     r.onload=e=>{
