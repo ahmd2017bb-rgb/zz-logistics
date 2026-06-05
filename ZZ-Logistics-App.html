@@ -944,16 +944,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="stat-card c-green"><div class="sc-ico">📈</div><div class="sc-body"><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl" data-i18n="reports.delivery_rate">معدل التسليم</div></div></div>
           <div class="stat-card c-purple"><div class="sc-ico">↩️</div><div class="sc-body"><div class="sc-num" id="rp-returns">0</div><div class="sc-lbl" data-i18n="reports.returned">مسترجع</div></div></div>
         </div>
-        <div class="two-col">
-          <div class="card">
-            <div class="card-top"><h3 class="card-title" data-i18n="reports.driver_perf">أداء السائقين</h3></div>
-            <table class="tbl full-tbl"><thead><tr><th data-i18n="reports.col_driver">السائق</th><th data-i18n="reports.col_total">المجموع</th><th data-i18n="reports.col_success">ناجح</th><th data-i18n="reports.col_rate">النسبة</th></tr></thead><tbody id="rp-drv"></tbody></table>
-          </div>
-          <div class="card">
-            <div class="card-top"><h3 class="card-title" data-i18n="reports.area_dist">توزيع المناطق</h3></div>
-            <table class="tbl full-tbl"><thead><tr><th data-i18n="reports.col_area">المنطقة</th><th data-i18n="reports.col_orders">الطلبات</th><th data-i18n="reports.col_done">مكتمل</th></tr></thead><tbody id="rp-area"></tbody></table>
-          </div>
-        </div>
         <div class="card" style="margin-top:16px">
           <div class="card-top" style="flex-wrap:wrap;gap:10px">
             <h3 class="card-title">📚 ذاكرة الموظفين — السجل الكامل</h3>
@@ -2380,15 +2370,6 @@ function renderReports(){
     }
   }
   $('rp-total').textContent=tot;$('rp-rate').textContent=rate+'%';$('rp-returns').textContent=totalReturns;
-  $('rp-drv').innerHTML=drivers.map(d=>{
-    const dt=orders.filter(o=>o.driver===d.id).length;
-    const dd=orders.filter(o=>o.driver===d.id&&o.status==='delivered').length;
-    const dr=dt?Math.round(dd/dt*100):0;
-    return`<tr><td>${d.name}</td><td>${dt}</td><td>${dd}</td><td><span class="badge ${dr>=80?'b-delivered':dr>=50?'b-pending':'b-failed'}">${dr}%</span></td></tr>`;
-  }).join('');
-  const areas={};
-  orders.forEach(o=>{const d=drivers.find(x=>x.id===o.driver);const a=d?d.area:'—';if(!areas[a])areas[a]={t:0,d:0};areas[a].t++;if(o.status==='delivered')areas[a].d++});
-  $('rp-area').innerHTML=Object.entries(areas).map(([a,s])=>`<tr><td>${a}</td><td>${s.t}</td><td>${s.d}</td></tr>`).join('');
   renderStaffHistory();
 }
 
