@@ -2189,7 +2189,7 @@ function showStaffTab(tab,btn){
   if(tab==='employees')updateStaffStats();
   if(tab==='attendance')renderAttendance();
   if(tab==='salary')renderSalaryReport();
-  if(tab==='sheet'){initSheetMonth();renderSheet();}
+  if(tab==='sheet'){initSheetMonth();_sheetAutoSave();renderSheet();}
 }
 
 // ── STAFF PAGE ───────────────────────────────────
@@ -2199,7 +2199,7 @@ function renderStaffPage(){
   populateAttStaffFilter();
   if(!$('stab-attendance').classList.contains('hidden'))renderAttendance();
   if(!$('stab-salary').classList.contains('hidden'))renderSalaryReport();
-  if(!$('stab-sheet').classList.contains('hidden')){initSheetMonth();renderSheet();}
+  if(!$('stab-sheet').classList.contains('hidden')){initSheetMonth();_sheetAutoSave();renderSheet();}
 }
 function updateStaffStats(){
   $('st-count').textContent=staff.length;
