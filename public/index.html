@@ -2324,22 +2324,78 @@ async function _handleSortPDF(file){
 }
 
 function _handleSortExcel(file){
+  toast('جاري قراءة الملف…','');
   const doRead=()=>{
     const r=new FileReader();
     r.onload=e=>{
-      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      if(!rows.length){toast('الملف فارغ','error');return;}
-      _parseSortRows(rows);
+      try{
+        const wb=XLSX.read(e.target.result,{type:'binary',codepage:1252});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        if(!rows.length){toast('الملف فارغ','error');return;}
+        _autoCardsAndRender(rows);
+      }catch(err){
+        const r2=new FileReader();
+        r2.onload=e2=>{
+          try{
+            const wb=XLSX.read(new Uint8Array(e2.target.result),{type:'array'});
+            const ws=wb.Sheets[wb.SheetNames[0]];
+            const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+            if(!rows.length){toast('الملف فارغ','error');return;}
+            _autoCardsAndRender(rows);
+          }catch(e2){toast('خطأ في قراءة الملف — تأكد أن الملف xlsx أو xls','error');}
+        };
+        r2.readAsArrayBuffer(file);
+      }
     };
-    r.readAsArrayBuffer(file);
+    r.onerror=()=>toast('فشل في قراءة الملف','error');
+    r.readAsBinaryString(file);
   };
   if(!window.XLSX){
     const s=document.createElement('script');
     s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload=doRead;document.head.appendChild(s);
+    s.onload=doRead;
+    s.onerror=()=>toast('فشل تحميل مكتبة Excel — تحقق من الإنترنت','error');
+    document.head.appendChild(s);
   }else doRead();
+}
+
+function _autoCardsAndRender(rows){
+  let hdrIdx=0,hdr=[];
+  for(let i=0;i<Math.min(8,rows.length);i++){
+    const r=rows[i].map(c=>String(c).toUpperCase().trim());
+    if(r.some(c=>c.length>0&&(c.includes('TOUR')||c.includes('CODE')||c.includes('PLZ')))){hdrIdx=i;hdr=r;break;}
+  }
+  if(!hdr.length){hdr=rows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
+  _sortHdrIdx=hdrIdx;
+  const ci=(...keys)=>{for(const k of keys){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
+  const iTour=ci('TOUR NO','TOUR_NO','TOUR','T-NR');
+  const iCode=ci('CODES','CODE','COD','SORT');
+  const iPlz =ci('PLZ','POSTAL','POST','ZIP');
+  const iComp=ci('COMPANY','FIRMA','COMP','ZUG','UNTERN','SUB');
+  const iId  =ci('OUT-APP','OUT APP','APP','ID');
+  if(iTour<0){toast('لم يتم العثور على عمود TOUR في الملف — تحقق من رؤوس الأعمدة','error');return;}
+  const tourMap={};
+  for(let i=hdrIdx+1;i<rows.length;i++){
+    const r=rows[i];
+    const tourRaw=String(r[iTour]||'').trim();
+    if(!tourRaw)continue;
+    if(!tourMap[tourRaw])tourMap[tourRaw]={tourRaw,tourNum:parseInt(tourRaw)||0,company:'',id:'',rows:[]};
+    const t=tourMap[tourRaw];
+    if(iComp>=0&&!t.company)t.company=String(r[iComp]||'').trim();
+    if(iId>=0&&!t.id)t.id=String(r[iId]||'').trim();
+    const code=iCode>=0?String(r[iCode]||'').trim():'';
+    const plz =iPlz>=0?String(r[iPlz] ||'').trim():'';
+    if(code||plz)t.rows.push({code,plz});
+  }
+  const tours=Object.values(tourMap).filter(t=>t.rows.length>0||t.id);
+  if(!tours.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
+  tours.sort((a,b)=>a.tourNum-b.tourNum);
+  tours.forEach(t=>{if(t.id){const n=parseInt(t.id);t.outApp=isNaN(n)?t.id:'D'+String(n).padStart(3,'0');}else t.outApp='—';});
+  _sortData={tours,total:tours.length};
+  $('sort-upload-panel').classList.add('hidden');
+  $('sort-mapper').classList.add('hidden');
+  _renderSortierkarten();
 }
 
 function _parseSortRows(rows){
