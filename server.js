@@ -108,6 +108,10 @@ app.post('/api/logout', (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`ZZ Logistics website running on port ${PORT}`);
+  console.log(`ZZ Logistics running on port ${PORT}`);
 });

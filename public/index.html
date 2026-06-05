@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Z&amp;Z Logistics — نظام الإدارة</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<main class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Z&amp;Z</div>
+    <h1>Z&amp;Z Logistics</h1>
+    <p class="login-sub">نظام إدارة العمليات اللوجستية — Germany / NRW</p>
+
+    <div class="form-group" style="margin-top:28px">
+      <label>البريد الإلكتروني</label>
+      <input id="email" type="email" placeholder="admin@zzlogistics.de" value="ahmadalreefai2021@gmail.com">
+    </div>
+    <button class="btn btn-primary fw" onclick="sendCode()">إرسال رمز الدخول ←</button>
+
+    <div id="codeArea" class="hidden">
+      <div class="form-group" style="margin-top:20px">
+        <label>رمز التحقق (6 أرقام)</label>
+        <input id="code" type="text" placeholder="● ● ● ● ● ●" maxlength="6" class="otp-inp">
+      </div>
+      <button class="btn btn-primary fw" onclick="verifyCode()">دخول إلى النظام</button>
+    </div>
+
+    <p id="msg" class="msg-text"></p>
+    <div class="login-note">🔒 جلسة آمنة — تنتهي تلقائياً بعد 8 ساعات</div>
+  </div>
+</main>
+
+<!-- ========== MAIN APP ========== -->
+<div class="app-shell hidden" id="mainApp">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-logo-box">Z&amp;Z</div>
+      <div>
+        <div class="sb-name">Z&amp;Z Logistics</div>
+        <div class="sb-sub">Germany / NRW</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <button class="nav-item active" onclick="goPage('dashboard',this)">
+        <span class="ni">📊</span><span>لوحة التحكم</span>
+      </button>
+      <button class="nav-item" onclick="goPage('orders',this)">
+        <span class="ni">📦</span><span>الطلبات</span>
+        <span class="nav-badge hidden" id="nav-pending-badge"></span>
+      </button>
+      <button class="nav-item" onclick="goPage('drivers',this)">
+        <span class="ni">🚗</span><span>السائقون</span>
+      </button>
+      <button class="nav-item" onclick="goPage('routes',this)">
+        <span class="ni">🗺️</span><span>المسارات</span>
+      </button>
+      <button class="nav-item" onclick="goPage('reports',this)">
+        <span class="ni">📋</span><span>التقارير</span>
+      </button>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user-row">
+        <div class="sb-av" id="sbAv">A</div>
+        <div class="sb-email" id="sbEmail">...</div>
+      </div>
+      <button class="btn-logout" onclick="logout()">⬅ خروج</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="app-main" id="appMain">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="tb-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h2 class="tb-title" id="pageTitle">لوحة التحكم</h2>
+          <p class="tb-date" id="pageDate"></p>
+        </div>
+      </div>
+      <div class="tb-right">
+        <div class="tb-notif" title="الإشعارات">
+          🔔<span class="notif-dot" id="notifDot"></span>
+        </div>
+        <div class="tb-user-box">
+          <div class="tb-av" id="tbAv">A</div>
+          <span id="tbLabel">المدير</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE CONTAINER -->
+    <div class="page-area">
+
+      <!-- DASHBOARD -->
+      <section class="pv" id="pv-dashboard">
+        <div class="stat-row">
+          <div class="stat-card c-blue">
+            <div class="sc-ico">📦</div>
+            <div><div class="sc-num" id="sc-total">0</div><div class="sc-lbl">طلبات اليوم</div></div>
+          </div>
+          <div class="stat-card c-green">
+            <div class="sc-ico">✅</div>
+            <div><div class="sc-num" id="sc-delivered">0</div><div class="sc-lbl">تم التسليم</div></div>
+          </div>
+          <div class="stat-card c-amber">
+            <div class="sc-ico">🚚</div>
+            <div><div class="sc-num" id="sc-transit">0</div><div class="sc-lbl">في الطريق</div></div>
+          </div>
+          <div class="stat-card c-red">
+            <div class="sc-ico">⏳</div>
+            <div><div class="sc-num" id="sc-pending">0</div><div class="sc-lbl">قيد الانتظار</div></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-top">
+              <h3 class="card-title">آخر الطلبات</h3>
+              <button class="ghost-btn" onclick="goPage('orders',null)">عرض الكل ←</button>
+            </div>
+            <table class="tbl">
+              <thead><tr><th>#</th><th>العميل</th><th>السائق</th><th>الحالة</th></tr></thead>
+              <tbody id="db-orders"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-top">
+              <h3 class="card-title">السائقون الآن</h3>
+              <button class="ghost-btn" onclick="goPage('drivers',null)">عرض الكل ←</button>
+            </div>
+            <div id="db-drivers"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="pv hidden" id="pv-orders">
+        <div class="toolbar">
+          <input class="tb-inp" type="text" placeholder="🔍 بحث عن طلب أو عميل..." oninput="filterOrders(this.value)" id="ord-q">
+          <select class="tb-sel" onchange="filterByStatus(this.value)">
+            <option value="">كل الحالات</option>
+            <option value="pending">قيد الانتظار</option>
+            <option value="in_transit">في الطريق</option>
+            <option value="delivered">تم التسليم</option>
+            <option value="failed">فشل التسليم</option>
+          </select>
+          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openOrderModal()">＋ طلب جديد</button>
+        </div>
+        <div class="card no-pad">
+          <div class="tbl-wrap">
+            <table class="tbl full-tbl">
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th><th>العميل</th><th>العنوان</th>
+                  <th>السائق</th><th>الحالة</th><th>الوقت</th><th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="ord-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DRIVERS -->
+      <section class="pv hidden" id="pv-drivers">
+        <div class="toolbar">
+          <input class="tb-inp" type="text" placeholder="🔍 بحث عن سائق..." oninput="filterDrivers(this.value)">
+          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openDriverModal()">＋ سائق جديد</button>
+        </div>
+        <div class="drivers-grid" id="drv-grid"></div>
+      </section>
+
+      <!-- ROUTES -->
+      <section class="pv hidden" id="pv-routes">
+        <div class="card no-pad">
+          <div class="card-top" style="padding:20px 22px 0">
+            <h3 class="card-title">مسارات اليوم</h3>
+            <span class="info-tag" id="routes-date"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl full-tbl">
+              <thead>
+                <tr>
+                  <th>المنطقة / Route</th><th>السائق</th>
+                  <th>المحطات</th><th>مكتمل</th><th>التقدم</th><th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="rts-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="pv hidden" id="pv-reports">
+        <div class="stat-row">
+          <div class="stat-card c-blue">
+            <div class="sc-ico">📊</div>
+            <div><div class="sc-num" id="rp-total">0</div><div class="sc-lbl">طلبات الأسبوع</div></div>
+          </div>
+          <div class="stat-card c-green">
+            <div class="sc-ico">📈</div>
+            <div><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl">معدل التسليم</div></div>
+          </div>
+          <div class="stat-card c-amber">
+            <div class="sc-ico">🚗</div>
+            <div><div class="sc-num" id="rp-drivers">0</div><div class="sc-lbl">سائقون نشطون</div></div>
+          </div>
+          <div class="stat-card c-red">
+            <div class="sc-ico">❌</div>
+            <div><div class="sc-num" id="rp-failed">0</div><div class="sc-lbl">طلبات فاشلة</div></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-top"><h3 class="card-title">أداء السائقين</h3></div>
+            <table class="tbl full-tbl">
+              <thead><tr><th>السائق</th><th>المجموع</th><th>ناجح</th><th>النسبة</th></tr></thead>
+              <tbody id="rp-drv"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-top"><h3 class="card-title">توزيع المناطق</h3></div>
+            <table class="tbl full-tbl">
+              <thead><tr><th>المنطقة</th><th>الطلبات</th><th>مكتمل</th></tr></thead>
+              <tbody id="rp-area"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /page-area -->
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
+
+<!-- MODAL: ORDER -->
+<div class="modal-bg hidden" id="modal-order">
+  <div class="modal">
+    <div class="modal-top">
+      <h3 id="modal-order-h">طلب جديد</h3>
+      <button class="modal-x" onclick="closeModal('modal-order')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <input type="hidden" id="ord-edit-id">
+      <div class="frow">
+        <div class="form-group">
+          <label>اسم العميل *</label>
+          <input type="text" id="ord-customer" placeholder="الاسم الكامل">
+        </div>
+        <div class="form-group">
+          <label>رقم التتبع</label>
+          <input type="text" id="ord-tracking" placeholder="ZZ-00000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>العنوان *</label>
+        <input type="text" id="ord-address" placeholder="الشارع، المدينة، الرمز البريدي">
+      </div>
+      <div class="frow">
+        <div class="form-group">
+          <label>السائق</label>
+          <select id="ord-driver-sel"></select>
+        </div>
+        <div class="form-group">
+          <label>الحالة</label>
+          <select id="ord-status-sel">
+            <option value="pending">قيد الانتظار</option>
+            <option value="in_transit">في الطريق</option>
+            <option value="delivered">تم التسليم</option>
+            <option value="failed">فشل التسليم</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>ملاحظات</label>
+        <input type="text" id="ord-notes" placeholder="أي تعليمات إضافية...">
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-order')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveOrder()">حفظ الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DRIVER -->
+<div class="modal-bg hidden" id="modal-driver">
+  <div class="modal">
+    <div class="modal-top">
+      <h3>سائق جديد</h3>
+      <button class="modal-x" onclick="closeModal('modal-driver')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="frow">
+        <div class="form-group">
+          <label>الاسم الكامل *</label>
+          <input type="text" id="drv-name" placeholder="اسم السائق">
+        </div>
+        <div class="form-group">
+          <label>رقم الهاتف</label>
+          <input type="text" id="drv-phone" placeholder="+49 xxxxxxxx">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="form-group">
+          <label>المنطقة / Route</label>
+          <input type="text" id="drv-area" placeholder="مثال: Köln Nord">
+        </div>
+        <div class="form-group">
+          <label>الحالة</label>
+          <select id="drv-status-sel">
+            <option value="available">متاح</option>
+            <option value="on_route">في المسار</option>
+            <option value="off">غير متاح</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-driver')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveDriver()">حفظ السائق</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="modal-bg hidden" id="modal-confirm">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-top">
+      <h3>تأكيد الحذف</h3>
+      <button class="modal-x" onclick="closeModal('modal-confirm')">✕</button>
+    </div>
+    <div class="modal-bd">
+      <p id="confirm-msg" style="color:#374151;font-size:15px;margin:0">هل أنت متأكد من الحذف؟</p>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">إلغاء</button>
+      <button class="btn btn-danger" style="width:auto;padding:11px 28px" id="confirm-ok-btn">حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
