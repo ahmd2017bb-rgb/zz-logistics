@@ -945,6 +945,38 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   </div>
 </div>
 
+        <!-- Disposition mapper step -->
+        <div id="sort-disp-mapper" class="hidden">
+          <div class="card" style="max-width:720px;margin:0 auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <h3 class="card-title">⚙️ تعيين أعمدة جدول التوزيع</h3>
+              <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:13px" onclick="clearSortResult()">↩ إلغاء</button>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:12px">معاينة أول صفوف من الملف — اختر العمود المناسب لكل حقل:</div>
+            <div id="disp-preview" style="overflow-x:auto;margin-bottom:18px;border:1px solid var(--border);border-radius:6px;font-size:11px"></div>
+            <div class="frow">
+              <div class="form-group"><label>📌 رقم التور TOUR *</label><select id="dm-tour" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+              <div class="form-group"><label>🚛 الشركة / Subunternehmer</label><select id="dm-sub" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+            </div>
+            <div class="frow">
+              <div class="form-group"><label>👤 السائق FAHRER</label><select id="dm-fahrer" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+              <div class="form-group"><label>📱 OUT-APP ID</label><select id="dm-appid" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+            </div>
+            <div class="frow">
+              <div class="form-group"><label>🔢 الكود 3. CODE</label><select id="dm-code" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+              <div class="form-group"><label>📮 PLZ</label><select id="dm-plz" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+            </div>
+            <div class="frow">
+              <div class="form-group"><label>⏰ GEPLANT</label><select id="dm-geplant" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+              <div class="form-group"><label>⏱ IST</label><select id="dm-ist" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+            </div>
+            <div class="frow">
+              <div class="form-group" style="max-width:50%"><label>📝 BEMERKUNG</label><select id="dm-bemerk" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;font-size:13px"></select></div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:10px" onclick="_buildFromDispMapper()">✓ إنشاء جدول التوزيع</button>
+          </div>
+        </div>
+
         <div id="sort-result" class="hidden">
           <div class="toolbar no-print" style="margin-bottom:20px">
             <button class="btn btn-ghost" style="width:auto;padding:10px 20px" data-i18n="sort.new_import" onclick="clearSortResult()">↩ استيراد جديد</button>
@@ -2181,6 +2213,7 @@ function clearSortResult(){
   $('dp-pages').innerHTML='';
   $('sort-result').classList.add('hidden');
   $('sort-mapper').classList.add('hidden');
+  $('sort-disp-mapper').classList.add('hidden');
   $('sort-upload-panel').classList.remove('hidden');
   $('sort-file-inp').value='';
 }
@@ -2436,46 +2469,120 @@ function _handleDispExcel(file){
     r.onload=e=>{
       const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:""});
-      if(!rows.length){toast('الملف فارغ أو لا يحتوي رأس أعمدة','error');return;}
-      _renderDisposition(rows);
+      const rawRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(!rawRows.length){toast('الملف فارغ','error');return;}
+      _sortRawRows=rawRows;_sortHdrIdx=0;
+      _showDispMapper(rawRows);
     };
     r.readAsArrayBuffer(file);
   };
   if(!window.XLSX){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=doRead;document.head.appendChild(s);}else doRead();
 }
-function _renderDisposition(rows){
-  rows.sort((a,b)=>Number(a.TOUR||a.Tour||0)-Number(b.TOUR||b.Tour||0));
+function _showDispMapper(rawRows){
+  let hdrIdx=0,hdr=[];
+  for(let i=0;i<Math.min(6,rawRows.length);i++){
+    const r=rawRows[i].map(c=>String(c).toUpperCase().trim());
+    if(r.some(c=>c.includes('TOUR')||c.includes('FAHRER')||c.includes('PLZ')||c.includes('SUB'))){hdrIdx=i;hdr=r;break;}
+  }
+  if(!hdr.length){hdr=rawRows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
+  _sortHdrIdx=hdrIdx;
+  const origHdr=rawRows[hdrIdx].map(c=>String(c).trim());
+  const ci=(keys)=>{for(const k of keys){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
+  const iTour =ci(['TOUR']);
+  const iSub  =ci(['SUB','FIRMA','COMPANY','UNTERN']);
+  const iFahrer=ci(['FAHRER','DRIVER']);
+  const iAppid =ci(['OUT-APP','APP-ID','APPID','APP ID']);
+  const iCode  =ci(['CODE','COD']);
+  const iPlz   =ci(['PLZ','POSTAL','ZIP']);
+  const iGeplant=ci(['GEPLANT','PLAN']);
+  const iIst   =ci(['IST','ACTUAL']);
+  const iBemerk=ci(['BEMERK','NOTE','REMARK']);
+  const NONE=`<option value="-1">— لا شيء —</option>`;
+  const opts=origHdr.map((h,i)=>`<option value="${i}">${h||'عمود '+(i+1)}</option>`).join('');
+  ['dm-tour','dm-sub','dm-fahrer','dm-appid','dm-code','dm-plz','dm-geplant','dm-ist','dm-bemerk'].forEach(id=>{const el=$(id);if(el)el.innerHTML=NONE+opts;});
+  if(iTour>=0)$('dm-tour').value=iTour;
+  if(iSub>=0)$('dm-sub').value=iSub;
+  if(iFahrer>=0)$('dm-fahrer').value=iFahrer;
+  if(iAppid>=0)$('dm-appid').value=iAppid;
+  if(iCode>=0)$('dm-code').value=iCode;
+  if(iPlz>=0)$('dm-plz').value=iPlz;
+  if(iGeplant>=0)$('dm-geplant').value=iGeplant;
+  if(iIst>=0)$('dm-ist').value=iIst;
+  if(iBemerk>=0)$('dm-bemerk').value=iBemerk;
+  const pvRows=rawRows.slice(hdrIdx,Math.min(hdrIdx+5,rawRows.length));
+  let pv=`<table style="width:100%;border-collapse:collapse"><thead><tr>`;
+  origHdr.forEach(h=>pv+=`<th style="background:#1F2C5C;color:#fff;padding:5px 8px;white-space:nowrap;font-size:11px">${h||'—'}</th>`);
+  pv+=`</tr></thead><tbody>`;
+  pvRows.slice(1).forEach(row=>{pv+=`<tr>`;origHdr.forEach((_,i)=>pv+=`<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap;font-size:11px">${String(row[i]||'')}</td>`);pv+=`</tr>`;});
+  pv+=`</tbody></table>`;
+  $('disp-preview').innerHTML=pv;
+  $('sort-upload-panel').classList.add('hidden');
+  $('sort-disp-mapper').classList.remove('hidden');
+}
+function _buildFromDispMapper(){
+  const iTour  =parseInt($('dm-tour').value);
+  const iSub   =parseInt($('dm-sub').value);
+  const iFahrer=parseInt($('dm-fahrer').value);
+  const iAppid =parseInt($('dm-appid').value);
+  const iCode  =parseInt($('dm-code').value);
+  const iPlz   =parseInt($('dm-plz').value);
+  const iGeplant=parseInt($('dm-geplant').value);
+  const iIst   =parseInt($('dm-ist').value);
+  const iBemerk=parseInt($('dm-bemerk').value);
+  if(iTour<0){toast('يرجى اختيار عمود رقم التور TOUR','error');return;}
+  const rawRows=_sortRawRows,hdrIdx=_sortHdrIdx;
+  const objRows=[];
+  for(let i=hdrIdx+1;i<rawRows.length;i++){
+    const r=rawRows[i];
+    const tour=String(r[iTour]||'').trim();
+    if(!tour)continue;
+    objRows.push({
+      tour,sub:iSub>=0?String(r[iSub]||'').trim():'',
+      fahrer:iFahrer>=0?String(r[iFahrer]||'').trim():'',
+      appid:iAppid>=0?String(r[iAppid]||'').trim():'',
+      code:iCode>=0?String(r[iCode]||'').trim():'',
+      plz:iPlz>=0?String(r[iPlz]||'').trim():'',
+      geplant:iGeplant>=0?String(r[iGeplant]||'').trim():'',
+      ist:iIst>=0?String(r[iIst]||'').trim():'',
+      bemerk:iBemerk>=0?String(r[iBemerk]||'').trim():''
+    });
+  }
+  if(!objRows.length){toast('لم يتم العثور على بيانات','error');return;}
+  objRows.sort((a,b)=>Number(a.tour||0)-Number(b.tour||0));
+  const useSub=iSub>=0&&objRows.some(r=>r.sub);
+  $('sort-disp-mapper').classList.add('hidden');
+  _renderDisposition(objRows,useSub);
+}
+function _renderDisposition(rows,useSub){
   const groups={};
   rows.forEach(r=>{
-    const tour=r.TOUR||r.Tour||"";
-    const co=_dispCo(tour);
+    const co=useSub?(r.sub||'OHNE FIRMA'):_dispCo(r.tour);
     if(!groups[co])groups[co]=[];
     groups[co].push(r);
   });
+  const coKeys=useSub?Object.keys(groups).sort():DISP_ORDER.filter(c=>groups[c]).concat(Object.keys(groups).filter(c=>!DISP_ORDER.includes(c)));
   const date=_fmtDate($('sort-date').value);
   const loc=($('sort-loc').value.trim())||'Z&Z GmbH · NRW005';
   const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #bbb;padding:7px 10px;font-size:13px;white-space:nowrap">${t}</th>`;
-  const TD=(t,bold)=>`<td style="border:1px solid #bbb;padding:7px 10px;text-align:center;font-size:13px${bold?';font-weight:700':''}">${t}</td>`;
+  const TD=(t)=>`<td style="border:1px solid #bbb;padding:7px 10px;text-align:center;font-size:13px">${t||'—'}</td>`;
   let html=`<div id="disp-inner" style="font-family:Arial,sans-serif">
     <div style="margin-bottom:14px">
       <h2 style="color:#1F2C5C;margin:0 0 4px;font-size:18px">DISPOSITION – ${date}</h2>
       <p style="margin:0;font-size:13px;color:#555"><b>Z&amp;Z GmbH Transporte</b> | Depot: NRW005 | ${loc}</p>
     </div>`;
-  DISP_ORDER.forEach(co=>{
+  coKeys.forEach(co=>{
     if(!groups[co])return;
     html+=`<div style="background:#0E7C3A;color:#fff;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px">Subunternehmer: ${co}</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:0"><thead><tr>
       ${TH('TOUR')}${TH('OUT-APP ID')}${TH('FAHRER / السائق')}${TH('3. CODE')}${TH('PLZ')}${TH('GEPLANT')}${TH('IST')}${TH('BEMERKUNG')}
     </tr></thead><tbody>`;
     groups[co].forEach(r=>{
-      const codes=String(r["3. CODE"]||r.CODE||r.Code||"").split(/[,·\s]+/).filter(Boolean)
+      const codes=r.code.split(/[,·\s]+/).filter(Boolean)
         .map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${c}</span>`).join('');
       html+=`<tr>
-        ${TD(r.TOUR||r.Tour||"")}${TD(r["OUT-APP ID"]||r.APPID||r.AppID||"")}
-        ${TD(r.FAHRER||r.Driver||r["السائق"]||"")}
+        ${TD(r.tour)}${TD(r.appid)}${TD(r.fahrer)}
         <td style="border:1px solid #bbb;padding:7px 10px;text-align:center">${codes||'—'}</td>
-        ${TD(r.PLZ||"")}${TD(r.GEPLANT||"")}${TD(r.IST||"")}${TD(r.BEMERKUNG||"")}
+        ${TD(r.plz)}${TD(r.geplant)}${TD(r.ist)}${TD(r.bemerk)}
       </tr>`;
     });
     html+=`<tr>
@@ -2485,7 +2592,6 @@ function _renderDisposition(rows){
   });
   html+=`</div>`;
   $('dp-pages').innerHTML=html;
-  $('sort-upload-panel').classList.add('hidden');
   $('sort-result').classList.remove('hidden');
 }
 function printDisp(){
