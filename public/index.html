@@ -193,20 +193,32 @@ button,select,input{font-family:inherit;font-size:inherit}
 .act-edit{background:#dbeafe;color:#1e40af}.act-delete{background:#fee2e2;color:#991b1b}
 .act-btn:hover{opacity:.75}
 
-/* DRIVER CARDS */
-.drivers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
-.drv-card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s}
-.drv-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.1)}
-.drv-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
-.drv-av{width:54px;height:54px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--blue));color:var(--white);font-weight:700;font-size:19px;display:flex;align-items:center;justify-content:center}
-.drv-name{font-size:16px;font-weight:700;color:var(--primary)}
-.drv-phone{font-size:13px;color:var(--muted);margin-top:3px}
-.drv-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.drv-stat{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
-.drv-stat-n{font-size:20px;font-weight:900;color:var(--primary)}
-.drv-stat-l{font-size:11px;color:var(--muted)}
-.drv-actions{margin-top:14px;display:flex;gap:8px}
-.drv-actions .act-btn{flex:1;text-align:center}
+/* DISPATCH PLAN */
+.dp-page{background:#fff;width:100%;max-width:960px;margin:0 auto 32px;box-shadow:0 2px 12px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+.dp-header{background:#c0392b;background:linear-gradient(135deg,#c0392b,#96281b);color:#fff;text-align:center;padding:14px 16px}
+.dp-title{font-size:20px;font-weight:900;letter-spacing:1px;direction:rtl}
+.dp-subhdr{background:#1a2744;color:#e8eaf6;text-align:center;padding:7px 16px;font-size:13px}
+.dp-tbl{width:100%;border-collapse:collapse}
+.dp-tbl th{background:#1a2744;color:#fff;padding:9px 10px;font-size:11px;text-align:center;border:1px solid #2d3a5a;line-height:1.3}
+.dp-tbl td{padding:8px 10px;border:1px solid #dde3ee;vertical-align:middle;font-size:13px;background:#fff}
+.dp-tbl tr:nth-child(even) td{background:#f5f7ff}
+.dp-num{text-align:center;width:36px;font-weight:700;color:#555}
+.dp-id{text-align:center;font-weight:700;color:#1a2744;white-space:nowrap;font-size:14px}
+.dp-driver-name{font-weight:900;font-size:14px}
+.dp-codes{color:#c0392b;font-weight:900;font-size:15px;text-align:center;letter-spacing:0.5px}
+.dp-plz{font-size:12px;color:#333;line-height:1.7;word-break:break-word}
+.dp-inp{width:100%;border:1px solid #dde3ee;border-radius:4px;padding:4px 6px;font-size:12px;background:#fffef0;box-sizing:border-box}
+.dp-footer{text-align:center;padding:9px 16px;font-size:12px;color:#666;background:#f8f9ff;border-top:1px solid #e2e8f0;direction:rtl}
+.sort-upload-card{max-width:560px;margin:40px auto 0}
+.sort-drop-zone{border:2px dashed var(--blue);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:background .2s}
+.sort-drop-zone:hover{background:#eff6ff}
+@media print{
+  .no-print{display:none!important}
+  .dp-page{box-shadow:none;margin:0;border-radius:0;page-break-after:always}
+  .dp-inp{border:none;background:transparent;padding:0}
+  #sort-upload-panel{display:none!important}
+  #sort-result .no-print{display:none!important}
+}
 
 /* DASHBOARD DRIVER LIST */
 .db-drv-row{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--bg);border-radius:11px;margin-bottom:9px}
@@ -251,7 +263,7 @@ button,select,input{font-family:inherit;font-size:inherit}
   .stat-row{grid-template-columns:1fr 1fr}.page-area{padding:16px}.topbar{padding:13px 16px}
   .frow{grid-template-columns:1fr}
 }
-@media(max-width:500px){.stat-row{grid-template-columns:1fr}.drivers-grid{grid-template-columns:1fr}.login-card{padding:32px 24px 28px}}
+@media(max-width:500px){.stat-row{grid-template-columns:1fr}.login-card{padding:32px 24px 28px}}
 
 /* ── NRW MAP PAGE ─────────────────────────── */
 .pv-map-full{margin:-26px -28px;height:calc(100vh - 55px);display:flex;direction:ltr}
@@ -628,7 +640,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <button class="nav-item active" onclick="goPage('map',this)"><span class="ni">🗺</span><span>خريطة NRW</span></button>
       <button class="nav-item" onclick="goPage('dashboard',this)"><span class="ni">📊</span><span>لوحة التحكم</span></button>
       <button class="nav-item" onclick="goPage('orders',this)"><span class="ni">📦</span><span>الطلبات</span><span class="nav-badge hidden" id="nav-badge"></span></button>
-      <button class="nav-item" onclick="goPage('drivers',this)"><span class="ni">🚗</span><span>السائقون</span></button>
+      <button class="nav-item" onclick="goPage('sort',this)"><span class="ni">📋</span><span>فرز</span></button>
       <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span>المسارات</span></button>
       <button class="nav-item" onclick="goPage('staff',this)"><span class="ni">👥</span><span>الموظفون</span></button>
       <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
@@ -733,10 +745,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <div class="card-top"><h3 class="card-title">آخر الطلبات</h3><button class="ghost-btn" onclick="goPage('orders',null)">عرض الكل ←</button></div>
             <table class="tbl"><thead><tr><th>#</th><th>العميل</th><th>السائق</th><th>الحالة</th></tr></thead><tbody id="db-orders"></tbody></table>
           </div>
-          <div class="card">
-            <div class="card-top"><h3 class="card-title">السائقون الآن</h3><button class="ghost-btn" onclick="goPage('drivers',null)">عرض الكل ←</button></div>
-            <div id="db-drivers"></div>
-          </div>
         </div>
 
         <!-- Returns Table -->
@@ -795,13 +803,38 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         </div>
       </section>
 
-      <!-- ====== DRIVERS ====== -->
-      <section class="pv hidden" id="pv-drivers">
-        <div class="toolbar">
-          <input class="tb-inp" type="text" placeholder="🔍 بحث عن سائق..." oninput="filterDrivers(this.value)">
-          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openDriverModal()">＋ سائق جديد</button>
+      <!-- ====== SORT / DISPATCH PLAN ====== -->
+      <section class="pv hidden" id="pv-sort">
+        <div id="sort-upload-panel">
+          <div class="card sort-upload-card">
+            <h3 class="card-title" style="margin-bottom:16px">📋 فرز حطة التوزيع اليومية</h3>
+            <div class="frow" style="margin-bottom:14px">
+              <div class="form-group">
+                <label>التاريخ</label>
+                <input type="date" id="sort-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px">
+              </div>
+              <div class="form-group">
+                <label>الموقع / Location</label>
+                <input type="text" id="sort-loc" placeholder="مثال: DE05005 Duisburg" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px">
+              </div>
+            </div>
+            <div class="sort-drop-zone" id="sort-drop" onclick="$('sort-file-inp').click()" ondragover="event.preventDefault()" ondrop="sortDropHandler(event)">
+              <div style="font-size:36px;margin-bottom:8px">📂</div>
+              <div style="font-weight:700;font-size:15px;margin-bottom:4px">اسحب ملف Excel هنا أو اضغط للاختيار</div>
+              <div style="font-size:13px;color:var(--muted)">.xlsx / .xls</div>
+              <input type="file" id="sort-file-inp" accept=".xlsx,.xls" style="display:none" onchange="handleSortFile(this.files[0])">
+            </div>
+          </div>
         </div>
-        <div class="drivers-grid" id="drv-grid"></div>
+
+        <div id="sort-result" class="hidden">
+          <div class="toolbar no-print" style="margin-bottom:20px">
+            <button class="btn btn-ghost" style="width:auto;padding:10px 20px" onclick="clearSortResult()">↩ استيراد جديد</button>
+            <div style="flex:1"></div>
+            <button class="btn btn-primary" style="width:auto;padding:10px 24px" onclick="window.print()">🖨 طباعة</button>
+          </div>
+          <div id="dp-pages"></div>
+        </div>
       </section>
 
       <!-- ====== ROUTES ====== -->
@@ -1073,27 +1106,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   </div>
 </div>
 
-<!-- MODAL: DRIVER -->
-<div class="modal-bg hidden" id="modal-driver">
-  <div class="modal">
-    <div class="modal-top"><h3>سائق جديد</h3><button class="modal-x" onclick="closeModal('modal-driver')">✕</button></div>
-    <div class="modal-bd">
-      <div class="frow">
-        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="drv-name" placeholder="اسم السائق"></div>
-        <div class="form-group"><label>رقم الهاتف</label><input type="text" id="drv-phone" placeholder="+49 xxxxxxxx"></div>
-      </div>
-      <div class="frow">
-        <div class="form-group"><label>المنطقة / Route</label><input type="text" id="drv-area" placeholder="مثال: Köln Nord"></div>
-        <div class="form-group"><label>الحالة</label><select id="drv-status-sel"><option value="available">متاح</option><option value="on_route">في المسار</option><option value="off">غير متاح</option></select></div>
-      </div>
-    </div>
-    <div class="modal-ft">
-      <button class="btn btn-ghost" onclick="closeModal('modal-driver')">إلغاء</button>
-      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveDriver()">حفظ السائق</button>
-    </div>
-  </div>
-</div>
-
 <!-- MODAL: CONFIRM -->
 <div class="modal-bg hidden" id="modal-confirm">
   <div class="modal" style="max-width:380px">
@@ -1244,13 +1256,7 @@ function _doLogoutUI() {
 // ══════════════════════════════════════════════════
 // SAMPLE DATA (orders/drivers)
 // ══════════════════════════════════════════════════
-let drivers = [
-  {id:1,name:'أحمد الريفاي', phone:'+49 176 11223344',area:'Köln Nord',  status:'on_route'},
-  {id:2,name:'عمر حسن',      phone:'+49 176 22334455',area:'Köln Süd',   status:'on_route'},
-  {id:3,name:'مصطفى يلماز', phone:'+49 176 33445566',area:'Düsseldorf', status:'available'},
-  {id:4,name:'بيتر شميدت',  phone:'+49 176 44556677',area:'Bonn',        status:'on_route'},
-  {id:5,name:'علي كريمي',   phone:'+49 176 55667788',area:'Aachen',      status:'off'},
-];
+let drivers = [];
 let orders = [
   {id:1, tracking:'ZZ-10241',customer:'Klaus Müller',    address:'Aachener Str. 45, Köln',      driver:1,status:'delivered', time:'08:12',notes:''},
   {id:2, tracking:'ZZ-10242',customer:'Fatima Hassan',   address:'Venloer Str. 12, Köln',       driver:1,status:'delivered', time:'08:45',notes:''},
@@ -1728,7 +1734,7 @@ async function saveProfile(){
 // ══════════════════════════════════════════════════
 // NAV
 // ══════════════════════════════════════════════════
-const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير',map:'خريطة NRW — مناطق التوصيل',staff:'إدارة الموظفين'};
+const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',sort:'فرز الجدول اليومي',routes:'المسارات',reports:'التقارير',map:'خريطة NRW — مناطق التوصيل',staff:'إدارة الموظفين'};
 function goPage(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
@@ -1736,7 +1742,7 @@ function goPage(name,btn){
   $('pageTitle').textContent=titles[name]||name;
   if(name==='dashboard')renderDashboard();
   if(name==='orders')renderOrders();
-  if(name==='drivers')renderDrivers();
+  if(name==='sort'){}
   if(name==='routes')renderRoutes();
   if(name==='reports')renderReports();
   if(name==='map')initNRWMapPage();
@@ -1782,9 +1788,6 @@ function doPrint(sectionName, tabId){
 function renderDashboard(){
   $('db-orders').innerHTML=[...orders].reverse().slice(0,5).map(o=>
     `<tr><td><small style="color:var(--muted)">${o.tracking}</small></td><td>${o.customer}</td><td>${dName(o.driver)}</td><td>${badge(o.status)}</td></tr>`
-  ).join('');
-  $('db-drivers').innerHTML=drivers.map(d=>
-    `<div class="db-drv-row"><div class="db-drv-info"><div class="db-av">${d.name[0]}</div><div><div class="db-drv-name">${d.name}</div><div class="db-drv-area">${d.area}</div></div></div>${badge(d.status,'d')}</div>`
   ).join('');
 }
 
@@ -1843,38 +1846,154 @@ function saveOrder(){
 function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success');autosaveNow()}
 
 // ══════════════════════════════════════════════════
-// DRIVERS
+// SORT / DISPATCH PLAN
 // ══════════════════════════════════════════════════
-function renderDrivers(list){
-  const data=list||drivers;
-  $('drv-grid').innerHTML=data.length===0?'<p style="color:var(--muted)">لا يوجد سائقون</p>':data.map(d=>{
-    const do_=orders.filter(o=>o.driver===d.id);
-    const dv=do_.filter(o=>o.status==='delivered').length;
-    const rt=do_.length?Math.round(dv/do_.length*100):0;
-    return`<div class="drv-card">
-      <div class="drv-top"><div class="drv-av">${d.name[0]}</div><div><div class="drv-name">${d.name}</div><div class="drv-phone">${d.phone}</div></div></div>
-      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700;color:var(--muted)">${d.area}</span>${badge(d.status,'d')}</div>
-      <div class="drv-stats"><div class="drv-stat"><div class="drv-stat-n">${do_.length}</div><div class="drv-stat-l">طلبات</div></div><div class="drv-stat"><div class="drv-stat-n">${rt}%</div><div class="drv-stat-l">معدل التسليم</div></div></div>
-      <div class="drv-actions"><button class="act-btn act-edit" onclick="editDriver(${d.id})">تعديل</button><button class="act-btn act-delete" onclick="askDelete('driver',${d.id})">حذف</button></div>
+let _sortData=null;
+
+function sortDropHandler(ev){
+  ev.preventDefault();
+  const f=ev.dataTransfer&&ev.dataTransfer.files[0];
+  if(f)handleSortFile(f);
+}
+
+function clearSortResult(){
+  _sortData=null;
+  $('dp-pages').innerHTML='';
+  $('sort-result').classList.add('hidden');
+  $('sort-upload-panel').classList.remove('hidden');
+  $('sort-file-inp').value='';
+}
+
+function handleSortFile(file){
+  if(!file)return;
+  // Auto-fill date from filename e.g. "daily income 29.05.pdf" → 29.05.2026
+  if(!$('sort-date').value){
+    const dm=file.name.match(/(\d{2})\.(\d{2})\.(\d{4})/)||file.name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);
+    if(dm)$('sort-date').value=dm[3]+'-'+dm[2]+'-'+dm[1];
+  }
+  const doRead=()=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(!rows.length){toast('الملف فارغ','error');return;}
+      _parseSortRows(rows);
+    };
+    r.readAsArrayBuffer(file);
+  };
+  if(!window.XLSX){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=doRead;document.head.appendChild(s);
+  }else doRead();
+}
+
+function _parseSortRows(rows){
+  // Find header row
+  let hdrIdx=0,hdr=[];
+  for(let i=0;i<Math.min(6,rows.length);i++){
+    const r=rows[i].map(c=>String(c).toUpperCase().trim());
+    if(r.some(c=>c==='NAME'||c==='DRIVER'||c.includes('FAHRER')||c==='السائق')){hdrIdx=i;hdr=r;break;}
+  }
+  if(!hdr.length){hdr=rows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
+
+  const ci=(keys)=>{for(const k of keys){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
+  const iName  =ci(['NAME','DRIVER','FAHRER','السائق']);
+  const iTour  =ci(['TOUR NO','TOUR_NO','TOUR']);
+  const iCodes =ci(['CODES','CODE','PLZ','POSTAL']);
+  const iId    =ci(['OUT-APP','OUT APP','APP','ID']);
+  const iComp  =ci(['COMPANY','FIRMA','COMP']);
+
+  if(iName<0){toast('لم أجد عمود اسم السائق (NAME) في الملف','error');return;}
+
+  const map={};
+  for(let i=hdrIdx+1;i<rows.length;i++){
+    const r=rows[i];
+    const name=String(r[iName]||'').trim();
+    if(!name)continue;
+    if(!map[name])map[name]={name,id:'',tours:[],codes:[],comp:''};
+    const d=map[name];
+    if(iId>=0&&!d.id)d.id=String(r[iId]||'').trim();
+    if(iComp>=0&&!d.comp)d.comp=String(r[iComp]||'').trim();
+    if(iTour>=0){const t=String(r[iTour]||'').trim();if(t&&!d.tours.includes(t))d.tours.push(t);}
+    if(iCodes>=0){const c=String(r[iCodes]||'').trim();if(c&&!d.codes.includes(c))d.codes.push(c);}
+  }
+
+  const list=Object.values(map).filter(d=>d.name);
+  if(!list.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
+
+  // Format tour ranges
+  list.forEach(d=>{
+    const nums=d.tours.map(t=>parseInt(t)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+    const uniq=[...new Set(nums)];
+    if(uniq.length){
+      const ranges=[];let s=uniq[0],e=uniq[0];
+      for(let i=1;i<uniq.length;i++){
+        if(uniq[i]===e+1)e=uniq[i];
+        else{ranges.push(s===e?`${s}`:`${s}-${e}`);s=e=uniq[i];}
+      }
+      ranges.push(s===e?`${s}`:`${s}-${e}`);
+      d.toursStr=ranges.join(', ');
+    }else d.toursStr=d.tours.join(', ');
+    // Format OUT-APP id
+    if(d.id){const n=parseInt(d.id);d.outApp=isNaN(n)?d.id:'D'+String(n).padStart(3,'0');}
+    else d.outApp='—';
+  });
+
+  _sortData={list,total:list.length};
+  _renderDispatchPlan();
+}
+
+function _fmtDate(v){
+  if(!v)return new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const[y,m,d]=v.split('-');return`${d}/${m}/${y}`;
+}
+
+function _renderDispatchPlan(){
+  if(!_sortData)return;
+  const{list,total}=_sortData;
+  const date=$('sort-date').value;
+  const loc=($('sort-loc').value.trim())||'DE05005 Duisburg';
+  const PER=8,pages=Math.ceil(total/PER);
+  let html='';
+  for(let p=0;p<pages;p++){
+    const slice=list.slice(p*PER,(p+1)*PER);
+    const from=p*PER+1,to=Math.min((p+1)*PER,total);
+    html+=`<div class="dp-page">
+      <div class="dp-header"><div class="dp-title">حطة التوزيع اليومية — ${_fmtDate(date)}</div></div>
+      <div class="dp-subhdr">Daily Dispatch Plan &bull; ${total} Drivers &bull; ${loc} &bull; Page ${p+1} of ${pages} &bull; Drivers ${from}&ndash;${to}</div>
+      <table class="dp-tbl">
+        <thead><tr>
+          <th style="width:40px">رقم<br><small>#</small></th>
+          <th style="width:72px">اوت آب<br><small>OUT-APP</small></th>
+          <th>السائق<br><small>Driver</small></th>
+          <th style="width:110px">الأكواد<br><small>Codes</small></th>
+          <th>البريد<br><small>PLZ</small></th>
+          <th style="width:78px">المخطط<br><small>Planned</small></th>
+          <th style="width:78px">الفعلي<br><small>Actual</small></th>
+          <th style="width:88px">المسؤول<br><small>Manager</small></th>
+          <th style="width:130px">ملاحظات<br><small>Notes</small></th>
+        </tr></thead>
+        <tbody>${slice.map((d,i)=>`<tr>
+          <td class="dp-num">${p*PER+i+1}</td>
+          <td class="dp-id">${d.outApp}</td>
+          <td><div class="dp-driver-name">${d.name}</div>${d.comp?`<div style="font-size:11px;color:#888">${d.comp}</div>`:''}</td>
+          <td class="dp-codes">${d.toursStr||'—'}</td>
+          <td class="dp-plz">${d.codes.join(' ')}</td>
+          <td><input class="dp-inp" type="text" placeholder="—"></td>
+          <td><input class="dp-inp" type="text" placeholder="—"></td>
+          <td><input class="dp-inp" type="text" placeholder="—"></td>
+          <td><input class="dp-inp" type="text" placeholder="ملاحظة..."></td>
+        </tr>`).join('')}</tbody>
+      </table>
+      <div class="dp-footer">مجموع الطرود في هذه الصفحة: — &bull; Page total: — &bull; Drivers: ${slice.length}</div>
     </div>`;
-  }).join('');
+  }
+  $('dp-pages').innerHTML=html;
+  $('sort-upload-panel').classList.add('hidden');
+  $('sort-result').classList.remove('hidden');
 }
-function filterDrivers(q){const ql=q.toLowerCase();renderDrivers(ql?drivers.filter(d=>d.name.toLowerCase().includes(ql)||d.area.toLowerCase().includes(ql)):undefined)}
-function openDriverModal(){$('drv-name').value='';$('drv-phone').value='';$('drv-area').value='';$('drv-status-sel').value='available';delete $('drv-name').dataset.eid;openM('modal-driver')}
-function editDriver(id){
-  const d=drivers.find(x=>x.id===id);if(!d)return;
-  $('drv-name').value=d.name;$('drv-phone').value=d.phone;$('drv-area').value=d.area;$('drv-status-sel').value=d.status;
-  $('drv-name').dataset.eid=id;openM('modal-driver');
-}
-function saveDriver(){
-  const n=$('drv-name').value.trim();if(!n){toast('يرجى إدخال اسم السائق','error');return}
-  const eid=$('drv-name').dataset.eid;
-  const data={name:n,phone:$('drv-phone').value.trim()||'—',area:$('drv-area').value.trim()||'—',status:$('drv-status-sel').value};
-  if(eid){const i=drivers.findIndex(d=>d.id===parseInt(eid));if(i!==-1)drivers[i]={...drivers[i],...data};delete $('drv-name').dataset.eid;toast('تم تحديث السائق','success')}
-  else{drivers.push({id:nextDId++,...data});toast('تم إضافة السائق','success')}
-  closeModal('modal-driver');renderDrivers();autosaveNow();
-}
-function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success');autosaveNow()}
 
 // ══════════════════════════════════════════════════
 // ROUTES
@@ -1917,7 +2036,6 @@ function renderReports(){
 function askDelete(type,id){
   let label='', fn;
   if(type==='order'){const o=orders.find(x=>x.id===id);if(!o)return;label=o.customer+' — '+o.tracking;fn=()=>delOrder(id);}
-  else if(type==='driver'){const d=drivers.find(x=>x.id===id);if(!d)return;label=d.name;fn=()=>delDriver(id);}
   else if(type==='staff'){const s=staff.find(x=>x.id===id);if(!s)return;label=s.name+' (سيتم حذف سجلات دوامه)';fn=()=>delStaff(id);}
   else if(type==='att'){const a=attendance.find(x=>x.id===id);if(!a)return;const s=staff.find(x=>x.id===a.staffId);label=(s?s.name:'موظف')+' — '+a.date;fn=()=>delAttendance(id);}
   else return;
