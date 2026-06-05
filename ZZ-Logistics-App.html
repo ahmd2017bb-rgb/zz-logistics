@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Z&amp;Z Logistics — نظام الإدارة</title>
+<style>
+:root{
+  --primary:#0b1f3a;--blue:#1a56db;--amber:#f59e0b;
+  --green:#10b981;--red:#ef4444;--bg:#f1f5f9;
+  --white:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
+  --sb-w:252px;--r:14px;--sh:0 2px 10px rgba(0,0,0,.07);
+  --shlg:0 20px 60px rgba(0,0,0,.22);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+button,select,input{font-family:inherit;font-size:inherit}
+.hidden{display:none!important}
+
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#071529 0%,#0b1f3a 40%,#1a3a70 100%);padding:20px}
+.login-card{background:var(--white);border-radius:26px;padding:44px 40px 36px;max-width:460px;width:100%;box-shadow:var(--shlg)}
+.login-logo{width:88px;height:88px;border-radius:24px;margin:0 auto 18px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0b1f3a;font-weight:900;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(245,158,11,.38)}
+.login-card h1{text-align:center;color:var(--primary);font-size:26px;margin-bottom:6px}
+.login-sub{text-align:center;color:var(--muted);font-size:14px}
+.login-note{text-align:center;color:var(--muted);font-size:13px;margin-top:24px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-weight:700;font-size:13px;margin-bottom:7px}
+.form-group input,.form-group select{width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;color:var(--text);background:var(--white);outline:none;transition:border-color .18s}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.11)}
+.btn{border:none;border-radius:12px;padding:13px 20px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(135deg,var(--amber),#fbbf24);color:#0b1f3a;box-shadow:0 4px 16px rgba(245,158,11,.3)}
+.btn-primary:hover{opacity:.9}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-ghost:hover{background:var(--bg)}
+.btn-danger{background:#fee2e2;color:#991b1b;border:none}
+.fw{width:100%;margin-top:14px}
+.msg-text{min-height:20px;text-align:center;font-size:14px;color:var(--red);margin-top:12px}
+.sep{height:1px;background:var(--border);margin:22px 0}
+.login-demo-box{background:#eff6ff;border-radius:12px;padding:14px;text-align:center;font-size:13px;color:var(--blue)}
+.login-demo-box b{display:block;font-size:16px;letter-spacing:4px;margin-top:6px;color:var(--primary)}
+
+/* APP SHELL */
+.app-shell{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sb-w);background:var(--primary);display:flex;flex-direction:column;position:fixed;top:0;right:0;height:100vh;z-index:200;transition:transform .28s}
+.sb-header{display:flex;align-items:center;gap:12px;padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.09)}
+.sb-logo-box{width:46px;height:46px;border-radius:14px;flex-shrink:0;background:linear-gradient(135deg,var(--amber),#fbbf24);color:var(--primary);font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center}
+.sb-name{color:var(--white);font-weight:700;font-size:15px}
+.sb-sub{color:rgba(255,255,255,.45);font-size:12px;margin-top:1px}
+.sb-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:11px;padding:12px 15px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer;width:100%;text-align:right;transition:all .18s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.07);color:var(--white)}
+.nav-item.active{background:rgba(245,158,11,.18);color:var(--amber)}
+.ni{font-size:17px;flex-shrink:0}
+.nav-badge{margin-right:auto;background:var(--red);color:var(--white);border-radius:999px;min-width:20px;height:20px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.sb-footer{padding:14px 14px 18px;border-top:1px solid rgba(255,255,255,.09)}
+.sb-user-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sb-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--blue),#60a5fa);color:var(--white);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.sb-email{color:rgba(255,255,255,.65);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+.btn-logout{width:100%;padding:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.12);color:#fca5a5;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:background .18s}
+.btn-logout:hover{background:rgba(239,68,68,.25)}
+
+/* MAIN */
+.app-main{flex:1;margin-right:var(--sb-w);display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:15px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.tb-left{display:flex;align-items:center;gap:14px}
+.menu-btn{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text);display:none;padding:4px 8px;border-radius:8px}
+.menu-btn:hover{background:var(--bg)}
+.tb-title{font-size:20px;font-weight:900;color:var(--primary)}
+.tb-date{font-size:13px;color:var(--muted);margin-top:1px}
+.tb-right{display:flex;align-items:center;gap:18px}
+.tb-notif{font-size:20px;cursor:pointer;position:relative;line-height:1}
+.notif-dot{position:absolute;top:-3px;left:-3px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--white)}
+.tb-user-box{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--text)}
+.tb-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--blue));color:var(--white);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.page-area{padding:26px 28px;flex:1}
+.pv{}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.stat-card{background:var(--white);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh);border-right:4px solid transparent}
+.c-blue{border-right-color:var(--blue)}.c-green{border-right-color:var(--green)}.c-amber{border-right-color:var(--amber)}.c-red{border-right-color:var(--red)}
+.sc-ico{font-size:30px}
+.sc-num{font-size:30px;font-weight:900;color:var(--primary);line-height:1}
+.sc-lbl{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* LAYOUT */
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.card{background:var(--white);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.card.no-pad{padding:0}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:16px;font-weight:700;color:var(--primary)}
+.ghost-btn{background:none;border:none;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:8px}
+.ghost-btn:hover{background:#eff6ff}
+.info-tag{background:#eff6ff;color:var(--blue);padding:5px 14px;border-radius:999px;font-size:13px;font-weight:700}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:right;padding:10px 15px;color:var(--muted);font-size:12px;font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:13px 15px;border-bottom:1px solid #f8fafc;color:var(--text);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafbfc}
+.tbl-wrap{overflow-x:auto}
+.full-tbl{min-width:620px}
+
+/* BADGES */
+.badge{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.b-delivered{background:#d1fae5;color:#065f46}
+.b-in_transit{background:#dbeafe;color:#1e40af}
+.b-pending{background:#fef3c7;color:#92400e}
+.b-failed{background:#fee2e2;color:#991b1b}
+.b-available{background:#d1fae5;color:#065f46}
+.b-on_route{background:#dbeafe;color:#1e40af}
+.b-off{background:#f3f4f6;color:#6b7280}
+
+/* PROGRESS */
+.prog-wrap{background:#f1f5f9;border-radius:999px;height:7px;min-width:80px;overflow:hidden}
+.prog-bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),#34d399)}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.tb-inp{padding:11px 15px;border:1.5px solid var(--border);border-radius:12px;color:var(--text);min-width:220px;outline:none;background:var(--white);transition:border-color .18s}
+.tb-inp:focus{border-color:var(--blue)}
+.tb-sel{padding:11px 15px;border:1.5px solid var(--border);border-radius:12px;color:var(--text);background:var(--white);outline:none;cursor:pointer}
+
+/* ACTION BUTTONS */
+.act-btn{padding:5px 12px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-right:4px}
+.act-edit{background:#dbeafe;color:#1e40af}.act-delete{background:#fee2e2;color:#991b1b}
+.act-btn:hover{opacity:.75}
+
+/* DRIVER CARDS */
+.drivers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.drv-card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s}
+.drv-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.1)}
+.drv-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.drv-av{width:54px;height:54px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--blue));color:var(--white);font-weight:700;font-size:19px;display:flex;align-items:center;justify-content:center}
+.drv-name{font-size:16px;font-weight:700;color:var(--primary)}
+.drv-phone{font-size:13px;color:var(--muted);margin-top:3px}
+.drv-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.drv-stat{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.drv-stat-n{font-size:20px;font-weight:900;color:var(--primary)}
+.drv-stat-l{font-size:11px;color:var(--muted)}
+.drv-actions{margin-top:14px;display:flex;gap:8px}
+.drv-actions .act-btn{flex:1;text-align:center}
+
+/* DASHBOARD DRIVER LIST */
+.db-drv-row{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--bg);border-radius:11px;margin-bottom:9px}
+.db-drv-row:last-child{margin-bottom:0}
+.db-drv-info{display:flex;align-items:center;gap:10px}
+.db-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--blue));color:var(--white);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.db-drv-name{font-weight:700;font-size:14px}
+.db-drv-area{font-size:12px;color:var(--muted)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.48);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:var(--white);border-radius:22px;width:100%;max-width:520px;box-shadow:var(--shlg);animation:fadeUp .22s ease}
+@keyframes fadeUp{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+.modal-top{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+.modal-top h3{font-size:17px;color:var(--primary)}
+.modal-x{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 7px;border-radius:8px;line-height:1}
+.modal-x:hover{background:var(--bg)}
+.modal-bd{padding:22px 24px}
+.modal-ft{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--border)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--white);padding:13px 26px;border-radius:12px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:toastIn .25s ease;white-space:nowrap}
+@keyframes toastIn{from{opacity:0;bottom:10px}to{opacity:1;bottom:28px}}
+.toast.success{background:#065f46}.toast.error{background:#991b1b}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.stat-row{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
+@media(max-width:800px){
+  .sidebar{transform:translateX(100%)}.sidebar.open{transform:translateX(0)}
+  .app-main{margin-right:0}.menu-btn{display:block}
+  .stat-row{grid-template-columns:1fr 1fr}.page-area{padding:16px}.topbar{padding:13px 16px}
+  .frow{grid-template-columns:1fr}
+}
+@media(max-width:500px){.stat-row{grid-template-columns:1fr}.drivers-grid{grid-template-columns:1fr}.login-card{padding:32px 24px 28px}}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<main class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Z&amp;Z</div>
+    <h1>Z&amp;Z Logistics</h1>
+    <p class="login-sub">نظام إدارة العمليات اللوجستية — Germany / NRW</p>
+
+    <div class="sep"></div>
+
+    <div class="login-demo-box">
+      لعرض النظام — أدخل أي كلمة مرور
+      <b>0000</b>
+    </div>
+
+    <div class="form-group" style="margin-top:20px">
+      <label>اسم المستخدم</label>
+      <input id="login-user" type="text" value="المدير">
+    </div>
+    <div class="form-group">
+      <label>كلمة المرور</label>
+      <input id="login-pass" type="password" placeholder="أدخل كلمة المرور" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary fw" onclick="doLogin()">دخول إلى النظام ←</button>
+    <p id="msg" class="msg-text"></p>
+    <div class="login-note">🔒 هذا النظام مخصص لشركة Z&amp;Z Logistics فقط</div>
+  </div>
+</main>
+
+<!-- ========== MAIN APP ========== -->
+<div class="app-shell hidden" id="mainApp">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-logo-box">Z&amp;Z</div>
+      <div><div class="sb-name">Z&amp;Z Logistics</div><div class="sb-sub">Germany / NRW</div></div>
+    </div>
+    <nav class="sb-nav">
+      <button class="nav-item active" onclick="goPage('dashboard',this)"><span class="ni">📊</span><span>لوحة التحكم</span></button>
+      <button class="nav-item" onclick="goPage('orders',this)"><span class="ni">📦</span><span>الطلبات</span><span class="nav-badge hidden" id="nav-badge"></span></button>
+      <button class="nav-item" onclick="goPage('drivers',this)"><span class="ni">🚗</span><span>السائقون</span></button>
+      <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span>المسارات</span></button>
+      <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user-row">
+        <div class="sb-av" id="sbAv">م</div>
+        <div class="sb-email" id="sbName">المدير</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">⬅ خروج</button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <div class="tb-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h2 class="tb-title" id="pageTitle">لوحة التحكم</h2>
+          <p class="tb-date" id="pageDate"></p>
+        </div>
+      </div>
+      <div class="tb-right">
+        <div class="tb-notif">🔔<span class="notif-dot"></span></div>
+        <div class="tb-user-box">
+          <div class="tb-av" id="tbAv">م</div>
+          <span id="tbName">المدير</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-area">
+
+      <!-- DASHBOARD -->
+      <section class="pv" id="pv-dashboard">
+        <div class="stat-row">
+          <div class="stat-card c-blue"><div class="sc-ico">📦</div><div><div class="sc-num" id="sc-total">0</div><div class="sc-lbl">طلبات اليوم</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">✅</div><div><div class="sc-num" id="sc-delivered">0</div><div class="sc-lbl">تم التسليم</div></div></div>
+          <div class="stat-card c-amber"><div class="sc-ico">🚚</div><div><div class="sc-num" id="sc-transit">0</div><div class="sc-lbl">في الطريق</div></div></div>
+          <div class="stat-card c-red"><div class="sc-ico">⏳</div><div><div class="sc-num" id="sc-pending">0</div><div class="sc-lbl">قيد الانتظار</div></div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-top"><h3 class="card-title">آخر الطلبات</h3><button class="ghost-btn" onclick="goPage('orders',null)">عرض الكل ←</button></div>
+            <table class="tbl"><thead><tr><th>#</th><th>العميل</th><th>السائق</th><th>الحالة</th></tr></thead><tbody id="db-orders"></tbody></table>
+          </div>
+          <div class="card">
+            <div class="card-top"><h3 class="card-title">السائقون الآن</h3><button class="ghost-btn" onclick="goPage('drivers',null)">عرض الكل ←</button></div>
+            <div id="db-drivers"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="pv hidden" id="pv-orders">
+        <div class="toolbar">
+          <input class="tb-inp" type="text" placeholder="🔍 بحث..." oninput="filterOrders(this.value)">
+          <select class="tb-sel" onchange="filterByStatus(this.value)">
+            <option value="">كل الحالات</option>
+            <option value="pending">قيد الانتظار</option>
+            <option value="in_transit">في الطريق</option>
+            <option value="delivered">تم التسليم</option>
+            <option value="failed">فشل التسليم</option>
+          </select>
+          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openOrderModal()">＋ طلب جديد</button>
+        </div>
+        <div class="card no-pad">
+          <div class="tbl-wrap">
+            <table class="tbl full-tbl">
+              <thead><tr><th>رقم الطلب</th><th>العميل</th><th>العنوان</th><th>السائق</th><th>الحالة</th><th>الوقت</th><th>إجراءات</th></tr></thead>
+              <tbody id="ord-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DRIVERS -->
+      <section class="pv hidden" id="pv-drivers">
+        <div class="toolbar">
+          <input class="tb-inp" type="text" placeholder="🔍 بحث عن سائق..." oninput="filterDrivers(this.value)">
+          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openDriverModal()">＋ سائق جديد</button>
+        </div>
+        <div class="drivers-grid" id="drv-grid"></div>
+      </section>
+
+      <!-- ROUTES -->
+      <section class="pv hidden" id="pv-routes">
+        <div class="card no-pad">
+          <div class="card-top" style="padding:20px 22px 0"><h3 class="card-title">مسارات اليوم</h3><span class="info-tag" id="routes-date"></span></div>
+          <div class="tbl-wrap">
+            <table class="tbl full-tbl">
+              <thead><tr><th>المنطقة / Route</th><th>السائق</th><th>المحطات</th><th>مكتمل</th><th>التقدم</th><th>الحالة</th></tr></thead>
+              <tbody id="rts-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="pv hidden" id="pv-reports">
+        <div class="stat-row">
+          <div class="stat-card c-blue"><div class="sc-ico">📊</div><div><div class="sc-num" id="rp-total">0</div><div class="sc-lbl">طلبات الأسبوع</div></div></div>
+          <div class="stat-card c-green"><div class="sc-ico">📈</div><div><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl">معدل التسليم</div></div></div>
+          <div class="stat-card c-amber"><div class="sc-ico">🚗</div><div><div class="sc-num" id="rp-drivers">0</div><div class="sc-lbl">سائقون نشطون</div></div></div>
+          <div class="stat-card c-red"><div class="sc-ico">❌</div><div><div class="sc-num" id="rp-failed">0</div><div class="sc-lbl">طلبات فاشلة</div></div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-top"><h3 class="card-title">أداء السائقين</h3></div>
+            <table class="tbl full-tbl"><thead><tr><th>السائق</th><th>المجموع</th><th>ناجح</th><th>النسبة</th></tr></thead><tbody id="rp-drv"></tbody></table>
+          </div>
+          <div class="card">
+            <div class="card-top"><h3 class="card-title">توزيع المناطق</h3></div>
+            <table class="tbl full-tbl"><thead><tr><th>المنطقة</th><th>الطلبات</th><th>مكتمل</th></tr></thead><tbody id="rp-area"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ORDER -->
+<div class="modal-bg hidden" id="modal-order">
+  <div class="modal">
+    <div class="modal-top"><h3 id="modal-order-h">طلب جديد</h3><button class="modal-x" onclick="closeModal('modal-order')">✕</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="ord-edit-id">
+      <div class="frow">
+        <div class="form-group"><label>اسم العميل *</label><input type="text" id="ord-customer" placeholder="الاسم الكامل"></div>
+        <div class="form-group"><label>رقم التتبع</label><input type="text" id="ord-tracking" placeholder="ZZ-00000"></div>
+      </div>
+      <div class="form-group"><label>العنوان *</label><input type="text" id="ord-address" placeholder="الشارع، المدينة، الرمز البريدي"></div>
+      <div class="frow">
+        <div class="form-group"><label>السائق</label><select id="ord-driver-sel"></select></div>
+        <div class="form-group"><label>الحالة</label><select id="ord-status-sel"><option value="pending">قيد الانتظار</option><option value="in_transit">في الطريق</option><option value="delivered">تم التسليم</option><option value="failed">فشل التسليم</option></select></div>
+      </div>
+      <div class="form-group"><label>ملاحظات</label><input type="text" id="ord-notes" placeholder="أي تعليمات إضافية..."></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-order')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveOrder()">حفظ الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DRIVER -->
+<div class="modal-bg hidden" id="modal-driver">
+  <div class="modal">
+    <div class="modal-top"><h3>سائق جديد</h3><button class="modal-x" onclick="closeModal('modal-driver')">✕</button></div>
+    <div class="modal-bd">
+      <div class="frow">
+        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="drv-name" placeholder="اسم السائق"></div>
+        <div class="form-group"><label>رقم الهاتف</label><input type="text" id="drv-phone" placeholder="+49 xxxxxxxx"></div>
+      </div>
+      <div class="frow">
+        <div class="form-group"><label>المنطقة / Route</label><input type="text" id="drv-area" placeholder="مثال: Köln Nord"></div>
+        <div class="form-group"><label>الحالة</label><select id="drv-status-sel"><option value="available">متاح</option><option value="on_route">في المسار</option><option value="off">غير متاح</option></select></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-driver')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveDriver()">حفظ السائق</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRM -->
+<div class="modal-bg hidden" id="modal-confirm">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-top"><h3>تأكيد الحذف</h3><button class="modal-x" onclick="closeModal('modal-confirm')">✕</button></div>
+    <div class="modal-bd"><p id="confirm-msg" style="color:#374151;font-size:15px;margin:0"></p></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">إلغاء</button>
+      <button class="btn btn-danger" style="width:auto;padding:11px 28px" id="confirm-ok">حذف</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────
+let drivers = [
+  {id:1,name:'أحمد الريفاي',  phone:'+49 176 11223344',area:'Köln Nord',  status:'on_route', orders:28,delivered:25},
+  {id:2,name:'عمر حسن',       phone:'+49 176 22334455',area:'Köln Süd',   status:'on_route', orders:31,delivered:29},
+  {id:3,name:'مصطفى يلماز',  phone:'+49 176 33445566',area:'Düsseldorf', status:'available',orders:22,delivered:20},
+  {id:4,name:'بيتر شميدت',   phone:'+49 176 44556677',area:'Bonn',        status:'on_route', orders:19,delivered:17},
+  {id:5,name:'علي كريمي',    phone:'+49 176 55667788',area:'Aachen',      status:'off',      orders:14,delivered:13},
+];
+let orders = [
+  {id:1, tracking:'ZZ-10241',customer:'Klaus Müller',      address:'Aachener Str. 45, Köln 50674',      driver:1,status:'delivered', time:'08:12',notes:''},
+  {id:2, tracking:'ZZ-10242',customer:'Fatima Al-Hassan',  address:'Venloer Str. 12, Köln 50672',       driver:1,status:'delivered', time:'08:45',notes:'الباب الخلفي'},
+  {id:3, tracking:'ZZ-10243',customer:'Thomas Wagner',     address:'Sülzgürtel 88, Köln 50937',         driver:2,status:'in_transit',time:'09:00',notes:''},
+  {id:4, tracking:'ZZ-10244',customer:'Selin Yilmaz',      address:'Ehrenfelder Gürtel 7, Köln 50823',  driver:2,status:'delivered', time:'09:30',notes:''},
+  {id:5, tracking:'ZZ-10245',customer:'Hamid Karimi',      address:'Gladbacher Str. 55, Düsseldorf',    driver:3,status:'pending',   time:'10:00',notes:'اتصل قبل الوصول'},
+  {id:6, tracking:'ZZ-10246',customer:'Anna Schmidt',      address:'Breite Str. 22, Bonn 53111',        driver:4,status:'in_transit',time:'09:15',notes:''},
+  {id:7, tracking:'ZZ-10247',customer:'Mohammed Saleh',    address:'Elisenstr. 3, Aachen 52062',        driver:5,status:'delivered', time:'07:55',notes:''},
+  {id:8, tracking:'ZZ-10248',customer:'Laura Braun',       address:'Friedrich-Ebert-Str. 9, Bonn 53113',driver:4,status:'failed',    time:'10:20',notes:'لم يُرَد عليه'},
+  {id:9, tracking:'ZZ-10249',customer:'Yusuf Demir',       address:'Neumarkt 18, Köln 50667',           driver:1,status:'in_transit',time:'10:35',notes:''},
+  {id:10,tracking:'ZZ-10250',customer:'Sandra Koch',       address:'Brehmstr. 41, Düsseldorf 40239',    driver:3,status:'pending',   time:'11:00',notes:''},
+  {id:11,tracking:'ZZ-10251',customer:'Khalid Mansour',    address:'Hohenzollernring 4, Köln 50672',    driver:2,status:'delivered', time:'11:15',notes:''},
+  {id:12,tracking:'ZZ-10252',customer:'Maria Fischer',     address:'Kölner Str. 77, Bonn 53111',        driver:4,status:'pending',   time:'11:30',notes:'صندوق ثقيل'},
+];
+let nextOId=13, nextDId=6;
+let fq='', fst='';
+
+// ── AUTH ──────────────────────────────────────────
+function doLogin(){
+  const u=$('login-user').value.trim()||'المدير';
+  const p=$('login-pass').value.trim();
+  const msg=$('msg');
+  if(!p){msg.textContent='يرجى إدخال كلمة المرور';return}
+  msg.textContent='';
+  $('loginScreen').classList.add('hidden');
+  $('mainApp').classList.remove('hidden');
+  const av=u[0].toUpperCase();
+  $('sbAv').textContent=av; $('tbAv').textContent=av;
+  $('sbName').textContent=u; $('tbName').textContent=u;
+  const now=new Date();
+  $('pageDate').textContent=now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  $('routes-date').textContent=now.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+  renderDashboard(); updateBadge();
+}
+function doLogout(){$('mainApp').classList.add('hidden');$('loginScreen').classList.remove('hidden');$('login-pass').value='';$('msg').textContent=''}
+
+// ── NAV ───────────────────────────────────────────
+const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير'};
+function goPage(name,btn){
+  document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
+  $('pv-'+name).classList.remove('hidden');
+  if(btn){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));btn.classList.add('active')}
+  $('pageTitle').textContent=titles[name]||name;
+  if(name==='dashboard')renderDashboard();
+  if(name==='orders')renderOrders();
+  if(name==='drivers')renderDrivers();
+  if(name==='routes')renderRoutes();
+  if(name==='reports')renderReports();
+  if(window.innerWidth<=800)$('sidebar').classList.remove('open');
+}
+function toggleSidebar(){$('sidebar').classList.toggle('open')}
+
+// ── DASHBOARD ─────────────────────────────────────
+function renderDashboard(){
+  const d=orders.filter(o=>o.status==='delivered').length;
+  const t=orders.filter(o=>o.status==='in_transit').length;
+  const p=orders.filter(o=>o.status==='pending').length;
+  $('sc-total').textContent=orders.length;
+  $('sc-delivered').textContent=d;
+  $('sc-transit').textContent=t;
+  $('sc-pending').textContent=p;
+  $('db-orders').innerHTML=[...orders].reverse().slice(0,5).map(o=>`<tr><td><small style="color:var(--muted)">${o.tracking}</small></td><td>${o.customer}</td><td>${dName(o.driver)}</td><td>${badge(o.status)}</td></tr>`).join('');
+  $('db-drivers').innerHTML=drivers.map(d=>`<div class="db-drv-row"><div class="db-drv-info"><div class="db-av">${d.name[0]}</div><div><div class="db-drv-name">${d.name}</div><div class="db-drv-area">${d.area}</div></div></div>${badge(d.status,'d')}</div>`).join('');
+}
+
+// ── ORDERS ────────────────────────────────────────
+function renderOrders(list){
+  const data=list||filtered();
+  $('ord-tbody').innerHTML=data.length===0
+    ?'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">لا توجد طلبات</td></tr>'
+    :data.map(o=>`<tr>
+      <td><b style="color:var(--blue)">${o.tracking}</b></td>
+      <td>${o.customer}</td>
+      <td style="font-size:13px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.address}</td>
+      <td>${dName(o.driver)}</td>
+      <td>${badge(o.status)}</td>
+      <td style="color:var(--muted);font-size:13px">${o.time}</td>
+      <td><button class="act-btn act-edit" onclick="editOrder(${o.id})">تعديل</button><button class="act-btn act-delete" onclick="askDelete('order',${o.id})">حذف</button></td>
+    </tr>`).join('');
+  updateBadge();
+}
+function filtered(){
+  return orders.filter(o=>{
+    const mq=!fq||o.customer.toLowerCase().includes(fq)||o.tracking.toLowerCase().includes(fq)||o.address.toLowerCase().includes(fq);
+    return mq&&(!fst||o.status===fst);
+  });
+}
+function filterOrders(q){fq=q.toLowerCase();renderOrders()}
+function filterByStatus(s){fst=s;renderOrders()}
+
+function openOrderModal(o){
+  $('ord-driver-sel').innerHTML=drivers.map(d=>`<option value="${d.id}">${d.name} — ${d.area}</option>`).join('');
+  if(o){
+    $('modal-order-h').textContent='تعديل الطلب';
+    $('ord-edit-id').value=o.id;
+    $('ord-customer').value=o.customer;
+    $('ord-tracking').value=o.tracking;
+    $('ord-address').value=o.address;
+    $('ord-driver-sel').value=o.driver;
+    $('ord-status-sel').value=o.status;
+    $('ord-notes').value=o.notes;
+  }else{
+    $('modal-order-h').textContent='طلب جديد';
+    $('ord-edit-id').value='';
+    $('ord-customer').value='';
+    $('ord-tracking').value='ZZ-'+(10240+nextOId);
+    $('ord-address').value='';
+    $('ord-notes').value='';
+    $('ord-status-sel').value='pending';
+  }
+  openM('modal-order');
+}
+function editOrder(id){const o=orders.find(x=>x.id===id);if(o)openOrderModal(o)}
+function saveOrder(){
+  const c=$('ord-customer').value.trim(),a=$('ord-address').value.trim();
+  if(!c||!a){toast('يرجى ملء الحقول المطلوبة *','error');return}
+  const eid=$('ord-edit-id').value;
+  const data={customer:c,tracking:$('ord-tracking').value.trim()||'ZZ-'+(10240+nextOId),address:a,
+    driver:parseInt($('ord-driver-sel').value),status:$('ord-status-sel').value,
+    notes:$('ord-notes').value.trim(),time:new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})};
+  if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث الطلب','success')}
+  else{orders.push({id:nextOId++,...data});toast('تم إضافة الطلب','success')}
+  closeModal('modal-order');renderOrders();
+}
+function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success')}
+
+// ── DRIVERS ───────────────────────────────────────
+function renderDrivers(list){
+  const data=list||drivers;
+  $('drv-grid').innerHTML=data.length===0?'<p style="color:var(--muted)">لا يوجد سائقون</p>':data.map(d=>{
+    const do_=orders.filter(o=>o.driver===d.id);
+    const dv=do_.filter(o=>o.status==='delivered').length;
+    const rt=do_.length?Math.round(dv/do_.length*100):0;
+    return`<div class="drv-card">
+      <div class="drv-top"><div class="drv-av">${d.name[0]}</div><div><div class="drv-name">${d.name}</div><div class="drv-phone">${d.phone}</div></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700;color:var(--muted)">${d.area}</span>${badge(d.status,'d')}</div>
+      <div class="drv-stats"><div class="drv-stat"><div class="drv-stat-n">${do_.length}</div><div class="drv-stat-l">طلبات اليوم</div></div><div class="drv-stat"><div class="drv-stat-n">${rt}%</div><div class="drv-stat-l">معدل التسليم</div></div></div>
+      <div class="drv-actions"><button class="act-btn act-edit" onclick="editDriver(${d.id})">تعديل</button><button class="act-btn act-delete" onclick="askDelete('driver',${d.id})">حذف</button></div>
+    </div>`;
+  }).join('');
+}
+function filterDrivers(q){const ql=q.toLowerCase();renderDrivers(ql?drivers.filter(d=>d.name.toLowerCase().includes(ql)||d.area.toLowerCase().includes(ql)):undefined)}
+function openDriverModal(){$('drv-name').value='';$('drv-phone').value='';$('drv-area').value='';$('drv-status-sel').value='available';delete $('drv-name').dataset.eid;openM('modal-driver')}
+function editDriver(id){
+  const d=drivers.find(x=>x.id===id);if(!d)return;
+  $('drv-name').value=d.name;$('drv-phone').value=d.phone;$('drv-area').value=d.area;$('drv-status-sel').value=d.status;
+  $('drv-name').dataset.eid=id;openM('modal-driver');
+}
+function saveDriver(){
+  const n=$('drv-name').value.trim();if(!n){toast('يرجى إدخال اسم السائق','error');return}
+  const eid=$('drv-name').dataset.eid;
+  const data={name:n,phone:$('drv-phone').value.trim()||'—',area:$('drv-area').value.trim()||'—',status:$('drv-status-sel').value};
+  if(eid){const i=drivers.findIndex(d=>d.id===parseInt(eid));if(i!==-1)drivers[i]={...drivers[i],...data};delete $('drv-name').dataset.eid;toast('تم تحديث السائق','success')}
+  else{drivers.push({id:nextDId++,orders:0,delivered:0,...data});toast('تم إضافة السائق','success')}
+  closeModal('modal-driver');renderDrivers();
+}
+function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success')}
+
+// ── ROUTES ────────────────────────────────────────
+function renderRoutes(){
+  $('rts-tbody').innerHTML=drivers.map(d=>{
+    const do_=orders.filter(o=>o.driver===d.id);
+    const done=do_.filter(o=>o.status==='delivered'||o.status==='failed').length;
+    const total=do_.length,pct=total?Math.round(done/total*100):0;
+    const st=d.status==='off'?'off':pct===100?'delivered':d.status==='on_route'?'in_transit':'pending';
+    return`<tr><td><b>${d.area}</b></td><td>${d.name}</td><td>${total}</td><td>${done}</td>
+      <td><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div><small style="color:var(--muted)">${pct}%</small></td>
+      <td>${badge(st)}</td></tr>`;
+  }).join('');
+}
+
+// ── REPORTS ───────────────────────────────────────
+function renderReports(){
+  const tot=orders.length,del=orders.filter(o=>o.status==='delivered').length,
+        fail=orders.filter(o=>o.status==='failed').length,
+        actD=drivers.filter(d=>d.status!=='off').length,
+        rate=tot?Math.round(del/tot*100):0;
+  $('rp-total').textContent=tot;$('rp-rate').textContent=rate+'%';$('rp-drivers').textContent=actD;$('rp-failed').textContent=fail;
+  $('rp-drv').innerHTML=drivers.map(d=>{
+    const dt=orders.filter(o=>o.driver===d.id).length;
+    const dd=orders.filter(o=>o.driver===d.id&&o.status==='delivered').length;
+    const dr=dt?Math.round(dd/dt*100):0;
+    return`<tr><td>${d.name}</td><td>${dt}</td><td>${dd}</td><td><span class="badge ${dr>=80?'b-delivered':dr>=50?'b-pending':'b-failed'}">${dr}%</span></td></tr>`;
+  }).join('');
+  const areas={};
+  orders.forEach(o=>{const d=drivers.find(x=>x.id===o.driver);const a=d?d.area:'—';if(!areas[a])areas[a]={t:0,d:0};areas[a].t++;if(o.status==='delivered')areas[a].d++});
+  $('rp-area').innerHTML=Object.entries(areas).map(([a,s])=>`<tr><td>${a}</td><td>${s.t}</td><td>${s.d}</td></tr>`).join('');
+}
+
+// ── CONFIRM DELETE ────────────────────────────────
+function askDelete(type,id){
+  const item=type==='order'?orders.find(o=>o.id===id):drivers.find(d=>d.id===id);
+  if(!item)return;
+  $('confirm-msg').textContent=`هل تريد حذف "${type==='order'?item.customer+' — '+item.tracking:item.name}" نهائياً؟`;
+  $('confirm-ok').onclick=()=>{closeModal('modal-confirm');type==='order'?delOrder(id):delDriver(id)};
+  openM('modal-confirm');
+}
+
+// ── HELPERS ───────────────────────────────────────
+function dName(id){const d=drivers.find(x=>x.id===id);return d?d.name:'—'}
+const BL={delivered:'تم التسليم',in_transit:'في الطريق',pending:'قيد الانتظار',failed:'فشل التسليم',available:'متاح',on_route:'في المسار',off:'غير متاح'};
+function badge(s){return`<span class="badge b-${s}">${BL[s]||s}</span>`}
+function updateBadge(){const c=orders.filter(o=>o.status==='pending').length;const b=$('nav-badge');b.textContent=c;c>0?b.classList.remove('hidden'):b.classList.add('hidden')}
+function openM(id){$(id).classList.remove('hidden')}
+function closeModal(id){$(id).classList.add('hidden')}
+function toast(msg,type){const e=$('toast');e.textContent=msg;e.className='toast '+(type||'');e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),3000)}
+function $(id){return document.getElementById(id)}
+</script>
+</body>
+</html>
