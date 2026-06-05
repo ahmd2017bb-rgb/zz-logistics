@@ -228,6 +228,16 @@ button,select,input{font-family:inherit;font-size:inherit}
 .modal-ft{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--border)}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
+/* SAVE INDICATOR + DATA MENU */
+.save-ind{background:#d1fae5;color:#065f46;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.tb-data-btn{font-size:18px;cursor:pointer;padding:4px 7px;border-radius:8px;color:var(--muted);line-height:1;transition:background .15s}
+.tb-data-btn:hover{background:var(--bg);color:var(--text)}
+.data-menu{position:absolute;top:58px;left:20px;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--shlg);z-index:999;min-width:220px;overflow:hidden;animation:fadeUp .18s ease}
+.data-menu button{display:block;width:100%;text-align:right;padding:13px 18px;border:none;background:none;font-size:14px;font-weight:700;cursor:pointer;color:var(--text);transition:background .15s}
+.data-menu button:hover{background:var(--bg)}
+.data-menu button+button{border-top:1px solid var(--border)}
+
 /* TOAST */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--white);padding:13px 26px;border-radius:12px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:toastIn .25s ease;white-space:nowrap}
 @keyframes toastIn{from{opacity:0;bottom:10px}to{opacity:1;bottom:28px}}
@@ -406,6 +416,13 @@ button,select,input{font-family:inherit;font-size:inherit}
         </div>
       </div>
       <div class="tb-right">
+        <span class="save-ind hidden" id="save-indicator">💾 محفوظ</span>
+        <div class="tb-data-btn" title="إدارة البيانات" onclick="toggleDataMenu()">⚙</div>
+        <div class="data-menu hidden" id="data-menu">
+          <button onclick="exportData();toggleDataMenu()">📤 تصدير نسخة احتياطية</button>
+          <button onclick="importData();toggleDataMenu()">📥 استيراد نسخة احتياطية</button>
+          <button onclick="toggleDataMenu();resetAllData()" style="color:var(--red)">🗑 مسح جميع البيانات</button>
+        </div>
         <div class="tb-notif">🔔<span class="notif-dot"></span></div>
         <div class="tb-user-box">
           <div class="tb-av" id="tbAv">م</div>
@@ -1149,6 +1166,8 @@ function goPage(name,btn){
   if(window.innerWidth<=800)$('sidebar').classList.remove('open');
 }
 function toggleSidebar(){$('sidebar').classList.toggle('open')}
+function toggleDataMenu(){$('data-menu').classList.toggle('hidden')}
+document.addEventListener('click',e=>{const m=$('data-menu');if(m&&!m.classList.contains('hidden')&&!m.contains(e.target)&&!e.target.classList.contains('tb-data-btn'))m.classList.add('hidden');})
 
 // ══════════════════════════════════════════════════
 // DASHBOARD
@@ -1212,9 +1231,9 @@ function saveOrder(){
     notes:$('ord-notes').value.trim(),time:new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})};
   if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث الطلب','success')}
   else{orders.push({id:nextOId++,...data});toast('تم إضافة الطلب','success')}
-  closeModal('modal-order');renderOrders();
+  closeModal('modal-order');renderOrders();autosave();
 }
-function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success')}
+function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success');autosave()}
 
 // ══════════════════════════════════════════════════
 // DRIVERS
@@ -1246,9 +1265,9 @@ function saveDriver(){
   const data={name:n,phone:$('drv-phone').value.trim()||'—',area:$('drv-area').value.trim()||'—',status:$('drv-status-sel').value};
   if(eid){const i=drivers.findIndex(d=>d.id===parseInt(eid));if(i!==-1)drivers[i]={...drivers[i],...data};delete $('drv-name').dataset.eid;toast('تم تحديث السائق','success')}
   else{drivers.push({id:nextDId++,...data});toast('تم إضافة السائق','success')}
-  closeModal('modal-driver');renderDrivers();
+  closeModal('modal-driver');renderDrivers();autosave();
 }
-function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success')}
+function delDriver(id){drivers=drivers.filter(d=>d.id!==id);renderDrivers();toast('تم حذف السائق','success');autosave()}
 
 // ══════════════════════════════════════════════════
 // ROUTES
@@ -1636,12 +1655,12 @@ function saveStaffMember(){
     rate:parseFloat($('st-rate').value)||13.5,weekHours:parseInt($('st-whours').value)||40};
   if(eid){const i=staff.findIndex(s=>s.id===parseInt(eid));if(i!==-1)staff[i]={...staff[i],...data};delete $('st-name').dataset.eid;toast('تم تحديث الموظف','success');}
   else{staff.push({id:nextStaffId++,...data});toast('تم إضافة الموظف','success');}
-  closeModal('modal-staff');renderStaffPage();
+  closeModal('modal-staff');renderStaffPage();autosave();
 }
 function delStaff(id){
   staff=staff.filter(s=>s.id!==id);
   attendance=attendance.filter(a=>a.staffId!==id);
-  renderStaffPage();toast('تم حذف الموظف','success');
+  renderStaffPage();toast('تم حذف الموظف','success');autosave();
 }
 
 // ── ATTENDANCE ───────────────────────────────────
@@ -1697,11 +1716,11 @@ function saveAttendance(){
   const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||30,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
-  closeModal('modal-att');renderAttendance();updateStaffStats();
+  closeModal('modal-att');renderAttendance();updateStaffStats();autosave();
 }
 function delAttendance(id){
   attendance=attendance.filter(a=>a.id!==id);
-  renderAttendance();updateStaffStats();toast('تم حذف السجل','success');
+  renderAttendance();updateStaffStats();toast('تم حذف السجل','success');autosave();
 }
 
 // ── SALARY REPORT ────────────────────────────────
@@ -1830,11 +1849,109 @@ function importExcelData(){
   document.querySelectorAll('.stab')[1].classList.add('active');
   renderAttendance();
   toast('تم استيراد '+imported+' سجل'+(skipped?' — تخطي '+skipped:''),'success');
+  autosave();
 }
 function clearExcelPreview(){
   $('excel-preview').classList.add('hidden');
   $('excel-preview-tbody').innerHTML='';
   pendingImport=[];$('excel-file').value='';
+}
+
+// ══════════════════════════════════════════════════
+// PERSISTENCE — AUTO SAVE / LOAD ALL DATA
+// Keys: zzdata_orders / zzdata_drivers / zzdata_staff / zzdata_attendance / zzdata_meta
+// ══════════════════════════════════════════════════
+const DB={
+  orders:'zzdata_orders',drivers:'zzdata_drivers',
+  staff:'zzdata_staff',attendance:'zzdata_attendance',meta:'zzdata_meta'
+};
+let _firstLoad=true; // tracks if localStorage had no data (first-run)
+
+function loadAllData(){
+  let loaded=false;
+  try{const r=localStorage.getItem(DB.orders);if(r){orders=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=localStorage.getItem(DB.drivers);if(r){drivers=JSON.parse(r);}}catch(e){}
+  try{const r=localStorage.getItem(DB.staff);if(r){staff=JSON.parse(r);}}catch(e){}
+  try{const r=localStorage.getItem(DB.attendance);if(r){attendance=JSON.parse(r);}}catch(e){}
+  try{
+    const r=localStorage.getItem(DB.meta);
+    if(r){const m=JSON.parse(r);
+      if(m.nextOId)nextOId=m.nextOId;if(m.nextDId)nextDId=m.nextDId;
+      if(m.nextStaffId)nextStaffId=m.nextStaffId;if(m.nextAttId)nextAttId=m.nextAttId;
+    }
+  }catch(e){}
+  _firstLoad=!loaded;
+  // On very first run, save the sample data so it's persisted
+  if(_firstLoad)autosave();
+}
+
+function autosave(){
+  try{
+    localStorage.setItem(DB.orders,JSON.stringify(orders));
+    localStorage.setItem(DB.drivers,JSON.stringify(drivers));
+    localStorage.setItem(DB.staff,JSON.stringify(staff));
+    localStorage.setItem(DB.attendance,JSON.stringify(attendance));
+    localStorage.setItem(DB.meta,JSON.stringify({nextOId,nextDId,nextStaffId,nextAttId}));
+    showSaveIndicator();
+  }catch(e){console.warn('autosave:',e);}
+}
+
+// Brief green flash on the topbar to confirm save
+function showSaveIndicator(){
+  const el=document.getElementById('save-indicator');
+  if(!el)return;
+  el.classList.remove('hidden');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.add('hidden'),1800);
+}
+
+function resetAllData(){
+  $('confirm-msg').textContent='سيتم حذف جميع البيانات (الطلبات، السائقون، الموظفون، الدوام). هل أنت متأكد؟';
+  $('confirm-ok').onclick=()=>{
+    closeModal('modal-confirm');
+    [DB.orders,DB.drivers,DB.staff,DB.attendance,DB.meta].forEach(k=>localStorage.removeItem(k));
+    // also clear daily and sheet data
+    const toRemove=[];
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.startsWith('zzlg_')||k.startsWith('zzsheet_')))toRemove.push(k);}
+    toRemove.forEach(k=>localStorage.removeItem(k));
+    location.reload();
+  };
+  openM('modal-confirm');
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({
+    orders,drivers,staff,attendance,
+    meta:{nextOId,nextDId,nextStaffId,nextAttId},
+    exported:new Date().toISOString()
+  },null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='ZZ-Logistics-Backup-'+todayStr()+'.json';
+  a.click();toast('تم تصدير البيانات ✓','success');
+}
+
+function importData(){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(!d.orders||!d.drivers){toast('ملف غير صالح','error');return;}
+        orders=d.orders||orders;drivers=d.drivers||drivers;
+        staff=d.staff||staff;attendance=d.attendance||attendance;
+        if(d.meta){nextOId=d.meta.nextOId||nextOId;nextDId=d.meta.nextDId||nextDId;nextStaffId=d.meta.nextStaffId||nextStaffId;nextAttId=d.meta.nextAttId||nextAttId;}
+        autosave();
+        toast('تم استيراد البيانات ✓ — جاري إعادة التحميل','success');
+        setTimeout(()=>location.reload(),1500);
+      }catch(e){toast('خطأ في قراءة الملف: '+e.message,'error');}
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
 }
 
 // ══════════════════════════════════════════════════
@@ -2050,6 +2167,9 @@ function sheetDelEmp(id){
   Object.keys(sheetDays).forEach(dd=>{if(sheetDays[dd])delete sheetDays[dd][id];});
   renderSheet();
 }
+
+// Load all persisted data immediately on page load
+loadAllData();
 
 // Drop zone drag events
 document.addEventListener('DOMContentLoaded',()=>{
