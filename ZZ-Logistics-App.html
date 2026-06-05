@@ -2409,17 +2409,61 @@ function _handleDispExcel(file){
   const doRead=()=>{
     const r=new FileReader();
     r.onload=e=>{
-      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rawRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      if(!rawRows.length){toast('الملف فارغ','error');return;}
-      _sortRawRows=rawRows;
-      _sortHdrIdx=0;
-      _showDispMapper(rawRows);
+      try{
+        const wb=XLSX.read(e.target.result,{type:'binary',codepage:1252});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rawRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        if(!rawRows.length){toast('الملف فارغ','error');return;}
+        _sortRawRows=rawRows;
+        _autoDispAndRender(rawRows);
+      }catch(err){toast('خطأ في قراءة الملف','error');}
     };
-    r.readAsArrayBuffer(file);
+    r.readAsBinaryString(file);
   };
   if(!window.XLSX){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=doRead;document.head.appendChild(s);}else doRead();
+}
+function _autoDispAndRender(rawRows){
+  let hdrIdx=0,hdr=[];
+  for(let i=0;i<Math.min(8,rawRows.length);i++){
+    const r=rawRows[i].map(c=>String(c).toUpperCase().trim());
+    if(r.some(c=>c.includes('TOUR')||c.includes('FAHRER')||c.includes('UNTERN')||c.includes('PLZ'))){hdrIdx=i;hdr=r;break;}
+  }
+  if(!hdr.length){hdr=rawRows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
+  _sortHdrIdx=hdrIdx;
+  const ci=(...keys)=>{for(const k of keys){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
+  const iTour   =ci('TOUR');
+  const iSub    =ci('UNTERN','SUB','FIRMA','COMPANY');
+  const iFahrer =ci('FAHRER','DRIVER');
+  const iAppid  =ci('APP');
+  const iCode   =ci('CODE','COD','3.');
+  const iPlz    =ci('PLZ','POSTAL','ZIP');
+  const iGeplant=ci('GEPLANT','PLAN');
+  const iIst    =ci('IST','ACTUAL');
+  const iBemerk =ci('BEMERK','NOTE','REMARK');
+  if(iTour<0){toast('لم يتم العثور على عمود TOUR في الملف — تحقق من رؤوس الأعمدة','error');return;}
+  const objRows=[];
+  for(let i=hdrIdx+1;i<rawRows.length;i++){
+    const r=rawRows[i];
+    const tour=String(r[iTour]||'').trim();
+    if(!tour)continue;
+    objRows.push({
+      tour,
+      sub    :iSub>=0    ?String(r[iSub]    ||'').trim():'',
+      fahrer :iFahrer>=0 ?String(r[iFahrer] ||'').trim():'',
+      appid  :iAppid>=0  ?String(r[iAppid]  ||'').trim():'',
+      code   :iCode>=0   ?String(r[iCode]   ||'').trim():'',
+      plz    :iPlz>=0    ?String(r[iPlz]    ||'').trim():'',
+      geplant:iGeplant>=0?String(r[iGeplant]||'').trim():'',
+      ist    :iIst>=0    ?String(r[iIst]    ||'').trim():'',
+      bemerk :iBemerk>=0 ?String(r[iBemerk] ||'').trim():''
+    });
+  }
+  if(!objRows.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
+  objRows.sort((a,b)=>Number(a.tour||0)-Number(b.tour||0));
+  const useSub=iSub>=0&&objRows.some(r=>r.sub);
+  $('sort-upload-panel').classList.add('hidden');
+  $('sort-disp-mapper').classList.add('hidden');
+  _renderDisposition(objRows,useSub);
 }
 function _showDispMapper(rawRows){
   // find header row
