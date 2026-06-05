@@ -242,6 +242,41 @@ button,select,input{font-family:inherit;font-size:inherit}
   .frow{grid-template-columns:1fr}
 }
 @media(max-width:500px){.stat-row{grid-template-columns:1fr}.drivers-grid{grid-template-columns:1fr}.login-card{padding:32px 24px 28px}}
+
+/* ── NRW MAP PAGE ─────────────────────────── */
+.pv-map-full{margin:-26px -28px;height:calc(100vh - 55px);display:flex;direction:ltr}
+#nrw-panel{width:270px;min-width:270px;background:#1a1a2e;border-left:2px solid #2a2a4e;display:flex;flex-direction:column;overflow:hidden;z-index:10}
+.nrw-psec{padding:10px 14px;border-bottom:1px solid #2a2a4e}
+.nrw-plbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#7777aa;display:block;margin-bottom:7px}
+#nrw-pgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.nrw-sw{width:100%;aspect-ratio:1;border-radius:4px;cursor:pointer;border:2px solid transparent}
+.nrw-sw:hover{transform:scale(1.2)}.nrw-sw.on{border-color:#fff;transform:scale(1.15)}
+#nrw-crow{display:flex;align-items:center;gap:7px;margin-top:7px}
+#nrw-cpick{width:30px;height:26px;border:none;border-radius:4px;cursor:pointer;padding:0}
+#nrw-chex{flex:1;background:#0f0f1a;border:1px solid #2a2a4e;border-radius:5px;color:#fff;font-size:11px;padding:4px 8px;font-family:monospace}
+#nrw-chex:focus{outline:none;border-color:#5a5aae}
+#nrw-clist-wrap{flex:1;overflow-y:auto;padding:10px 14px}
+.nrw-crow2{display:flex;align-items:center;gap:7px;background:#0f0f1a;border-radius:5px;padding:6px 9px;cursor:pointer;border:1px solid #2a2a4e;margin-bottom:3px}
+.nrw-crow2:hover{background:#1e1e3e}
+.nrw-cdot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.nrw-cname{font-size:11px;flex:1;color:#fff}
+#nrw-pfoot{padding:7px 14px;border-top:1px solid #2a2a4e;background:#141428;font-size:10px;color:#5555aa}
+#nrw-map-wrap{flex:1;position:relative;background:#0f0f1a}
+#nrw-map{width:100%;height:100%}
+#nrw-overlay{position:absolute;inset:0;background:rgba(10,10,26,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:900;gap:14px;text-align:center;padding:20px;color:#fff}
+#nrw-overlay h2{font-size:17px;font-weight:700}
+#nrw-obar-w{width:320px;background:#2a2a4e;border-radius:6px;height:10px}
+#nrw-obar{height:10px;border-radius:6px;background:#4CAF50;width:0;transition:width .2s}
+#nrw-spin{width:42px;height:42px;border:4px solid #2a2a4e;border-top-color:#4CAF50;border-radius:50%;animation:nrwspin .8s linear infinite}
+@keyframes nrwspin{to{transform:rotate(360deg)}}
+#nrw-mhint{position:absolute;bottom:12px;right:14px;background:rgba(20,20,42,.88);border:1px solid #2a2a4e;border-radius:20px;padding:4px 13px;font-size:11px;color:#aaa;z-index:400;pointer-events:none}
+.nrw-zlabel{color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:800;text-align:center;border:2px solid rgba(255,255,255,.85);box-shadow:0 1px 5px rgba(0,0,0,.6);pointer-events:none;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+/* CSP table inside panel */
+#nrw-csp-wrap{padding:10px 14px;border-top:1px solid #2a2a4e}
+.nrw-csp-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #1e1e3e;color:#ccc}
+.nrw-csp-row:last-child{border-bottom:none}
+.nrw-csp-num{font-weight:700;color:#fff}
+@media(max-width:800px){.pv-map-full{margin:-16px}.nrw-panel{width:220px}}
 </style>
 </head>
 <body>
@@ -282,6 +317,7 @@ button,select,input{font-family:inherit;font-size:inherit}
       <button class="nav-item" onclick="goPage('drivers',this)"><span class="ni">🚗</span><span>السائقون</span></button>
       <button class="nav-item" onclick="goPage('routes',this)"><span class="ni">🗺️</span><span>المسارات</span></button>
       <button class="nav-item" onclick="goPage('reports',this)"><span class="ni">📋</span><span>التقارير</span></button>
+      <button class="nav-item" onclick="goPage('map',this)"><span class="ni">🗺</span><span>خريطة NRW</span></button>
     </nav>
     <div class="sb-footer">
       <div class="sb-user-row">
@@ -473,6 +509,59 @@ button,select,input{font-family:inherit;font-size:inherit}
             <div class="card-top"><h3 class="card-title">توزيع المناطق</h3></div>
             <table class="tbl full-tbl"><thead><tr><th>المنطقة</th><th>الطلبات</th><th>مكتمل</th></tr></thead><tbody id="rp-area"></tbody></table>
           </div>
+        </div>
+      </section>
+
+      <!-- ====== NRW MAP ====== -->
+      <section class="pv hidden pv-map-full" id="pv-map">
+        <!-- LEFT PANEL -->
+        <div id="nrw-panel">
+          <div class="nrw-psec">
+            <span class="nrw-plbl">Farbe wählen / اختر لوناً</span>
+            <div id="nrw-pgrid"></div>
+            <div id="nrw-crow">
+              <span style="font-size:10px;color:#7777aa">Eigene:</span>
+              <input type="color" id="nrw-cpick" value="#E53935" oninput="nrwPickC(this.value)">
+              <input type="text"  id="nrw-chex"  value="#E53935" maxlength="7" oninput="nrwHexT(this.value)" placeholder="#rrggbb">
+            </div>
+          </div>
+          <!-- CSP Stats -->
+          <div id="nrw-csp-wrap">
+            <span class="nrw-plbl">CSP — إجمالي الطلبات</span>
+            <div class="nrw-csp-row"><span>NRW-001</span><span class="nrw-csp-num">411</span></div>
+            <div class="nrw-csp-row"><span>NRW-002</span><span class="nrw-csp-num">75</span></div>
+            <div class="nrw-csp-row"><span>NRW-003</span><span class="nrw-csp-num">540</span></div>
+            <div class="nrw-csp-row"><span>NRW-004</span><span class="nrw-csp-num">1102</span></div>
+            <div class="nrw-csp-row"><span>NRW-005</span><span class="nrw-csp-num">759</span></div>
+            <div class="nrw-csp-row"><span>NRW-006</span><span class="nrw-csp-num">437</span></div>
+            <div class="nrw-csp-row"><span>NRW-007</span><span class="nrw-csp-num">798</span></div>
+            <div class="nrw-csp-row"><span>NRW-008</span><span class="nrw-csp-num">509</span></div>
+            <div class="nrw-csp-row"><span>NRW-009</span><span class="nrw-csp-num">376</span></div>
+            <div class="nrw-csp-row"><span>NRW-010</span><span class="nrw-csp-num">275</span></div>
+            <div class="nrw-csp-row"><span>NRW-011</span><span class="nrw-csp-num">549</span></div>
+          </div>
+          <!-- Zone list -->
+          <div id="nrw-clist-wrap">
+            <span class="nrw-plbl" style="display:flex;align-items:center;justify-content:space-between">
+              <span>PLZ-Gebiete</span>
+              <span id="nrw-ccount" style="background:#2a2a4e;border-radius:10px;padding:1px 8px;font-size:10px;color:#fff">0</span>
+            </span>
+            <div id="nrw-clist"><div style="font-size:11px;color:#4a4a6e;text-align:center;padding:16px">الخريطة لم تُفتح بعد</div></div>
+          </div>
+          <div id="nrw-pfoot">⏳ اضغط "تحميل الخريطة" للبدء</div>
+        </div>
+        <!-- MAP AREA -->
+        <div id="nrw-map-wrap">
+          <div id="nrw-map"></div>
+          <div id="nrw-overlay">
+            <div id="nrw-spin"></div>
+            <h2>🗺 خريطة NRW — Lieferzonen</h2>
+            <p id="nrw-otxt" style="font-size:12px;color:#8888bb">اضغط الزر لتحميل الخريطة</p>
+            <div id="nrw-obar-w"><div id="nrw-obar"></div></div>
+            <p id="nrw-opct" style="font-size:13px;color:#66BB6A;font-weight:700">0 / 85</p>
+            <button onclick="startNRWLoad()" id="nrw-start-btn" style="margin-top:8px;padding:12px 28px;background:#4CAF50;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer">▶ تحميل الخريطة</button>
+          </div>
+          <div id="nrw-mhint">📍 Lieferzonen — NRW</div>
         </div>
       </section>
 
@@ -773,7 +862,7 @@ function doLogout(){
 // ══════════════════════════════════════════════════
 // NAV
 // ══════════════════════════════════════════════════
-const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير'};
+const titles={dashboard:'لوحة التحكم',orders:'إدارة الطلبات',drivers:'السائقون',routes:'المسارات',reports:'التقارير',map:'خريطة NRW — مناطق التوصيل'};
 function goPage(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
@@ -784,6 +873,7 @@ function goPage(name,btn){
   if(name==='drivers')renderDrivers();
   if(name==='routes')renderRoutes();
   if(name==='reports')renderReports();
+  if(name==='map')initNRWMapPage();
   if(window.innerWidth<=800)$('sidebar').classList.remove('open');
 }
 function toggleSidebar(){$('sidebar').classList.toggle('open')}
@@ -951,6 +1041,183 @@ function openM(id){$(id).classList.remove('hidden')}
 function closeModal(id){$(id).classList.add('hidden')}
 function toast(msg,type){const e=$('toast');e.textContent=msg;e.className='toast '+(type||'');e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),3200)}
 function $(id){return document.getElementById(id)}
+
+// ══════════════════════════════════════════════════
+// NRW MAP
+// ══════════════════════════════════════════════════
+const NRW_PAL=[
+  '#E53935','#B71C1C','#FF5252','#FF8A80',
+  '#8E24AA','#4A148C','#CE93D8','#AB47BC',
+  '#1976D2','#1A237E','#42A5F5','#90CAF9',
+  '#00897B','#004D40','#4DB6AC','#80CBC4',
+  '#43A047','#1B5E20','#A5D6A7','#66BB6A',
+  '#F9A825','#E65100','#FFD54F','#FF7043',
+  '#6D4C41','#3E2723','#A1887F','#BCAAA4',
+  '#546E7A','#263238','#90A4AE','#78909C',
+];
+const NRW_PLZ=[
+  '46325','46348','46395','46397','46399','46414','46419','46446','46459',
+  '46483','46485','46487','46499','46509','46514','46519','46535','46537',
+  '46539','46562','46569',
+  '47051','47053','47055','47057','47058','47059','47119','47137','47138',
+  '47139','47166','47167','47169','47178','47179','47198','47199','47226',
+  '47228','47229','47239','47249','47259','47269','47279',
+  '47441','47443','47445','47447','47475','47495','47506','47509','47533',
+  '47546','47551','47559','47574','47589','47608','47623','47624','47625',
+  '47626','47627','47638','47647','47652','47661','47665','47669',
+  '47798','47799','47800','47802','47803','47804','47805','47807','47809',
+  '47829','47839','47906','47918'
+];
+function nrwColorForPLZ(plz){
+  const p=plz.slice(0,3);
+  const m={'463':'#E53935','465':'#E53935','470':'#1976D2','471':'#1976D2',
+           '472':'#1976D2','474':'#8E24AA','475':'#8E24AA','476':'#43A047',
+           '477':'#F9A825','478':'#00897B','479':'#6D4C41'};
+  return m[p]||'#546E7A';
+}
+
+let nrwSelC='#E53935', nrwMap=null, nrwZones={}, nrwLoaded=false, nrwLeafletReady=false;
+
+function initNRWMapPage(){
+  if(nrwLoaded)return;
+  nrwLoaded=true;
+  buildNRWPalette();
+  // Load Leaflet CSS
+  if(!document.getElementById('leaflet-css')){
+    const lc=document.createElement('link');
+    lc.id='leaflet-css';lc.rel='stylesheet';
+    lc.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+    document.head.appendChild(lc);
+  }
+  // Load Leaflet JS
+  if(!window.L){
+    const ls=document.createElement('script');
+    ls.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    ls.onload=()=>{
+      nrwLeafletReady=true;
+      nrwMap=L.map('nrw-map').setView([51.55,7.0],9);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+        attribution:'© OpenStreetMap © CARTO',maxZoom:19
+      }).addTo(nrwMap);
+      $('nrw-start-btn').disabled=false;
+    };
+    ls.onerror=()=>{ $('nrw-otxt').textContent='❌ تعذّر تحميل مكتبة الخريطة — يرجى الاتصال بالإنترنت'; };
+    document.head.appendChild(ls);
+  } else {
+    nrwLeafletReady=true;
+    if(!nrwMap){
+      nrwMap=L.map('nrw-map').setView([51.55,7.0],9);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+        attribution:'© OpenStreetMap © CARTO',maxZoom:19
+      }).addTo(nrwMap);
+    }
+  }
+}
+
+function buildNRWPalette(){
+  const pg=$('nrw-pgrid');
+  if(pg.children.length)return;
+  NRW_PAL.forEach(h=>{
+    const d=document.createElement('div');
+    d.className='nrw-sw';d.style.background=h;d.dataset.h=h;
+    d.onclick=()=>nrwSelColor(h);
+    pg.appendChild(d);
+  });
+  nrwSelColor('#E53935');
+}
+function nrwSelColor(h){
+  nrwSelC=h;
+  document.querySelectorAll('.nrw-sw').forEach(s=>s.classList.toggle('on',s.dataset.h===h));
+  $('nrw-cpick').value=h;$('nrw-chex').value=h;
+}
+function nrwPickC(h){nrwSelC=h;$('nrw-chex').value=h;document.querySelectorAll('.nrw-sw').forEach(s=>s.classList.remove('on'))}
+function nrwHexT(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){nrwSelC=v;$('nrw-cpick').value=v;}}
+
+async function startNRWLoad(){
+  if(!nrwLeafletReady){toast('جاري تحميل الخريطة، انتظر لحظة...','error');return;}
+  $('nrw-start-btn').style.display='none';
+  $('nrw-spin').style.display='block';
+  const total=NRW_PLZ.length;let done=0,ok=0;
+  $('nrw-obar').style.width='0';$('nrw-opct').textContent=`0 / ${total}`;
+  for(const plz of NRW_PLZ){
+    try{
+      $('nrw-otxt').textContent=`جاري تحميل PLZ ${plz}…`;
+      const res=await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${plz}&country=de&format=json&limit=1&polygon_geojson=1`,{headers:{'Accept-Language':'de'}});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const data=await res.json();
+      if(!data.length||!data[0].geojson)throw new Error('لا نتائج');
+      const city=data[0].display_name.split(',')[0].trim();
+      const color=nrwColorForPLZ(plz);
+      nrwAddZone(plz,city,data[0].geojson,color);
+      ok++;
+    }catch(e){console.warn('PLZ',plz,e.message);}
+    done++;
+    const pct=Math.round((done/total)*100);
+    $('nrw-obar').style.width=pct+'%';
+    $('nrw-opct').textContent=`${done} / ${total}`;
+    await new Promise(r=>setTimeout(r,1100)); // Nominatim rate limit
+  }
+  $('nrw-spin').style.display='none';
+  $('nrw-obar').style.background='#66BB6A';
+  $('nrw-otxt').textContent=`✅ ${ok} من ${total} منطقة تم تحميلها`;
+  $('nrw-pfoot').textContent=`✅ ${ok} منطقة PLZ`;
+  setTimeout(()=>$('nrw-overlay').style.display='none',1000);
+  const all=Object.values(nrwZones).map(z=>z.layer);
+  if(all.length){
+    const g=L.featureGroup(all);
+    nrwMap.fitBounds(g.getBounds(),{padding:[30,30]});
+  }
+}
+
+function nrwAddZone(plz,city,geojson,color){
+  const layer=L.geoJSON(geojson,{
+    style:{color:'#fff',weight:1.5,fillColor:color,fillOpacity:0.65,opacity:1}
+  });
+  const bounds=layer.getBounds();
+  if(bounds.isValid()){
+    L.tooltip({permanent:true,direction:'center',className:'leaflet-tooltip'})
+      .setContent(`<div class="nrw-zlabel" style="background:${color}">${plz}</div>`)
+      .setLatLng(bounds.getCenter())
+      .addTo(nrwMap);
+  }
+  layer.on('click',()=>nrwRecolor(plz,layer));
+  layer.addTo(nrwMap);
+  nrwZones[plz]={layer,color,city};
+  nrwRefreshList();
+}
+
+function nrwRecolor(plz,layer){
+  nrwZones[plz].color=nrwSelC;
+  layer.setStyle({fillColor:nrwSelC});
+  nrwMap.eachLayer(l=>{
+    if(l._content&&typeof l._content==='string'&&l._content.includes(`>${plz}<`)){
+      l.setContent(`<div class="nrw-zlabel" style="background:${nrwSelC}">${plz}</div>`);
+    }
+  });
+  nrwRefreshList();
+}
+
+function nrwRefreshList(){
+  const keys=Object.keys(nrwZones).sort();
+  $('nrw-ccount').textContent=keys.length;
+  const list=$('nrw-clist');
+  if(!keys.length){list.innerHTML='<div style="font-size:11px;color:#4a4a6e;padding:10px">لا توجد مناطق</div>';return;}
+  const byCity={};
+  keys.forEach(plz=>{const c=nrwZones[plz].city||'—';if(!byCity[c])byCity[c]=[];byCity[c].push(plz);});
+  list.innerHTML=Object.entries(byCity).sort((a,b)=>a[0].localeCompare(b[0])).map(([city,plzs])=>`
+    <div style="margin-bottom:8px">
+      <div style="font-size:10px;color:#7777aa;margin-bottom:4px;font-weight:700">${city}</div>
+      ${plzs.map(plz=>`<div class="nrw-crow2" onclick="nrwZoomTo('${plz}')">
+        <div class="nrw-cdot" style="background:${nrwZones[plz].color}"></div>
+        <span class="nrw-cname">${plz}</span>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function nrwZoomTo(plz){
+  const b=nrwZones[plz]?.layer?.getBounds();
+  if(b?.isValid())nrwMap.fitBounds(b,{padding:[40,40]});
+}
 </script>
 </body>
 </html>
