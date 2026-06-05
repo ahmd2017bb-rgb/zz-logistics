@@ -962,7 +962,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
         <div class="staff-tabs">
           <button class="stab active" data-i18n="staff.tab_emp" onclick="showStaffTab('employees',this)">👥 الموظفون</button>
-          <button class="stab" data-i18n="staff.tab_att" onclick="showStaffTab('attendance',this)">📅 الدوام والجدول</button>
+          <button class="stab" data-i18n="staff.tab_att" onclick="showStaffTab('attendance',this)">📋 جدول الدوام</button>
           <button class="stab" data-i18n="staff.tab_sal" onclick="showStaffTab('salary',this)">💶 تقرير الراتب</button>
           <button class="stab" data-i18n="staff.tab_excel" onclick="showStaffTab('excel',this)">📊 استيراد Excel</button>
         </div>
@@ -978,38 +978,19 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         </div>
 
         <!-- Tab: Attendance + Monthly Sheet (merged) -->
+        <!-- Tab: Monthly Sheet -->
         <div id="stab-attendance" class="stab-content hidden">
-          <div class="toolbar">
-            <input class="tb-inp" type="date" id="att-date-f" onchange="attDateFilter=this.value;renderAttendance()">
-            <select class="tb-sel" id="att-staff-f" onchange="attStaffFilter=this.value;renderAttendance()">
-              <option value="" data-i18n="staff.all_employees">كل الموظفين</option>
-            </select>
-            <button class="btn btn-primary" style="width:auto;padding:10px 22px" data-i18n="staff.add_att" onclick="openAttModal()">＋ إضافة دوام</button>
-            <button class="print-btn" data-i18n="staff.print_att" onclick="doPrint('سجل الدوام','attendance')">🖨 طباعة</button>
+          <div class="sheet-nav">
+            <button class="date-nav-btn" data-i18n="sheet.prev" onclick="sheetChangeMonth(-1)">→ الشهر السابق</button>
+            <button class="date-nav-btn date-nav-today" data-i18n="sheet.today" onclick="sheetGoToday()">📅 الشهر الحالي</button>
+            <div class="sheet-month-title" id="sheet-month-label">—</div>
+            <button class="date-nav-btn" data-i18n="sheet.next" onclick="sheetChangeMonth(1)">الشهر التالي ←</button>
+            <button class="date-nav-btn date-nav-save" data-i18n="sheet.save" onclick="saveSheet()">💾 حفظ</button>
+            <button class="print-btn" data-i18n="sheet.print" onclick="doPrint('جدول الدوام الشهري','sheet')">🖨 طباعة</button>
           </div>
           <div class="card no-pad">
-            <div class="tbl-wrap">
-              <table class="tbl full-tbl">
-                <thead><tr><th data-i18n="staff.att_emp">الموظف</th><th data-i18n="staff.att_date">التاريخ</th><th data-i18n="staff.att_start">بداية</th><th data-i18n="staff.att_end">نهاية</th><th data-i18n="staff.att_break">استراحة</th><th data-i18n="staff.att_hours">الساعات</th><th data-i18n="staff.att_notes">ملاحظات</th><th data-i18n="staff.att_actions">إجراءات</th></tr></thead>
-                <tbody id="att-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Monthly Sheet section -->
-          <div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--border)">
-            <div class="sheet-nav">
-              <button class="date-nav-btn" data-i18n="sheet.prev" onclick="sheetChangeMonth(-1)">→ الشهر السابق</button>
-              <button class="date-nav-btn date-nav-today" data-i18n="sheet.today" onclick="sheetGoToday()">📅 الشهر الحالي</button>
-              <div class="sheet-month-title" id="sheet-month-label">—</div>
-              <button class="date-nav-btn" data-i18n="sheet.next" onclick="sheetChangeMonth(1)">الشهر التالي ←</button>
-              <button class="date-nav-btn date-nav-save" data-i18n="sheet.save" onclick="saveSheet()">💾 حفظ</button>
-              <button class="print-btn" data-i18n="sheet.print" onclick="doPrint('جدول الدوام الشهري','sheet')">🖨 طباعة</button>
-            </div>
-            <div class="card no-pad">
-              <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
-                <div style="padding:40px;text-align:center;color:var(--muted)" data-i18n="sheet.loading">جاري تحميل الجدول…</div>
-              </div>
+            <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
+              <div style="padding:40px;text-align:center;color:var(--muted)" data-i18n="sheet.loading">جاري تحميل الجدول…</div>
             </div>
           </div>
         </div>
@@ -1350,7 +1331,7 @@ Object.assign(T.ar,{
   'reports.col_area':'المنطقة','reports.col_orders':'الطلبات','reports.col_done':'مكتمل',
   'staff.section':'إدارة الموظفين','staff.count':'الموظفون',
   'staff.week_hours':'ساعات هذا الأسبوع','staff.week_salary':'رواتب هذا الأسبوع',
-  'staff.tab_emp':'👥 الموظفون','staff.tab_att':'📅 الدوام والجدول',
+  'staff.tab_emp':'👥 الموظفون','staff.tab_att':'📋 جدول الدوام',
   'staff.tab_sal':'💶 تقرير الراتب','staff.tab_excel':'📊 استيراد Excel',
   'staff.search_ph':'🔍 بحث عن موظف...','staff.new':'＋ موظف جديد','staff.print_list':'🖨 طباعة',
   'staff.all_employees':'كل الموظفين','staff.add_att':'＋ إضافة دوام','staff.print_att':'🖨 طباعة',
@@ -1465,7 +1446,7 @@ Object.assign(T.de,{
   'reports.col_area':'Gebiet','reports.col_orders':'Aufträge','reports.col_done':'Abgeschlossen',
   'staff.section':'Mitarbeiterverwaltung','staff.count':'Mitarbeiter',
   'staff.week_hours':'Stunden diese Woche','staff.week_salary':'Gehälter diese Woche',
-  'staff.tab_emp':'👥 Mitarbeiter','staff.tab_att':'📅 Anwesenheit & Plan',
+  'staff.tab_emp':'👥 Mitarbeiter','staff.tab_att':'📋 Monatsplan',
   'staff.tab_sal':'💶 Gehaltsberichte','staff.tab_excel':'📊 Excel-Import',
   'staff.search_ph':'🔍 Mitarbeiter suchen...','staff.new':'＋ Neuer Mitarbeiter','staff.print_list':'🖨 Drucken',
   'staff.all_employees':'Alle Mitarbeiter','staff.add_att':'＋ Anwesenheit hinzufügen','staff.print_att':'🖨 Drucken',
@@ -2707,7 +2688,7 @@ function showStaffTab(tab,btn){
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   if(tab==='employees')updateStaffStats();
-  if(tab==='attendance'){renderAttendance();initSheetMonth();renderSheet();}
+  if(tab==='attendance'){initSheetMonth();renderSheet();}
   if(tab==='salary')renderSalaryReport();
 }
 
@@ -2716,10 +2697,7 @@ function renderStaffPage(){
   updateStaffStats();
   renderStaffCards();
   populateAttStaffFilter();
-  if(!$('stab-attendance').classList.contains('hidden')){
-    renderAttendance();
-    if(sheetMonthKey)renderSheet();
-  }
+  if(!$('stab-attendance').classList.contains('hidden')&&sheetMonthKey)renderSheet();
   if(!$('stab-salary').classList.contains('hidden'))renderSalaryReport();
 }
 function _sheetWeekStats(staffId,weekStart,weekEnd,weekAtt){
@@ -3022,7 +3000,7 @@ function importExcelData(){
   $('stab-attendance').classList.remove('hidden');
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.stab')[1].classList.add('active');
-  renderAttendance();
+  if(sheetMonthKey)renderSheet();
   toast('تم استيراد '+imported+' سجل'+(skipped?' — تخطي '+skipped:''),'success');
   autosave();
 }
