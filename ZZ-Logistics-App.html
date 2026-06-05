@@ -1112,11 +1112,11 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <div class="form-group"><label>الموظف *</label><select id="att-staff-sel"></select></div>
       <div class="frow">
         <div class="form-group"><label>التاريخ *</label><input type="date" id="att-date"></div>
-        <div class="form-group"><label>استراحة (دقيقة)</label><input type="number" id="att-break" placeholder="30" min="0" value="30"></div>
+        <div class="form-group"><label>استراحة (دقيقة)</label><input type="number" id="att-break" placeholder="0" min="0"></div>
       </div>
       <div class="frow">
-        <div class="form-group"><label>بداية العمل *</label><input type="time" id="att-start" value="07:00" lang="de"></div>
-        <div class="form-group"><label>نهاية العمل *</label><input type="time" id="att-end" value="16:00" lang="de"></div>
+        <div class="form-group"><label>بداية العمل *</label><input type="time" id="att-start" lang="de"></div>
+        <div class="form-group"><label>نهاية العمل *</label><input type="time" id="att-end" lang="de"></div>
       </div>
       <div class="form-group"><label>ملاحظات</label><input type="text" id="att-notes" placeholder="ملاحظات اختيارية..."></div>
     </div>
@@ -2200,7 +2200,7 @@ function filterStaff(q){
 }
 function openStaffModal(){
   $('st-name').value='';$('st-role').value='';$('st-phone').value='';
-  $('st-rate').value='13.50';$('st-whours').value='40';
+  $('st-rate').value='';$('st-whours').value='';
   delete $('st-name').dataset.eid;
   $('modal-staff-h').textContent='موظف جديد';openM('modal-staff');
 }
@@ -2214,8 +2214,12 @@ function editStaffMember(id){
 function saveStaffMember(){
   const n=$('st-name').value.trim();if(!n){toast('يرجى إدخال اسم الموظف','error');return;}
   const eid=$('st-name').dataset.eid;
+  const rate=parseFloat($('st-rate').value);
+  const wh=parseInt($('st-whours').value);
+  if(!rate||rate<=0){toast('يرجى إدخال الأجر بالساعة','error');return;}
+  if(!wh||wh<=0){toast('يرجى إدخال ساعات العمل الأسبوعية','error');return;}
   const data={name:n,role:$('st-role').value.trim()||'موظف',phone:$('st-phone').value.trim()||'—',
-    rate:parseFloat($('st-rate').value)||13.5,weekHours:parseInt($('st-whours').value)||40};
+    rate,weekHours:wh};
   if(eid){const i=staff.findIndex(s=>s.id===parseInt(eid));if(i!==-1)staff[i]={...staff[i],...data};delete $('st-name').dataset.eid;toast('تم تحديث الموظف','success');}
   else{staff.push({id:nextStaffId++,...data});toast('تم إضافة الموظف','success');}
   closeModal('modal-staff');renderStaffPage();autosave();
@@ -2259,8 +2263,8 @@ function renderAttendance(){
 }
 function openAttModal(){
   $('att-staff-sel').innerHTML=staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
-  $('att-date').value=todayStr();$('att-start').value='07:00';$('att-end').value='16:00';
-  $('att-break').value='30';$('att-notes').value='';
+  $('att-date').value=todayStr();$('att-start').value='';$('att-end').value='';
+  $('att-break').value='';$('att-notes').value='';
   delete $('att-date').dataset.eid;
   $('modal-att-h').textContent='إضافة دوام';openM('modal-att');
 }
