@@ -2142,6 +2142,9 @@ function renderStaffPage(){
   updateStaffStats();
   renderStaffCards();
   populateAttStaffFilter();
+  if(!$('stab-attendance').classList.contains('hidden'))renderAttendance();
+  if(!$('stab-salary').classList.contains('hidden'))renderSalaryReport();
+  if(!$('stab-sheet').classList.contains('hidden')){initSheetMonth();renderSheet();}
 }
 function updateStaffStats(){
   $('st-count').textContent=staff.length;
@@ -2228,7 +2231,6 @@ function delStaff(id){
   staff=staff.filter(s=>s.id!==id);
   attendance=attendance.filter(a=>a.staffId!==id);
   renderStaffPage();
-  setTimeout(updateStaffStats,50);
   toast('تم حذف الموظف','success');autosave();
 }
 
@@ -2282,14 +2284,14 @@ function saveAttendance(){
   const start=$('att-start').value,end=$('att-end').value;
   if(!sid||!date||!start||!end){toast('يرجى ملء جميع الحقول','error');return;}
   const eid=$('att-date').dataset.eid;
-  const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||30,notes:$('att-notes').value.trim()};
+  const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||0,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
-  closeModal('modal-att');renderAttendance();renderStaffPage();autosave();
+  closeModal('modal-att');renderStaffPage();autosave();
 }
 function delAttendance(id){
   attendance=attendance.filter(a=>a.id!==id);
-  renderAttendance();renderStaffPage();toast('تم حذف السجل','success');autosave();
+  renderStaffPage();toast('تم حذف السجل','success');autosave();
 }
 
 // ── SALARY REPORT ────────────────────────────────
