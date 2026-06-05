@@ -2599,16 +2599,22 @@ function sheetTodayKey(){
   const n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1);
 }
 
+function _syncSheetStaff(){
+  staff.forEach(s=>{
+    const ex=sheetEmps.find(e=>e.staffId===s.id);
+    if(ex){ex.name=s.name;ex.rate=s.rate;}
+    else sheetEmps.push({id:sheetNextEId++,staffId:s.id,name:s.name,rate:s.rate});
+  });
+  sheetEmps=sheetEmps.filter(e=>!e.staffId||staff.find(s=>s.id===e.staffId));
+}
+
 function initSheetMonth(){
   if(!sheetMonthKey)sheetMonthKey=sheetTodayKey();
   const d=_sd.sheets&&_sd.sheets[sheetMonthKey];
-  if(d){sheetEmps=d.emps||[];sheetDays=d.days||{};sheetNotes=d.notes||{};sheetNextEId=d.nextId||sheetNextEId;return;}
-  sheetEmps=[
-    {id:sheetNextEId++,name:'طه',rate:13.5},
-    {id:sheetNextEId++,name:'حمزة',rate:13.5},
-    {id:sheetNextEId++,name:'ايمن',rate:13.5},
-  ];
-  sheetDays={};sheetNotes={};
+  if(d){sheetEmps=d.emps||[];sheetDays=d.days||{};sheetNotes=d.notes||{};sheetNextEId=d.nextId||sheetNextEId;}
+  else{sheetEmps=[];sheetDays={};sheetNotes={};}
+  _syncSheetStaff();
+}
 }
 
 function collectSheetFromDOM(){
