@@ -791,11 +791,11 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
         </div>
 
-        <!-- Two-col: recent orders + drivers -->
+        <!-- Two-col: pending tasks -->
         <div class="two-col">
           <div class="card">
-            <div class="card-top"><h3 class="card-title" data-i18n="dash.recent_orders">آخر الطلبات</h3><button class="ghost-btn" data-i18n="dash.view_all" onclick="goPage('orders',null)">عرض الكل ←</button></div>
-            <table class="tbl"><thead><tr><th>#</th><th data-i18n="dash.tbl_customer">العميل</th><th data-i18n="dash.tbl_driver">السائق</th><th data-i18n="dash.tbl_status">الحالة</th></tr></thead><tbody id="db-orders"></tbody></table>
+            <div class="card-top"><h3 class="card-title">📋 المهام المعلقة</h3><button class="ghost-btn" onclick="goPage('orders',null)">عرض الكل ←</button></div>
+            <table class="tbl"><thead><tr><th>المهمة</th><th>كتبها</th><th>الحالة</th></tr></thead><tbody id="db-orders"></tbody></table>
           </div>
         </div>
 
@@ -832,27 +832,18 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
       </section>
 
-      <!-- ====== ORDERS ====== -->
+      <!-- ====== TASKS (المهام) ====== -->
       <section class="pv hidden" id="pv-orders">
         <div class="toolbar">
-          <input class="tb-inp" type="text" data-i18n-ph="orders.search_ph" placeholder="🔍 بحث..." oninput="filterOrders(this.value)">
+          <input class="tb-inp" type="text" placeholder="🔍 بحث في المهام..." oninput="filterOrders(this.value)">
           <select class="tb-sel" onchange="filterByStatus(this.value)">
-            <option value="" data-i18n="orders.all_status">كل الحالات</option>
-            <option value="pending" data-i18n="orders.pending">قيد الانتظار</option>
-            <option value="in_transit" data-i18n="orders.in_transit">في الطريق</option>
-            <option value="delivered" data-i18n="orders.delivered">تم التسليم</option>
-            <option value="failed" data-i18n="orders.failed">فشل التسليم</option>
+            <option value="">كل المهام</option>
+            <option value="pending">لم تتم</option>
+            <option value="done">تمت</option>
           </select>
-          <button class="btn btn-primary" style="width:auto;padding:10px 22px" data-i18n="orders.new" onclick="openOrderModal()">＋ طلب جديد</button>
+          <button class="btn btn-primary" style="width:auto;padding:10px 22px" onclick="openOrderModal()">＋ مهمة جديدة</button>
         </div>
-        <div class="card no-pad">
-          <div class="tbl-wrap">
-            <table class="tbl full-tbl">
-              <thead><tr><th data-i18n="orders.col_num">رقم الطلب</th><th data-i18n="orders.col_customer">العميل</th><th data-i18n="orders.col_address">العنوان</th><th data-i18n="orders.col_driver">السائق</th><th data-i18n="orders.col_status">الحالة</th><th data-i18n="orders.col_time">الوقت</th><th data-i18n="orders.col_actions">إجراءات</th></tr></thead>
-              <tbody id="ord-tbody"></tbody>
-            </table>
-          </div>
-        </div>
+        <div id="tasks-list"></div>
       </section>
 
       <!-- ====== SORT / DISPATCH PLAN ====== -->
@@ -1122,23 +1113,17 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <!-- MODAL: ORDER -->
 <div class="modal-bg hidden" id="modal-order">
   <div class="modal">
-    <div class="modal-top"><h3 id="modal-order-h" data-i18n="ord.title_new">طلب جديد</h3><button class="modal-x" onclick="closeModal('modal-order')">✕</button></div>
+    <div class="modal-top"><h3 id="modal-order-h">مهمة جديدة</h3><button class="modal-x" onclick="closeModal('modal-order')">✕</button></div>
     <div class="modal-bd">
       <input type="hidden" id="ord-edit-id">
-      <div class="frow">
-        <div class="form-group"><label data-i18n="ord.customer">اسم العميل *</label><input type="text" id="ord-customer" data-i18n-ph="ord.customer_ph" placeholder="الاسم الكامل"></div>
-        <div class="form-group"><label data-i18n="ord.tracking">رقم التتبع</label><input type="text" id="ord-tracking" placeholder="ZZ-00000"></div>
-      </div>
-      <div class="form-group"><label data-i18n="ord.address">العنوان *</label><input type="text" id="ord-address" data-i18n-ph="ord.address_ph" placeholder="الشارع، المدينة، الرمز البريدي"></div>
-      <div class="frow">
-        <div class="form-group"><label data-i18n="ord.driver">السائق</label><select id="ord-driver-sel"></select></div>
-        <div class="form-group"><label data-i18n="ord.status">الحالة</label><select id="ord-status-sel"><option value="pending" data-i18n="orders.pending">قيد الانتظار</option><option value="in_transit" data-i18n="orders.in_transit">في الطريق</option><option value="delivered" data-i18n="orders.delivered">تم التسليم</option><option value="failed" data-i18n="orders.failed">فشل التسليم</option></select></div>
-      </div>
-      <div class="form-group"><label data-i18n="ord.notes">ملاحظات</label><input type="text" id="ord-notes" data-i18n-ph="ord.notes_ph" placeholder="أي تعليمات إضافية..."></div>
+      <div class="form-group"><label>عنوان المهمة *</label><input type="text" id="ord-title" placeholder="اكتب عنوان المهمة..."></div>
+      <div class="form-group"><label>تفاصيل المهمة *</label><textarea id="ord-body" placeholder="اكتب تفاصيل المهمة للموظف التالي..." rows="4" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical"></textarea></div>
+      <div class="form-group"><label>كتبها</label><input type="text" id="ord-author" placeholder="اسم الموظف"></div>
+      <div class="form-group"><label>ملاحظة</label><input type="text" id="ord-notes" placeholder="أي ملاحظة إضافية..."></div>
     </div>
     <div class="modal-ft">
-      <button class="btn btn-ghost" data-i18n="modal.cancel" onclick="closeModal('modal-order')">إلغاء</button>
-      <button class="btn btn-primary" style="width:auto;padding:11px 30px" data-i18n="ord.save" onclick="saveOrder()">حفظ الطلب</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-order')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveOrder()">حفظ المهمة</button>
     </div>
   </div>
 </div>
@@ -1562,21 +1547,8 @@ function applyLang(lang){
 // SAMPLE DATA (orders/drivers)
 // ══════════════════════════════════════════════════
 let drivers = [];
-let orders = [
-  {id:1, tracking:'ZZ-10241',customer:'Klaus Müller',    address:'Aachener Str. 45, Köln',      driver:1,status:'delivered', time:'08:12',notes:''},
-  {id:2, tracking:'ZZ-10242',customer:'Fatima Hassan',   address:'Venloer Str. 12, Köln',       driver:1,status:'delivered', time:'08:45',notes:''},
-  {id:3, tracking:'ZZ-10243',customer:'Thomas Wagner',   address:'Sülzgürtel 88, Köln',         driver:2,status:'in_transit',time:'09:00',notes:''},
-  {id:4, tracking:'ZZ-10244',customer:'Selin Yilmaz',    address:'Ehrenfelder Str. 7, Köln',    driver:2,status:'delivered', time:'09:30',notes:''},
-  {id:5, tracking:'ZZ-10245',customer:'Hamid Karimi',    address:'Gladbacher Str. 55, Düss.',   driver:3,status:'pending',   time:'10:00',notes:''},
-  {id:6, tracking:'ZZ-10246',customer:'Anna Schmidt',    address:'Breite Str. 22, Bonn',        driver:4,status:'in_transit',time:'09:15',notes:''},
-  {id:7, tracking:'ZZ-10247',customer:'Mohammed Saleh',  address:'Elisenstr. 3, Aachen',        driver:5,status:'delivered', time:'07:55',notes:''},
-  {id:8, tracking:'ZZ-10248',customer:'Laura Braun',     address:'Friedrich-Str. 9, Bonn',      driver:4,status:'failed',    time:'10:20',notes:''},
-  {id:9, tracking:'ZZ-10249',customer:'Yusuf Demir',     address:'Neumarkt 18, Köln',           driver:1,status:'in_transit',time:'10:35',notes:''},
-  {id:10,tracking:'ZZ-10250',customer:'Sandra Koch',     address:'Brehmstr. 41, Düsseldorf',    driver:3,status:'pending',   time:'11:00',notes:''},
-  {id:11,tracking:'ZZ-10251',customer:'Khalid Mansour',  address:'Hohenzollernring 4, Köln',    driver:2,status:'delivered', time:'11:15',notes:''},
-  {id:12,tracking:'ZZ-10252',customer:'Maria Fischer',   address:'Kölner Str. 77, Bonn',        driver:4,status:'pending',   time:'11:30',notes:''},
-];
-let nextOId=13, nextDId=6;
+let orders = [];
+let nextOId=1, nextDId=1;
 let fq='', fst='';
 
 // ══════════════════════════════════════════════════
@@ -2080,64 +2052,93 @@ function doPrint(sectionName, tabId){
 // DASHBOARD
 // ══════════════════════════════════════════════════
 function renderDashboard(){
-  $('db-orders').innerHTML=[...orders].reverse().slice(0,5).map(o=>
-    `<tr><td><small style="color:var(--muted)">${o.tracking}</small></td><td>${o.customer}</td><td>${dName(o.driver)}</td><td>${badge(o.status)}</td></tr>`
-  ).join('');
+  const pending=orders.filter(o=>o.status==='pending').slice(0,5);
+  $('db-orders').innerHTML=pending.length===0
+    ?'<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:15px">لا توجد مهام معلقة</td></tr>'
+    :pending.map(o=>`<tr>
+      <td style="font-size:13px;font-weight:600">${o.title}</td>
+      <td style="font-size:12px;color:var(--muted)">${o.createdBy||'—'}</td>
+      <td><span class="badge b-pending">لم تتم</span></td>
+    </tr>`).join('');
 }
 
 // ══════════════════════════════════════════════════
-// ORDERS
+// TASKS (المهام)
 // ══════════════════════════════════════════════════
-function renderOrders(list){
-  const data=list||filtered();
-  $('ord-tbody').innerHTML=data.length===0
-    ?'<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">لا توجد طلبات</td></tr>'
-    :data.map(o=>`<tr>
-      <td><b style="color:var(--blue)">${o.tracking}</b></td>
-      <td>${o.customer}</td>
-      <td style="font-size:13px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.address}</td>
-      <td>${dName(o.driver)}</td>
-      <td>${badge(o.status)}</td>
-      <td style="color:var(--muted);font-size:13px">${o.time}</td>
-      <td><button class="act-btn act-edit" onclick="editOrder(${o.id})">تعديل</button><button class="act-btn act-delete" onclick="askDelete('order',${o.id})">حذف</button></td>
-    </tr>`).join('');
+function renderOrders(){
+  const data=filtered();
+  const container=$('tasks-list');
+  if(data.length===0){
+    container.innerHTML='<div style="text-align:center;padding:50px;color:var(--muted)">لا توجد مهام — اضغط ＋ مهمة جديدة</div>';
+    updateBadge();return;
+  }
+  container.innerHTML=data.map(t=>`
+    <div class="card" style="margin-bottom:12px;border-right:4px solid ${t.status==='done'?'var(--green)':'#f59e0b'}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+            <b style="font-size:16px">${t.title}</b>
+            ${t.status==='done'
+              ?'<span class="badge b-delivered">✓ تمت المهمة</span>'
+              :'<span class="badge b-pending">⏳ لم تتم</span>'}
+          </div>
+          <div style="color:#374151;font-size:14px;margin-bottom:8px;white-space:pre-wrap;line-height:1.6">${t.body}</div>
+          ${t.notes?`<div style="background:#f8f9fa;border-radius:6px;padding:8px 12px;font-size:13px;color:#555;margin-bottom:8px">📝 <b>ملاحظة:</b> ${t.notes}</div>`:''}
+          <div style="font-size:12px;color:var(--muted)">كتبها: <b>${t.createdBy||'—'}</b> &nbsp;|&nbsp; ${t.createdAt}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        ${t.status==='pending'
+          ?`<button class="act-btn act-edit" style="background:#dcfce7;color:#166534;border-color:#86efac" onclick="setTaskStatus(${t.id},'done')">✓ تمت المهمة</button>`
+          :`<button class="act-btn act-edit" style="background:#fef9c3;color:#854d0e;border-color:#fde047" onclick="setTaskStatus(${t.id},'pending')">↩ لم تتم</button>`}
+        <button class="act-btn act-edit" onclick="editOrder(${t.id})">تعديل</button>
+        <button class="act-btn act-delete" onclick="askDelete('order',${t.id})">حذف</button>
+      </div>
+    </div>
+  `).join('');
   updateBadge();
 }
 function filtered(){
-  return orders.filter(o=>{
-    const mq=!fq||o.customer.toLowerCase().includes(fq)||o.tracking.toLowerCase().includes(fq);
-    return mq&&(!fst||o.status===fst);
+  return orders.filter(t=>{
+    const mq=!fq||t.title.toLowerCase().includes(fq)||(t.body||'').toLowerCase().includes(fq)||(t.createdBy||'').toLowerCase().includes(fq);
+    return mq&&(!fst||t.status===fst);
   });
 }
 function filterOrders(q){fq=q.toLowerCase();renderOrders()}
 function filterByStatus(s){fst=s;renderOrders()}
-function openOrderModal(o){
-  $('ord-driver-sel').innerHTML=drivers.map(d=>`<option value="${d.id}">${d.name} — ${d.area}</option>`).join('');
-  if(o){
-    $('modal-order-h').textContent='تعديل الطلب';
-    $('ord-edit-id').value=o.id;$('ord-customer').value=o.customer;
-    $('ord-tracking').value=o.tracking;$('ord-address').value=o.address;
-    $('ord-driver-sel').value=o.driver;$('ord-status-sel').value=o.status;$('ord-notes').value=o.notes;
+function openOrderModal(t){
+  if(t){
+    $('modal-order-h').textContent='تعديل المهمة';
+    $('ord-edit-id').value=t.id;
+    $('ord-title').value=t.title;
+    $('ord-body').value=t.body;
+    $('ord-author').value=t.createdBy||'';
+    $('ord-notes').value=t.notes||'';
   }else{
-    $('modal-order-h').textContent='طلب جديد';$('ord-edit-id').value='';
-    $('ord-customer').value='';$('ord-tracking').value='ZZ-'+(10240+nextOId);
-    $('ord-address').value='';$('ord-notes').value='';$('ord-status-sel').value='pending';
+    $('modal-order-h').textContent='مهمة جديدة';
+    $('ord-edit-id').value='';
+    $('ord-title').value='';$('ord-body').value='';
+    $('ord-author').value='';$('ord-notes').value='';
   }
   openM('modal-order');
 }
-function editOrder(id){const o=orders.find(x=>x.id===id);if(o)openOrderModal(o)}
+function editOrder(id){const t=orders.find(x=>x.id===id);if(t)openOrderModal(t)}
 function saveOrder(){
-  const c=$('ord-customer').value.trim(),a=$('ord-address').value.trim();
-  if(!c||!a){toast('يرجى ملء الحقول المطلوبة *','error');return}
+  const title=$('ord-title').value.trim();
+  const body=$('ord-body').value.trim();
+  if(!title||!body){toast('يرجى ملء العنوان والتفاصيل *','error');return}
   const eid=$('ord-edit-id').value;
-  const data={customer:c,tracking:$('ord-tracking').value.trim()||'ZZ-'+(10240+nextOId),address:a,
-    driver:parseInt($('ord-driver-sel').value),status:$('ord-status-sel').value,
-    notes:$('ord-notes').value.trim(),time:new Date().toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})};
-  if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث الطلب','success')}
-  else{orders.push({id:nextOId++,...data});toast('تم إضافة الطلب','success')}
+  const now=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'2-digit',day:'2-digit'})+' '+new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+  const data={title,body,createdBy:$('ord-author').value.trim(),notes:$('ord-notes').value.trim(),createdAt:now};
+  if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث المهمة','success')}
+  else{orders.push({id:nextOId++,status:'pending',...data});toast('تم إضافة المهمة','success')}
   closeModal('modal-order');renderOrders();autosave();
 }
-function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();toast('تم حذف الطلب','success');autosave()}
+function setTaskStatus(id,status){
+  const t=orders.find(x=>x.id===id);
+  if(t){t.status=status;renderOrders();renderDashboard();autosave();}
+}
+function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();renderDashboard();toast('تم حذف المهمة','success');autosave()}
 
 // ══════════════════════════════════════════════════
 // SORT / DISPATCH PLAN
@@ -2873,7 +2874,7 @@ function delPayment(id){
 // ══════════════════════════════════════════════════
 function askDelete(type,id){
   let label='', fn;
-  if(type==='order'){const o=orders.find(x=>x.id===id);if(!o)return;label=o.customer+' — '+o.tracking;fn=()=>delOrder(id);}
+  if(type==='order'){const o=orders.find(x=>x.id===id);if(!o)return;label=o.title;fn=()=>delOrder(id);}
   else if(type==='staff'){const s=staff.find(x=>x.id===id);if(!s)return;label=s.name+' (سيتم حذف سجلات دوامه)';fn=()=>delStaff(id);}
   else if(type==='att'){const a=attendance.find(x=>x.id===id);if(!a)return;const s=staff.find(x=>x.id===a.staffId);label=(s?s.name:'موظف')+' — '+a.date;fn=()=>delAttendance(id);}
   else return;
