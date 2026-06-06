@@ -2,10 +2,14 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const dataDir = path.join(__dirname, 'data');
+// DATABASE_PATH env var points to persistent disk on Render; falls back to local ./data/
+const dataDir = process.env.DATABASE_PATH
+  ? path.dirname(process.env.DATABASE_PATH)
+  : path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-const db = new Database(path.join(dataDir, 'zzlogistics.db'));
+const dbFile = process.env.DATABASE_PATH || path.join(dataDir, 'zzlogistics.db');
+const db = new Database(dbFile);
 
 db.exec(`
   PRAGMA journal_mode=WAL;
