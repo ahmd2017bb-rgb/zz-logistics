@@ -807,8 +807,10 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
                 <div class="returns-title" data-i18n="dash.returns_title">↩ جدول المسترجعات</div>
                 <div style="font-size:13px;color:var(--muted);margin-top:3px" data-i18n="dash.returns_sub">الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ</div>
               </div>
-              <div style="display:flex;gap:10px;align-items:center">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                 <span class="returns-date-tag" id="ret-date-tag"></span>
+                <button class="returns-add-btn" style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac" onclick="printReturns()">🖨️ طباعة</button>
+                <button class="returns-add-btn" style="background:#eff6ff;color:#1d4ed8;border:1.5px solid #93c5fd" onclick="shareReturns()">📤 مشاركة</button>
                 <button class="returns-add-btn" id="ret-add-btn" data-i18n="dash.ret_add" onclick="addReturnRow()">＋ إضافة صف</button>
               </div>
             </div>
@@ -816,7 +818,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
               <table class="returns-tbl">
                 <thead>
                   <tr>
-                    <th style="width:50px">#</th>
+                    <th style="width:40px">#</th>
+                    <th style="width:80px">الرقم</th>
                     <th data-i18n="dash.ret_qty">الكمية</th>
                     <th data-i18n="dash.ret_driver">اسم الشفير</th>
                     <th data-i18n="dash.ret_tour">التور</th>
@@ -1599,7 +1602,7 @@ function saveDay(){
   const rets=[];
   document.querySelectorAll('.ret-row').forEach(tr=>{
     const inps=tr.querySelectorAll('input');
-    rets.push({qty:inps[0].value.trim()||'0', driver:inps[1].value.trim(), tour:inps[2].value.trim()});
+    rets.push({num:inps[0].value.trim(), qty:inps[1].value.trim()||'0', driver:inps[2].value.trim(), tour:inps[3].value.trim()});
   });
   currentDay.returns=rets;
   localStorage.setItem(dateKey(currentDate),JSON.stringify(currentDay));
@@ -1694,8 +1697,69 @@ document.addEventListener('keydown',function(e){
 // ══════════════════════════════════════════════════
 let retRowId=1;
 
+function shareReturns(){
+  const rows=document.querySelectorAll('.ret-row');
+  if(rows.length===0){toast('لا توجد بيانات للمشاركة','error');return;}
+  let text=`↩ جدول المسترجعات — ${currentDate}\n${'─'.repeat(28)}\n`;
+  let total=0;
+  rows.forEach((tr,i)=>{
+    const inp=tr.querySelectorAll('input');
+    const num=inp[0].value||'—';
+    const qty=inp[1].value||'0';
+    const drv=inp[2].value||'—';
+    const tour=inp[3].value||'—';
+    total+=parseInt(qty)||0;
+    text+=`${i+1}. رقم: ${num} | كمية: ${qty} | ${drv} | ${tour}\n`;
+  });
+  text+=`${'─'.repeat(28)}\nالمجموع: ${total} طرد`;
+  if(navigator.share){
+    navigator.share({title:'جدول المسترجعات',text}).catch(()=>{});
+  }else{
+    window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  }
+}
+
+function printReturns(){
+  const rows=document.querySelectorAll('.ret-row');
+  const date=currentDate;
+  let total=0;
+  let trs='';
+  rows.forEach((tr,i)=>{
+    const inp=tr.querySelectorAll('input');
+    const num=inp[0].value||'—';
+    const qty=parseInt(inp[1].value)||0;
+    const drv=inp[2].value||'—';
+    const tour=inp[3].value||'—';
+    total+=qty;
+    trs+=`<tr><td>${i+1}</td><td>${num}</td><td>${qty}</td><td>${drv}</td><td>${tour}</td></tr>`;
+  });
+  const html=`<html dir="rtl"><head><meta charset="utf-8"><title>جدول المسترجعات</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:24px;direction:rtl;color:#111}
+    h2{text-align:center;margin-bottom:4px}
+    p.sub{text-align:center;color:#666;font-size:13px;margin-top:0}
+    table{width:100%;border-collapse:collapse;margin-top:16px}
+    th,td{border:1px solid #bbb;padding:8px 12px;text-align:right;font-size:14px}
+    th{background:#f4f4f4;font-weight:700}
+    tr:nth-child(even){background:#fafafa}
+    .total-row td{font-weight:700;background:#fff8e1;border-top:2px solid #bbb}
+  </style></head><body>
+  <h2>↩ جدول المسترجعات</h2>
+  <p class="sub">${date}</p>
+  <table>
+    <thead><tr><th>#</th><th>الرقم</th><th>الكمية</th><th>اسم الشفير</th><th>التور</th></tr></thead>
+    <tbody>${trs}</tbody>
+    <tfoot><tr class="total-row"><td colspan="2">المجموع</td><td>${total}</td><td colspan="2">طرد</td></tr></tfoot>
+  </table>
+  <script>setTimeout(()=>{window.print();},300);<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+
 function addReturnRow(data){
   const id=retRowId++;
+  const num=data?data.num||'':'';
   const qty=data?data.qty:'';
   const drv=data?data.driver:'';
   const tour=data?data.tour:'';
@@ -1705,7 +1769,8 @@ function addReturnRow(data){
   tr.dataset.id=id;
   tr.innerHTML=`
     <td style="color:var(--muted);font-weight:700;font-size:13px;text-align:center">${tbody.children.length+1}</td>
-    <td><input class="r-inp" type="number" placeholder="0" value="${qty}" min="0" style="width:80px"></td>
+    <td><input class="r-inp" type="text"   placeholder="رقم..." value="${num}" style="width:70px"></td>
+    <td><input class="r-inp" type="number" placeholder="0" value="${qty}" min="0" style="width:70px"></td>
     <td><input class="r-inp" type="text"   placeholder="اسم الشفير" value="${drv}"></td>
     <td><input class="r-inp" type="text"   placeholder="Tour 1" value="${tour}"></td>
     <td><button class="r-del" onclick="delReturnRow(this)">✕</button></td>
@@ -1713,7 +1778,6 @@ function addReturnRow(data){
   tbody.appendChild(tr);
   $('ret-empty').classList.add('hidden');
   updateReturnCount();
-  // focus qty
   tr.querySelector('input').focus();
 }
 
