@@ -3161,70 +3161,70 @@ function _buildFromDispMapper(){
   _renderDisposition(objRows,useSub);
 }
 function _renderDisposition(rows,useSub){
-  // Group by company, then aggregate by TOUR NO within each company
-  const companyGroups={};
+  // aggregate by (company, tour)
+  const coMap={};
   rows.forEach(r=>{
     const co=useSub?(r.sub||'OHNE FIRMA'):_dispCo(r.tour);
-    if(!companyGroups[co])companyGroups[co]=new Map();
+    if(!coMap[co])coMap[co]=new Map();
     const key=String(r.tour);
-    if(!companyGroups[co].has(key)){
-      companyGroups[co].set(key,{tour:r.tour,fahrer:r.fahrer,appid:r.appid,codes:[],plzs:[],geplant:r.geplant,bemerk:r.bemerk});
-    }
-    const entry=companyGroups[co].get(key);
-    if(r.code){
-      const parts=r.code.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean);
-      parts.forEach(p=>{if(!entry.codes.includes(p))entry.codes.push(p);});
-    }
-    if(r.plz){
-      const parts=r.plz.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean);
-      parts.forEach(p=>{if(!entry.plzs.includes(p))entry.plzs.push(p);});
-    }
-    if(!entry.fahrer&&r.fahrer)entry.fahrer=r.fahrer;
-    if(!entry.appid&&r.appid)entry.appid=r.appid;
-    if(!entry.geplant&&r.geplant)entry.geplant=r.geplant;
-    if(!entry.bemerk&&r.bemerk)entry.bemerk=r.bemerk;
+    if(!coMap[co].has(key))coMap[co].set(key,{tour:r.tour,fahrer:r.fahrer,appid:r.appid,codes:[],plzs:[],geplant:r.geplant,ist:r.ist||'',bemerk:r.bemerk});
+    const e=coMap[co].get(key);
+    if(r.code)r.code.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean).forEach(p=>{if(!e.codes.includes(p))e.codes.push(p);});
+    if(r.plz) r.plz.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean).forEach(p=>{if(!e.plzs.includes(p))e.plzs.push(p);});
+    if(!e.fahrer&&r.fahrer)e.fahrer=r.fahrer;
+    if(!e.appid&&r.appid)e.appid=r.appid;
+    if(!e.geplant&&r.geplant)e.geplant=r.geplant;
+    if(!e.ist&&r.ist)e.ist=r.ist;
+    if(!e.bemerk&&r.bemerk)e.bemerk=r.bemerk;
   });
   const coKeys=useSub
-    ?Object.keys(companyGroups).sort()
-    :DISP_ORDER.filter(c=>companyGroups[c]).concat(Object.keys(companyGroups).filter(c=>!DISP_ORDER.includes(c)));
+    ?Object.keys(coMap).sort()
+    :DISP_ORDER.filter(c=>coMap[c]).concat(Object.keys(coMap).filter(c=>!DISP_ORDER.includes(c)));
+  const srt=(a,b)=>{const na=parseInt(String(a.tour).replace(/[^\d]/g,'')),nb=parseInt(String(b.tour).replace(/[^\d]/g,''));return(!isNaN(na)&&!isNaN(nb))?na-nb:String(a.tour).localeCompare(String(b.tour));};
+  const byKey={};
+  coKeys.forEach(co=>{if(coMap[co])byKey[co]=Array.from(coMap[co].values()).sort(srt);});
   const date=_fmtDate($('sort-date').value);
   const loc=($('sort-loc').value.trim())||'Z&Z GmbH · NRW005';
-  const totalDrivers=coKeys.reduce((s,co)=>s+(companyGroups[co]?companyGroups[co].size:0),0);
-  const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #ccc;padding:8px 10px;font-size:13px;white-space:nowrap;text-align:center">${t}</th>`;
-  let html=`<div id="disp-inner" style="font-family:Arial,sans-serif;direction:rtl">
-    <div style="text-align:center;margin-bottom:16px;border-bottom:3px solid #1F2C5C;padding-bottom:10px">
-      <div style="font-size:20px;font-weight:bold;color:#1F2C5C">خطة التوزيع اليومية &nbsp;|&nbsp; ${date}</div>
-      <div style="font-size:13px;color:#555;margin-top:4px">Daily Dispatch Plan &nbsp;|&nbsp; ${totalDrivers} Drivers &nbsp;|&nbsp; ${loc}</div>
-    </div>`;
+  const totalDrv=coKeys.reduce((s,co)=>s+(byKey[co]?byKey[co].length:0),0);
+  // paginate: large companies own page; small ones share
+  const PAGE_MAX=12;
+  const pages=[];let cur=[],curN=0;
   coKeys.forEach(co=>{
-    if(!companyGroups[co])return;
-    const coColor=_coColor(co);
-    const tours=Array.from(companyGroups[co].values());
-    tours.sort((a,b)=>{
-      const na=parseInt(String(a.tour).replace(/[^\d]/g,'')),nb=parseInt(String(b.tour).replace(/[^\d]/g,''));
-      return(!isNaN(na)&&!isNaN(nb))?na-nb:String(a.tour).localeCompare(String(b.tour));
-    });
-    html+=`<div style="background:#1F2C5C;color:#fff;font-weight:bold;padding:8px 14px;margin-top:16px;border-radius:4px 4px 0 0;font-size:14px;letter-spacing:0.3px">${co} &nbsp;—&nbsp; ${tours.length} Drivers</div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:0"><thead><tr>
-      ${TH('رقم')}${TH('آوت آب')}${TH('السائق')}${TH('الأكواد')}${TH('البريدي')}${TH('المخطط')}${TH('ملاحظات')}
-    </tr></thead><tbody>`;
-    tours.forEach((t,idx)=>{
-      const bg=idx%2===0?'#fff':coColor;
-      const codes=t.codes.map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:12px;font-weight:bold">${c}</span>`).join(' ');
-      const plzs=t.plzs.map(p=>`<span style="background:#1e40af;color:#fff;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${p}</span>`).join(' ');
-      html+=`<tr style="background:${bg}">
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:14px;font-weight:bold">${t.tour||'—'}</td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.appid||'—'}</td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.fahrer||'—'}</td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center">${codes||'—'}</td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center">${plzs||'—'}</td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px"></td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px"></td>
-      </tr>`;
-    });
-    html+=`</tbody></table>`;
+    if(!byKey[co])return;
+    const t=byKey[co];
+    if(t.length>PAGE_MAX){
+      if(cur.length){pages.push(cur);cur=[];curN=0;}
+      for(let i=0;i<t.length;i+=PAGE_MAX)pages.push([{co,tours:t.slice(i,i+PAGE_MAX)}]);
+    }else if(t.length>6||curN+t.length>PAGE_MAX){
+      if(cur.length){pages.push(cur);cur=[];curN=0;}
+      pages.push([{co,tours:t}]);
+    }else{cur.push({co,tours:t});curN+=t.length;}
   });
-  html+=`</div>`;
+  if(cur.length)pages.push(cur);
+  const COLS=`<colgroup><col style="width:10mm"><col style="width:16mm"><col style="width:50mm"><col style="width:46mm"><col><col style="width:22mm"><col style="width:22mm"><col style="width:20mm"></colgroup>`;
+  const THEAD=`<tr class="dhr"><th>رقم</th><th>آوت آب<br><span style="font-size:6.5pt;font-weight:normal">OUT-APP</span></th><th>السائق<br><span style="font-size:6.5pt;font-weight:normal">Driver</span></th><th>الأكواد<br><span style="font-size:6.5pt;font-weight:normal">Codes</span></th><th>البريدي<br><span style="font-size:6.5pt;font-weight:normal">PLZ</span></th><th>المخطط<br><span style="font-size:6.5pt;font-weight:normal">Planned</span></th><th>الفعلي<br><span style="font-size:6.5pt;font-weight:normal">Actual</span></th><th>ملاحظات<br><span style="font-size:6.5pt;font-weight:normal">Notes</span></th></tr>`;
+  const buildSec=(co,tours,first)=>{
+    const t0=tours[0]?.tour,tN=tours[tours.length-1]?.tour;
+    const rng=tours.length>1?`Tours ${t0}–${tN}`:`Tour ${t0}`;
+    let s=`<div class="dsp-bd${first?'':' dsp-bdm'}">${co} &nbsp;·&nbsp; ${rng} &nbsp;·&nbsp; ${tours.length} Drivers</div>
+    <table class="dsp-tb">${COLS}<thead>${THEAD}</thead><tbody>`;
+    tours.forEach(t=>{
+      const pills=t.codes.map(c=>`<span class="dpil">${c}</span>`).join('');
+      const plzStr=t.plzs.join(' · ')||'—';
+      s+=`<tr class="ddr"><td class="dn">${t.tour}</td><td class="da">${t.appid||'—'}</td><td class="dd">${t.fahrer||'—'}</td><td class="dc">${pills||'—'}</td><td class="dp">${plzStr}</td><td class="dg">${t.geplant||''}</td><td class="di">${t.ist||''}</td><td class="dbm">${t.bemerk||''}</td></tr>`;
+    });
+    s+=`<tr><td class="dtot" colspan="5">${co} GESAMT &nbsp;·&nbsp; ${tours.length} Touren</td><td class="dtot"></td><td class="dtot"></td><td class="dtot"></td></tr></tbody></table>`;
+    return s;
+  };
+  const buildHdr=()=>`<div class="dsp-hd"><div class="dsp-ht">DISPOSITION – ${date}</div><div class="dsp-hm">Z&amp;Z GmbH Transporte &nbsp;|&nbsp; NRW005 &nbsp;|&nbsp; ${totalDrv} Drivers<br>${loc}</div></div>`;
+  const style=`<style id="ds">.dsp{font-family:Arial,sans-serif;font-size:9pt;background:#d0d0d0;padding:8px}.dsp-pg{background:#fff;margin:0 auto 10px;box-shadow:0 2px 8px rgba(0,0,0,.18);overflow:hidden}.dsp-hd{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:6px 10px}.dsp-ht{font-size:12.5pt;font-weight:bold}.dsp-hm{font-size:8pt;text-align:right;line-height:1.6}.dsp-bd{background:#0E7C3A;color:#fff;font-weight:bold;font-size:10pt;padding:5px 10px;text-transform:uppercase}.dsp-bdm{margin-top:5px}.dsp-tb{width:100%;border-collapse:collapse;table-layout:fixed}.dsp-tb th,.dsp-tb td{border:1px solid #bbb;padding:2px 4px;vertical-align:middle;word-wrap:break-word;overflow:hidden}.dhr th{background:#1F2C5C;color:#fff;font-size:7.5pt;text-align:center;font-weight:bold}.ddr .dn{width:10mm;background:#F2F2F2;font-weight:bold;text-align:center;font-size:9pt}.ddr .da{width:16mm;font-weight:bold;color:#1F2C5C;text-align:center;font-size:8.5pt}.ddr .dd{width:50mm;font-size:8.5pt}.ddr .dc{width:46mm;font-size:8pt}.ddr .dp{font-size:7.5pt}.ddr .dg{background:#D9E1F2;text-align:center;width:22mm;font-size:8.5pt}.ddr .di{background:#FFF2CC;text-align:center;width:22mm;font-size:8.5pt}.ddr .dbm{background:#FFF2CC;width:20mm;font-size:8.5pt}.ddr:nth-child(even) .dd,.ddr:nth-child(even) .dc,.ddr:nth-child(even) .dp{background:#F9F9F9}.dpil{display:inline-block;background:#C8102E;color:#fff;border-radius:3px;padding:0 3px;font-size:7pt;font-weight:bold;margin:0 2px 1px 0}.dtot{background:#1F2C5C;color:#fff;font-weight:bold;font-size:8.5pt;text-align:center;border-color:#1F2C5C!important}</style>`;
+  let html=`<div id="disp-inner"><div class="dsp">${style}`;
+  pages.forEach(pg=>{
+    html+=`<div class="dsp-pg">${buildHdr()}`;
+    pg.forEach((item,i)=>{html+=buildSec(item.co,item.tours,i===0);});
+    html+=`</div>`;
+  });
+  html+=`</div></div>`;
   $('dp-pages').innerHTML=html;
   $('sort-result').classList.remove('hidden');
 }
@@ -3232,22 +3232,38 @@ function printDisp(){
   const el=document.getElementById('disp-inner');
   if(!el){toast('لا يوجد جدول توزيع للطباعة','error');return;}
   const date=_fmtDate($('sort-date').value);
-  const win=window.open('','_blank','width=1100,height=800');
-  win.document.write(`<!DOCTYPE html><html lang="de"><head>
+  const win=window.open('','_blank','width=1200,height=900');
+  const content=el.innerHTML.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'');
+  win.document.write(`<!DOCTYPE html><html lang="ar"><head>
 <meta charset="UTF-8"><title>Disposition ${date}</title>
 <style>
+@page{size:A4 landscape;margin:7mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#fff;padding:14px;font-size:13px}
-table{width:100%;border-collapse:collapse;margin-bottom:0}
-th{background:#1F2C5C;color:white;border:1px solid #ccc;padding:8px 10px;text-align:center;white-space:nowrap}
-td{border:1px solid #ccc;padding:7px 10px;text-align:center}
-.pill{background:#C8102E;color:white;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:12px;font-weight:bold}
-.hdr-title{font-size:20px;font-weight:bold;color:#1F2C5C;text-align:center;border-bottom:3px solid #1F2C5C;padding-bottom:8px;margin-bottom:14px}
-.hdr-sub{font-size:13px;color:#555;text-align:center;margin-top:3px}
-.co-hdr{background:#1F2C5C;color:white;font-weight:bold;padding:8px 14px;margin-top:14px;border-radius:4px 4px 0 0;font-size:14px}
-@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}}
+body{font-family:Arial,sans-serif;font-size:9pt;background:#fff}
+.dsp{padding:0;background:#fff}
+.dsp-pg{background:#fff;width:100%;margin:0 auto;page-break-after:always;overflow:hidden}
+.dsp-pg:last-child{page-break-after:avoid}
+.dsp-hd{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:3mm 5mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.dsp-ht{font-size:13pt;font-weight:bold}
+.dsp-hm{font-size:8pt;text-align:right;line-height:1.6}
+.dsp-bd{background:#0E7C3A;color:#fff;font-weight:bold;font-size:10pt;padding:2.5mm 5mm;text-transform:uppercase;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.dsp-bdm{margin-top:2mm}
+.dsp-tb{width:100%;border-collapse:collapse;table-layout:fixed}
+.dsp-tb th,.dsp-tb td{border:1px solid #bbb;padding:1.5mm 2mm;vertical-align:middle;word-wrap:break-word;overflow:hidden}
+.dhr th{background:#1F2C5C;color:#fff;font-size:7.5pt;text-align:center;font-weight:bold;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.ddr .dn{width:12mm;background:#F2F2F2;font-weight:bold;text-align:center;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.ddr .da{width:18mm;font-weight:bold;color:#1F2C5C;text-align:center;font-size:8.5pt}
+.ddr .dd{width:52mm;font-size:8.5pt}
+.ddr .dc{width:48mm;font-size:8pt}
+.ddr .dp{width:85mm;font-size:7.5pt}
+.ddr .dg{width:24mm;background:#D9E1F2;text-align:center;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.ddr .di{width:24mm;background:#FFF2CC;text-align:center;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.ddr .dbm{width:20mm;background:#FFF2CC;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.ddr:nth-child(even) .dd,.ddr:nth-child(even) .dc,.ddr:nth-child(even) .dp{background:#F9F9F9;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.dpil{display:inline-block;background:#C8102E;color:#fff;border-radius:3px;padding:0 3px;font-size:7pt;font-weight:bold;margin:0 2px 1px 0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.dtot{background:#1F2C5C;color:#fff;font-weight:bold;font-size:8.5pt;text-align:center;border-color:#1F2C5C!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 </style></head><body>
-${el.innerHTML}
+<div class="dsp">${content}</div>
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
 </body></html>`);
   win.document.close();
