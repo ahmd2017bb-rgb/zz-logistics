@@ -3044,9 +3044,9 @@ function _autoDispAndRender(rawRows){
   const iTour   =ci('TOUR');
   // only explicit subcontractor column — "SUB" alone is stop-number in Amazon files
   const iSub    =ci('SUBUNTERNEHMER','UNTERNEHMER','COMPANY','FIRMA');
-  const iFahrer =ci('FAHRERNAME','FAHRER','DRIVER');
-  const iAppid  =ci('OUT-APP ID','OUT-APP','APP-ID','APP');
-  const iCode   =ci('3. CODE','3.CODE','CODE','COD');
+  const iFahrer =ci('FAHRERNAME','FAHRER','DRIVER','NAME');
+  const iAppid  =ci('OUT-APP ID','OUT-APP','APP-ID','APP','ID');
+  const iCode   =ci('3. CODE','3.CODE','CODES','CODE','COD');
   const iPlz    =ci('PLZ','POSTLEITZAHL','POSTAL','ZIP');
   const iGeplant=ci('GEPLANT','PLANNED','PLAN');
   const iIst    =ci('IST','ACTUAL');
@@ -3161,43 +3161,64 @@ function _buildFromDispMapper(){
   _renderDisposition(objRows,useSub);
 }
 function _renderDisposition(rows,useSub){
-  // group by sub column OR by hardcoded tour-to-company mapping
-  const groups={};
+  // Group by company, then aggregate by TOUR NO within each company
+  const companyGroups={};
   rows.forEach(r=>{
     const co=useSub?(r.sub||'OHNE FIRMA'):_dispCo(r.tour);
-    if(!groups[co])groups[co]=[];
-    groups[co].push(r);
+    if(!companyGroups[co])companyGroups[co]=new Map();
+    const key=String(r.tour);
+    if(!companyGroups[co].has(key)){
+      companyGroups[co].set(key,{tour:r.tour,fahrer:r.fahrer,appid:r.appid,codes:[],geplant:r.geplant,bemerk:r.bemerk});
+    }
+    const entry=companyGroups[co].get(key);
+    if(r.code){
+      // split on comma/space to handle multi-value cells, deduplicate
+      const parts=r.code.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean);
+      parts.forEach(p=>{if(!entry.codes.includes(p))entry.codes.push(p);});
+    }
+    if(!entry.fahrer&&r.fahrer)entry.fahrer=r.fahrer;
+    if(!entry.appid&&r.appid)entry.appid=r.appid;
+    if(!entry.geplant&&r.geplant)entry.geplant=r.geplant;
+    if(!entry.bemerk&&r.bemerk)entry.bemerk=r.bemerk;
   });
-  // order: if using sub column, sort alphabetically; else use DISP_ORDER
-  const coKeys=useSub?Object.keys(groups).sort():DISP_ORDER.filter(c=>groups[c]).concat(Object.keys(groups).filter(c=>!DISP_ORDER.includes(c)));
+  const coKeys=useSub
+    ?Object.keys(companyGroups).sort()
+    :DISP_ORDER.filter(c=>companyGroups[c]).concat(Object.keys(companyGroups).filter(c=>!DISP_ORDER.includes(c)));
   const date=_fmtDate($('sort-date').value);
   const loc=($('sort-loc').value.trim())||'Z&Z GmbH · NRW005';
-  const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #bbb;padding:7px 10px;font-size:13px;white-space:nowrap">${t}</th>`;
-  const TD=(t)=>`<td style="border:1px solid #bbb;padding:7px 10px;text-align:center;font-size:13px">${t||'—'}</td>`;
-  let html=`<div id="disp-inner" style="font-family:Arial,sans-serif">
-    <div style="margin-bottom:14px">
-      <h2 style="color:#1F2C5C;margin:0 0 4px;font-size:18px">DISPOSITION – ${date}</h2>
-      <p style="margin:0;font-size:13px;color:#555"><b>Z&amp;Z GmbH Transporte</b> | Depot: NRW005 | ${loc}</p>
+  const totalDrivers=coKeys.reduce((s,co)=>s+(companyGroups[co]?companyGroups[co].size:0),0);
+  const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #ccc;padding:8px 10px;font-size:13px;white-space:nowrap;text-align:center">${t}</th>`;
+  let html=`<div id="disp-inner" style="font-family:Arial,sans-serif;direction:rtl">
+    <div style="text-align:center;margin-bottom:16px;border-bottom:3px solid #1F2C5C;padding-bottom:10px">
+      <div style="font-size:20px;font-weight:bold;color:#1F2C5C">خطة التوزيع اليومية &nbsp;|&nbsp; ${date}</div>
+      <div style="font-size:13px;color:#555;margin-top:4px">Daily Dispatch Plan &nbsp;|&nbsp; ${totalDrivers} Drivers &nbsp;|&nbsp; ${loc}</div>
     </div>`;
   coKeys.forEach(co=>{
-    if(!groups[co])return;
-    html+=`<div style="background:#0E7C3A;color:#fff;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px">Subunternehmer: ${co}</div>
+    if(!companyGroups[co])return;
+    const coColor=_coColor(co);
+    const tours=Array.from(companyGroups[co].values());
+    tours.sort((a,b)=>{
+      const na=parseInt(String(a.tour).replace(/[^\d]/g,'')),nb=parseInt(String(b.tour).replace(/[^\d]/g,''));
+      return(!isNaN(na)&&!isNaN(nb))?na-nb:String(a.tour).localeCompare(String(b.tour));
+    });
+    html+=`<div style="background:#1F2C5C;color:#fff;font-weight:bold;padding:8px 14px;margin-top:16px;border-radius:4px 4px 0 0;font-size:14px;letter-spacing:0.3px">${co} &nbsp;—&nbsp; ${tours.length} Drivers</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:0"><thead><tr>
-      ${TH('TOUR')}${TH('OUT-APP ID')}${TH('FAHRER / السائق')}${TH('3. CODE')}${TH('PLZ')}${TH('GEPLANT')}${TH('IST')}${TH('BEMERKUNG')}
+      ${TH('رقم')}${TH('آوت آب')}${TH('السائق')}${TH('الأكواد')}${TH('البريدي')}${TH('المخطط')}${TH('ملاحظات')}
     </tr></thead><tbody>`;
-    groups[co].forEach(r=>{
-      const codes=r.code.split(/[,·\s]+/).filter(Boolean)
-        .map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${c}</span>`).join('');
-      html+=`<tr>
-        ${TD(r.tour)}${TD(r.appid)}${TD(r.fahrer)}
-        <td style="border:1px solid #bbb;padding:7px 10px;text-align:center">${codes||'—'}</td>
-        ${TD(r.plz)}${TD(r.geplant)}${TD(r.ist)}${TD(r.bemerk)}
+    tours.forEach((t,idx)=>{
+      const bg=idx%2===0?'#fff':coColor;
+      const codes=t.codes.map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:12px;font-weight:bold">${c}</span>`).join(' ');
+      html+=`<tr style="background:${bg}">
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:14px;font-weight:bold">${t.tour||'—'}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.appid||'—'}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.fahrer||'—'}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center">${codes||'—'}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px"></td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.geplant||''}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.bemerk||''}</td>
       </tr>`;
     });
-    html+=`<tr>
-      <td colspan="5" style="border:1px solid #bbb;padding:7px 10px;font-weight:bold;font-size:13px;background:#f8fafc">${co} GESAMT: ${groups[co].length} Touren</td>
-      <td colspan="3" style="border:1px solid #bbb;padding:7px;background:#f8fafc"></td>
-    </tr></tbody></table>`;
+    html+=`</tbody></table>`;
   });
   html+=`</div>`;
   $('dp-pages').innerHTML=html;
@@ -3214,10 +3235,12 @@ function printDisp(){
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#fff;padding:14px;font-size:13px}
 table{width:100%;border-collapse:collapse;margin-bottom:0}
-th{background:#1F2C5C;color:white;border:1px solid #bbb;padding:7px 10px;text-align:center;white-space:nowrap}
-td{border:1px solid #bbb;padding:7px 10px;text-align:center}
-.pill{background:#C8102E;color:white;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px}
-.sub-hdr{background:#0E7C3A;color:white;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px}
+th{background:#1F2C5C;color:white;border:1px solid #ccc;padding:8px 10px;text-align:center;white-space:nowrap}
+td{border:1px solid #ccc;padding:7px 10px;text-align:center}
+.pill{background:#C8102E;color:white;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:12px;font-weight:bold}
+.hdr-title{font-size:20px;font-weight:bold;color:#1F2C5C;text-align:center;border-bottom:3px solid #1F2C5C;padding-bottom:8px;margin-bottom:14px}
+.hdr-sub{font-size:13px;color:#555;text-align:center;margin-top:3px}
+.co-hdr{background:#1F2C5C;color:white;font-weight:bold;padding:8px 14px;margin-top:14px;border-radius:4px 4px 0 0;font-size:14px}
 @media print{@page{size:A4 landscape;margin:8mm}body{padding:0}}
 </style></head><body>
 ${el.innerHTML}
