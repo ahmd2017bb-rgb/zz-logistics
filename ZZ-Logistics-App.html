@@ -3168,13 +3168,16 @@ function _renderDisposition(rows,useSub){
     if(!companyGroups[co])companyGroups[co]=new Map();
     const key=String(r.tour);
     if(!companyGroups[co].has(key)){
-      companyGroups[co].set(key,{tour:r.tour,fahrer:r.fahrer,appid:r.appid,codes:[],geplant:r.geplant,bemerk:r.bemerk});
+      companyGroups[co].set(key,{tour:r.tour,fahrer:r.fahrer,appid:r.appid,codes:[],plzs:[],geplant:r.geplant,bemerk:r.bemerk});
     }
     const entry=companyGroups[co].get(key);
     if(r.code){
-      // split on comma/space to handle multi-value cells, deduplicate
       const parts=r.code.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean);
       parts.forEach(p=>{if(!entry.codes.includes(p))entry.codes.push(p);});
+    }
+    if(r.plz){
+      const parts=r.plz.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean);
+      parts.forEach(p=>{if(!entry.plzs.includes(p))entry.plzs.push(p);});
     }
     if(!entry.fahrer&&r.fahrer)entry.fahrer=r.fahrer;
     if(!entry.appid&&r.appid)entry.appid=r.appid;
@@ -3208,14 +3211,15 @@ function _renderDisposition(rows,useSub){
     tours.forEach((t,idx)=>{
       const bg=idx%2===0?'#fff':coColor;
       const codes=t.codes.map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:12px;font-weight:bold">${c}</span>`).join(' ');
+      const plzs=t.plzs.map(p=>`<span style="background:#1e40af;color:#fff;padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${p}</span>`).join(' ');
       html+=`<tr style="background:${bg}">
         <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:14px;font-weight:bold">${t.tour||'—'}</td>
         <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.appid||'—'}</td>
         <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.fahrer||'—'}</td>
         <td style="border:1px solid #ccc;padding:7px 10px;text-align:center">${codes||'—'}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center">${plzs||'—'}</td>
         <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px"></td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.geplant||''}</td>
-        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px">${t.bemerk||''}</td>
+        <td style="border:1px solid #ccc;padding:7px 10px;text-align:center;font-size:13px"></td>
       </tr>`;
     });
     html+=`</tbody></table>`;
