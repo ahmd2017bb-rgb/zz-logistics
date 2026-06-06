@@ -3511,6 +3511,30 @@ async function loadAllData(){
     const r=await api('GET','/api/data');
     _sd=r.ok?(await r.json()):{};
   }catch(e){_sd={};}
+
+  // If server returned no meaningful data (DB reset / new server) — restore from localStorage backup
+  const _hasSrvData=(_sd.staff&&_sd.staff.length)||(_sd.attendance&&_sd.attendance.length)||
+                    (_sd.payments&&_sd.payments.length)||(_sd.orders&&_sd.orders.length);
+  if(!_hasSrvData){
+    try{
+      const bak=localStorage.getItem('zzlg_srvbak');
+      if(bak){
+        const bd=JSON.parse(bak);
+        const _hasBakData=(bd.staff&&bd.staff.length)||(bd.attendance&&bd.attendance.length)||
+                          (bd.payments&&bd.payments.length)||(bd.orders&&bd.orders.length);
+        if(_hasBakData){
+          _sd=bd;
+          // Re-upload restored data to server
+          setTimeout(async()=>{try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}},600);
+          toast('✅ تم استعادة بياناتك المحفوظة تلقائياً','success');
+        }
+      }
+    }catch(e){}
+  }else{
+    // Server has data — keep localStorage in sync
+    try{localStorage.setItem('zzlg_srvbak',JSON.stringify(_sd));}catch(e){}
+  }
+
   if(_sd.orders){orders=_sd.orders;}
   if(_sd.drivers){drivers=_sd.drivers;}
   if(_sd.staff){staff=_sd.staff;}
@@ -3523,7 +3547,7 @@ async function loadAllData(){
   if(m.nextStaffId)nextStaffId=m.nextStaffId;
   if(m.nextAttId)nextAttId=m.nextAttId;
   if(m.nextPayId)nextPayId=m.nextPayId;
-  // First use: persist the sample data to the server
+  // First use: persist initial data to server
   if(!_sd.orders){autosave();}
 }
 
@@ -3531,6 +3555,8 @@ function _syncSD(){
   _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;
   _sd.attendance=attendance;_sd.payments=payments;_sd.staffArchive=staffArchive;
   _sd.meta={nextOId,nextDId,nextStaffId,nextAttId,nextPayId};
+  // Always mirror to localStorage — resilient backup if server DB resets
+  try{localStorage.setItem('zzlg_srvbak',JSON.stringify(_sd));}catch(e){}
 }
 function autosave(){
   _syncSD();
@@ -3548,12 +3574,11 @@ async function _pushToServer(){
   try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
 }
 
-// Called before page closes — flushes any pending save immediately
+// Called before page closes — always flush to localStorage and server
 window.addEventListener('beforeunload',()=>{
-  if(_saveTimer){
-    clearTimeout(_saveTimer);
-    fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
-  }
+  _syncSD(); // updates localStorage as side effect
+  clearTimeout(_saveTimer);_saveTimer=null;
+  fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
 });
 
 function showSaveIndicator(){
