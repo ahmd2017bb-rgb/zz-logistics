@@ -1118,7 +1118,10 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <input type="hidden" id="ord-edit-id">
       <div class="form-group"><label>عنوان المهمة *</label><input type="text" id="ord-title" placeholder="اكتب عنوان المهمة..."></div>
       <div class="form-group"><label>تفاصيل المهمة *</label><textarea id="ord-body" placeholder="اكتب تفاصيل المهمة للموظف التالي..." rows="4" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical"></textarea></div>
-      <div class="form-group"><label>كتبها</label><input type="text" id="ord-author" placeholder="اسم الموظف"></div>
+      <div class="frow">
+        <div class="form-group"><label>كتبها</label><input type="text" id="ord-author" placeholder="اسم الموظف"></div>
+        <div class="form-group"><label>التاريخ</label><input type="date" id="ord-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"></div>
+      </div>
       <div class="form-group"><label>ملاحظة</label><input type="text" id="ord-notes" placeholder="أي ملاحظة إضافية..."></div>
     </div>
     <div class="modal-ft">
@@ -2113,12 +2116,14 @@ function openOrderModal(t){
     $('ord-title').value=t.title;
     $('ord-body').value=t.body;
     $('ord-author').value=t.createdBy||'';
+    $('ord-date').value=t.taskDate||todayStr();
     $('ord-notes').value=t.notes||'';
   }else{
     $('modal-order-h').textContent='مهمة جديدة';
     $('ord-edit-id').value='';
     $('ord-title').value='';$('ord-body').value='';
     $('ord-author').value='';$('ord-notes').value='';
+    $('ord-date').value=todayStr();
   }
   openM('modal-order');
 }
@@ -2128,8 +2133,8 @@ function saveOrder(){
   const body=$('ord-body').value.trim();
   if(!title||!body){toast('يرجى ملء العنوان والتفاصيل *','error');return}
   const eid=$('ord-edit-id').value;
-  const now=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'2-digit',day:'2-digit'})+' '+new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
-  const data={title,body,createdBy:$('ord-author').value.trim(),notes:$('ord-notes').value.trim(),createdAt:now};
+  const now=new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+  const data={title,body,createdBy:$('ord-author').value.trim(),taskDate:$('ord-date').value||todayStr(),notes:$('ord-notes').value.trim(),createdAt:($('ord-date').value||todayStr())+' '+now};
   if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث المهمة','success')}
   else{orders.push({id:nextOId++,status:'pending',...data});toast('تم إضافة المهمة','success')}
   closeModal('modal-order');renderOrders();autosave();
