@@ -3223,9 +3223,29 @@ async function startNRWLoad(){
   if(!nrwLeafletReady){toast('جاري تحميل الخريطة، انتظر لحظة...','error');return;}
   $('nrw-start-btn').style.display='none';
   $('nrw-spin').style.display='block';
+
+  // Load cache from localStorage
+  let cache={};
+  try{const c=localStorage.getItem('zzlg_nrw_cache');if(c)cache=JSON.parse(c);}catch(e){}
+
   const total=NRW_PLZ.length;let done=0,ok=0;
   $('nrw-obar').style.width='0';$('nrw-opct').textContent=`0 / ${total}`;
-  for(const plz of NRW_PLZ){
+
+  const toFetch=NRW_PLZ.filter(plz=>!cache[plz]);
+  const fromCache=NRW_PLZ.filter(plz=>!!cache[plz]);
+
+  // Render cached zones instantly
+  for(const plz of fromCache){
+    const {geojson,city}=cache[plz];
+    nrwAddZone(plz,city,geojson,nrwColorForPLZ(plz));
+    done++;ok++;
+    $('nrw-obar').style.width=Math.round((done/total)*100)+'%';
+    $('nrw-opct').textContent=`${done} / ${total}`;
+  }
+  if(fromCache.length>0)$('nrw-otxt').textContent=`⚡ ${fromCache.length} منطقة من الذاكرة`;
+
+  // Fetch missing zones from Nominatim
+  for(const plz of toFetch){
     try{
       $('nrw-otxt').textContent=`جاري تحميل PLZ ${plz}…`;
       const res=await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${plz}&country=de&format=json&limit=1&polygon_geojson=1`,{headers:{'Accept-Language':'de'}});
@@ -3233,16 +3253,20 @@ async function startNRWLoad(){
       const data=await res.json();
       if(!data.length||!data[0].geojson)throw new Error('لا نتائج');
       const city=data[0].display_name.split(',')[0].trim();
-      const color=nrwColorForPLZ(plz);
-      nrwAddZone(plz,city,data[0].geojson,color);
+      const geojson=data[0].geojson;
+      cache[plz]={geojson,city};
+      nrwAddZone(plz,city,geojson,nrwColorForPLZ(plz));
       ok++;
     }catch(e){console.warn('PLZ',plz,e.message);}
     done++;
-    const pct=Math.round((done/total)*100);
-    $('nrw-obar').style.width=pct+'%';
+    $('nrw-obar').style.width=Math.round((done/total)*100)+'%';
     $('nrw-opct').textContent=`${done} / ${total}`;
-    await new Promise(r=>setTimeout(r,1100)); // Nominatim rate limit
+    await new Promise(r=>setTimeout(r,1100));
   }
+
+  // Save updated cache
+  try{localStorage.setItem('zzlg_nrw_cache',JSON.stringify(cache));}catch(e){}
+
   $('nrw-spin').style.display='none';
   $('nrw-obar').style.background='#66BB6A';
   $('nrw-otxt').textContent=`✅ ${ok} من ${total} منطقة تم تحميلها`;
