@@ -747,6 +747,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="date-nav-title" id="dn-label">...</div>
           <span id="dn-past-tag" class="date-is-past hidden" data-i18n="date.past_view">عرض سابق (قراءة فقط)</span>
           <button class="date-nav-btn date-nav-save" data-i18n="date.save" onclick="saveDay()">💾 حفظ</button>
+          <button class="date-nav-btn" style="background:#f0fdf4;color:#166534;border-color:#86efac" onclick="printDashboard()">🖨️ طباعة</button>
+          <button class="date-nav-btn" style="background:#eff6ff;color:#1d4ed8;border-color:#93c5fd" onclick="shareDashboard()">📤 مشاركة</button>
           <button class="date-nav-btn" data-i18n="date.next" onclick="changeDay(+1)" id="dn-next-btn">اليوم التالي ←</button>
         </div>
 
@@ -1778,6 +1780,82 @@ function _downloadImg(blob){
   const a=document.createElement('a');
   a.href=url;a.download=`مسترجعات-${currentDate}.png`;
   a.click();URL.revokeObjectURL(url);
+}
+
+async function shareDashboard(){
+  toast('جاري تصوير اللوحة...','');
+  const el=document.getElementById('pv-dashboard');
+  try{
+    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#f8fafc',
+      ignoreElements:e=>e.classList.contains('sc-edit-wrap')||e.classList.contains('sc-edit-btn')||e.id==='dn-past-tag'&&e.classList.contains('hidden')});
+    canvas.toBlob(async(blob)=>{
+      const file=new File([blob],`لوحة-التحكم-${currentDate}.png`,{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:`لوحة التحكم — ${currentDate}`});}
+        catch(e){if(e.name!=='AbortError')_downloadImg(blob);}
+      }else{
+        _downloadImg(blob);
+        toast('تم حفظ الصورة — شاركها من جهازك','success');
+      }
+    },'image/png');
+  }catch(e){toast('حدث خطأ أثناء التصوير','error');}
+}
+
+function printDashboard(){
+  const pkgs=$('sc-packages').textContent||'0';
+  const del=$('sc-delivered').textContent||'0';
+  const ret=$('sc-returns').textContent||'0';
+  const retRows=document.querySelectorAll('.ret-row');
+  let retTotal=0, retTrs='';
+  retRows.forEach((tr,i)=>{
+    const inp=tr.querySelectorAll('input');
+    const num=inp[0].value||'—';
+    const qty=parseInt(inp[1].value)||0;
+    const drv=inp[2].value||'—';
+    const tour=inp[3].value||'—';
+    retTotal+=qty;
+    retTrs+=`<tr><td>${i+1}</td><td>${num}</td><td>${qty}</td><td>${drv}</td><td>${tour}</td></tr>`;
+  });
+  const taskRows=document.querySelectorAll('#db-orders tr');
+  let taskTrs='';
+  taskRows.forEach(tr=>{taskTrs+=`<tr>${[...tr.cells].map(c=>`<td>${c.innerHTML}</td>`).join('')}</tr>`;});
+
+  const html=`<html dir="rtl"><head><meta charset="utf-8"><title>لوحة التحكم — ${currentDate}</title>
+  <style>
+    *{box-sizing:border-box}body{font-family:Arial,sans-serif;padding:24px;direction:rtl;color:#111;background:#f8fafc}
+    h1{text-align:center;color:#1e3a5f;margin-bottom:4px;font-size:22px}
+    .sub{text-align:center;color:#666;font-size:13px;margin-bottom:20px}
+    .stats{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+    .stat{flex:1;min-width:140px;padding:16px;border-radius:10px;text-align:center}
+    .stat.blue{background:#dbeafe;color:#1d4ed8}.stat.green{background:#dcfce7;color:#166534}.stat.purple{background:#ede9fe;color:#7c3aed}
+    .stat-num{font-size:32px;font-weight:800}.stat-lbl{font-size:13px;margin-top:4px;opacity:.8}
+    h3{color:#1e3a5f;margin:16px 0 8px;font-size:15px}
+    table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px}
+    th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:right}
+    th{background:#1e3a5f;color:#fff}
+    tr:nth-child(even){background:#f1f5f9}
+    .total-row td{font-weight:700;background:#fff8e1}
+    @media print{body{padding:10px}}
+  </style></head><body>
+  <h1>📊 لوحة التحكم — Z&amp;Z Logistics</h1>
+  <p class="sub">${currentDate}</p>
+  <div class="stats">
+    <div class="stat blue"><div class="stat-num">${pkgs}</div><div class="stat-lbl">📦 كمية الطرود</div></div>
+    <div class="stat green"><div class="stat-num">${del}</div><div class="stat-lbl">✅ تم التسليم</div></div>
+    <div class="stat purple"><div class="stat-num">${ret}</div><div class="stat-lbl">↩ مسترجع</div></div>
+  </div>
+  <h3>📋 المهام المعلقة</h3>
+  <table><thead><tr><th>المهمة</th><th>كتبها</th><th>الحالة</th></tr></thead><tbody>${taskTrs||'<tr><td colspan="3" style="text-align:center;color:#999">لا توجد مهام معلقة</td></tr>'}</tbody></table>
+  <h3>↩ جدول المسترجعات</h3>
+  <table>
+    <thead><tr><th>#</th><th>الرقم</th><th>الكمية</th><th>اسم الشفير</th><th>التور</th></tr></thead>
+    <tbody>${retTrs||'<tr><td colspan="5" style="text-align:center;color:#999">لا توجد مسترجعات</td></tr>'}</tbody>
+    <tfoot><tr class="total-row"><td colspan="2">المجموع</td><td>${retTotal}</td><td colspan="2">طرد</td></tr></tfoot>
+  </table>
+  <script>setTimeout(()=>{window.print();},300);<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
 }
 
 function printReturns(){
