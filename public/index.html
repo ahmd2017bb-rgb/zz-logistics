@@ -566,12 +566,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
     </div>
     <div class="auth-or"><span data-i18n="login.or">أو</span></div>
     <button class="btn btn-outline-green fw" onclick="showSignup()" data-i18n="login.create_account">＋ إنشاء حساب جديد</button>
-    <div id="offline-btn-wrap" class="hidden" style="margin-top:14px">
-      <button class="btn fw" onclick="enterOfflineMode()" style="background:#fff8e1;border:2px solid #f59e0b;color:#92400e;font-weight:700">
-        📱 دخول محلي — بدون سيرفر
-      </button>
-      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:5px">يعمل من البيانات المحفوظة في متصفحك</p>
-    </div>
   </div>
 </main>
 
@@ -1323,7 +1317,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 // ══════════════════════════════════════════════════
 let _sd = {};           // in-memory mirror of server data
 let _saveTimer = null;  // debounce handle
-let _offlineMode = false; // true when server is unreachable
 
 async function api(method, url, body) {
   const opts = { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } };
@@ -1857,13 +1850,11 @@ function enterApp(acct){
 }
 
 async function doLogout(){
-  _offlineMode=false;
   try{await api('POST','/api/auth/logout');}catch(e){}
   currentUser=null;
   $('mainApp').classList.add('hidden');
   $('loginScreen').classList.remove('hidden');
   $('login-identifier').value='';$('login-pass').value='';$('msg').textContent='';
-  const ob=$('offline-btn-wrap');if(ob)ob.classList.add('hidden');
 }
 
 // ── SECURITY QUESTIONS ─────────────────────────
@@ -1884,30 +1875,6 @@ function populateSecQuestions(){
 }
 
 // ── STARTUP ────────────────────────────────────
-function _applySDtoMemory(){
-  if(_sd.orders)orders=_sd.orders;
-  if(_sd.drivers)drivers=_sd.drivers;
-  if(_sd.staff)staff=_sd.staff;
-  if(_sd.attendance)attendance=_sd.attendance;
-  if(_sd.payments)payments=_sd.payments;
-  if(_sd.staffArchive)staffArchive=_sd.staffArchive;
-  const m=_sd.meta||{};
-  if(m.nextOId)nextOId=m.nextOId;
-  if(m.nextDId)nextDId=m.nextDId;
-  if(m.nextStaffId)nextStaffId=m.nextStaffId;
-  if(m.nextAttId)nextAttId=m.nextAttId;
-  if(m.nextPayId)nextPayId=m.nextPayId;
-}
-
-function enterOfflineMode(){
-  _offlineMode=true;
-  const bak=localStorage.getItem('zzlg_srvbak');
-  if(bak){try{_sd=JSON.parse(bak);_applySDtoMemory();}catch(e){}}
-  currentUser={id:0,name:'مدير',role:'admin'};
-  enterApp(currentUser);
-  setTimeout(()=>toast('📱 وضع محلي — التغييرات تُحفظ في المتصفح',''),500);
-}
-
 async function checkFirstRun(){
   populateSecQuestions();
   try{
@@ -1923,28 +1890,7 @@ async function checkFirstRun(){
       $('loginScreen').classList.add('hidden');
       $('setupScreen').classList.remove('hidden');
     }
-  }catch(e){
-    // Server unreachable — try auto offline mode with localStorage backup
-    const bak=localStorage.getItem('zzlg_srvbak');
-    if(bak){
-      try{
-        const bd=JSON.parse(bak);
-        const hasData=(bd.staff&&bd.staff.length)||(bd.attendance&&bd.attendance.length)||(bd.payments&&bd.payments.length)||(bd.orders&&bd.orders.length);
-        if(hasData){
-          _sd=bd;_applySDtoMemory();
-          _offlineMode=true;
-          currentUser={id:0,name:'مدير',role:'admin'};
-          enterApp(currentUser);
-          setTimeout(()=>toast('📱 وضع محلي — تم تحميل بياناتك المحفوظة',''),600);
-          return;
-        }
-      }catch(e2){}
-    }
-    // No local data — show offline button + warning
-    $('msg').textContent='⚠️ تعذّر الاتصال بالسيرفر';
-    const ob=$('offline-btn-wrap');
-    if(ob)ob.classList.remove('hidden');
-  }
+  }catch(e){/* network error — stay on login screen */}
 }
 
 // ── SIGNUP ─────────────────────────────────────
@@ -3565,30 +3511,6 @@ async function loadAllData(){
     const r=await api('GET','/api/data');
     _sd=r.ok?(await r.json()):{};
   }catch(e){_sd={};}
-
-  // If server returned no meaningful data (DB reset / new server) — restore from localStorage backup
-  const _hasSrvData=(_sd.staff&&_sd.staff.length)||(_sd.attendance&&_sd.attendance.length)||
-                    (_sd.payments&&_sd.payments.length)||(_sd.orders&&_sd.orders.length);
-  if(!_hasSrvData){
-    try{
-      const bak=localStorage.getItem('zzlg_srvbak');
-      if(bak){
-        const bd=JSON.parse(bak);
-        const _hasBakData=(bd.staff&&bd.staff.length)||(bd.attendance&&bd.attendance.length)||
-                          (bd.payments&&bd.payments.length)||(bd.orders&&bd.orders.length);
-        if(_hasBakData){
-          _sd=bd;
-          // Re-upload restored data to server
-          setTimeout(async()=>{try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}},600);
-          toast('✅ تم استعادة بياناتك المحفوظة تلقائياً','success');
-        }
-      }
-    }catch(e){}
-  }else{
-    // Server has data — keep localStorage in sync
-    try{localStorage.setItem('zzlg_srvbak',JSON.stringify(_sd));}catch(e){}
-  }
-
   if(_sd.orders){orders=_sd.orders;}
   if(_sd.drivers){drivers=_sd.drivers;}
   if(_sd.staff){staff=_sd.staff;}
@@ -3601,7 +3523,7 @@ async function loadAllData(){
   if(m.nextStaffId)nextStaffId=m.nextStaffId;
   if(m.nextAttId)nextAttId=m.nextAttId;
   if(m.nextPayId)nextPayId=m.nextPayId;
-  // First use: persist initial data to server
+  // First use: persist the sample data to the server
   if(!_sd.orders){autosave();}
 }
 
@@ -3609,19 +3531,15 @@ function _syncSD(){
   _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;
   _sd.attendance=attendance;_sd.payments=payments;_sd.staffArchive=staffArchive;
   _sd.meta={nextOId,nextDId,nextStaffId,nextAttId,nextPayId};
-  // Always mirror to localStorage — resilient backup if server DB resets
-  try{localStorage.setItem('zzlg_srvbak',JSON.stringify(_sd));}catch(e){}
 }
 function autosave(){
-  _syncSD(); // always updates localStorage
-  if(_offlineMode)return;
+  _syncSD();
   clearTimeout(_saveTimer);
   _saveTimer=setTimeout(()=>_pushToServer(),200);
 }
 // For CRUD operations — saves immediately, no debounce
 function autosaveNow(){
-  _syncSD(); // always updates localStorage
-  if(_offlineMode)return;
+  _syncSD();
   clearTimeout(_saveTimer);_saveTimer=null;
   _pushToServer();
 }
@@ -3630,11 +3548,12 @@ async function _pushToServer(){
   try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
 }
 
-// Called before page closes — always flush to localStorage and server
+// Called before page closes — flushes any pending save immediately
 window.addEventListener('beforeunload',()=>{
-  _syncSD(); // updates localStorage as side effect
-  clearTimeout(_saveTimer);_saveTimer=null;
-  fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
+  if(_saveTimer){
+    clearTimeout(_saveTimer);
+    fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
+  }
 });
 
 function showSaveIndicator(){
