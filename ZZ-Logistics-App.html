@@ -528,6 +528,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 .sh-body{padding:0 14px 14px;border-top:1px solid var(--border);}
 .sh-sec{font-size:12px;font-weight:700;color:var(--primary);margin:12px 0 6px;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -1697,26 +1698,86 @@ document.addEventListener('keydown',function(e){
 // ══════════════════════════════════════════════════
 let retRowId=1;
 
-function shareReturns(){
+async function shareReturns(){
   const rows=document.querySelectorAll('.ret-row');
   if(rows.length===0){toast('لا توجد بيانات للمشاركة','error');return;}
-  let text=`↩ جدول المسترجعات — ${currentDate}\n${'─'.repeat(28)}\n`;
+
+  // Collect data
   let total=0;
+  const data=[];
   rows.forEach((tr,i)=>{
     const inp=tr.querySelectorAll('input');
-    const num=inp[0].value||'—';
-    const qty=inp[1].value||'0';
-    const drv=inp[2].value||'—';
-    const tour=inp[3].value||'—';
-    total+=parseInt(qty)||0;
-    text+=`${i+1}. رقم: ${num} | كمية: ${qty} | ${drv} | ${tour}\n`;
+    const num=inp[0].value.trim()||'—';
+    const qty=parseInt(inp[1].value)||0;
+    const drv=inp[2].value.trim()||'—';
+    const tour=inp[3].value.trim()||'—';
+    total+=qty;
+    data.push({i:i+1,num,qty,drv,tour});
   });
-  text+=`${'─'.repeat(28)}\nالمجموع: ${total} طرد`;
-  if(navigator.share){
-    navigator.share({title:'جدول المسترجعات',text}).catch(()=>{});
-  }else{
-    window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+
+  // Build hidden table for screenshot
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;left:-9999px;top:0;background:#fff;padding:0;font-family:Arial,sans-serif;direction:rtl;width:560px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)';
+  wrap.innerHTML=`
+    <div style="background:#1e3a5f;color:#fff;padding:16px 20px;text-align:center">
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">↩ جدول المسترجعات</div>
+      <div style="font-size:13px;opacity:.8">Z&amp;Z Logistics — ${currentDate}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      <thead>
+        <tr style="background:#2d5a8e;color:#fff">
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">#</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">الرقم</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">الكمية</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:right">اسم الشفير</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">التور</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map((r,i)=>`
+        <tr style="background:${i%2===0?'#fff':'#f8fafc'}">
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center;color:#6b7280;font-weight:700">${r.i}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center">${r.num}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center;font-weight:700;color:#1d4ed8">${r.qty}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:right">${r.drv}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center">${r.tour}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:#fff8e1;font-weight:700">
+          <td colspan="2" style="padding:10px 12px;border:1px solid #e5e7eb;text-align:center">المجموع</td>
+          <td style="padding:10px 12px;border:1px solid #e5e7eb;text-align:center;color:#92400e;font-size:16px">${total}</td>
+          <td colspan="2" style="padding:10px 12px;border:1px solid #e5e7eb;color:#92400e">طرد</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div style="background:#f1f5f9;padding:8px 16px;font-size:11px;color:#94a3b8;text-align:center">Z&amp;Z Logistics App</div>
+  `;
+  document.body.appendChild(wrap);
+
+  try{
+    const canvas=await html2canvas(wrap,{scale:2,useCORS:true,backgroundColor:'#fff'});
+    document.body.removeChild(wrap);
+    canvas.toBlob(async(blob)=>{
+      const file=new File([blob],`مسترجعات-${currentDate}.png`,{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'جدول المسترجعات'});}
+        catch(e){if(e.name!=='AbortError')_downloadImg(blob);}
+      }else{
+        _downloadImg(blob);
+        toast('تم حفظ الصورة — شاركها من جهازك','success');
+      }
+    },'image/png');
+  }catch(e){
+    if(document.body.contains(wrap))document.body.removeChild(wrap);
+    toast('حدث خطأ أثناء التصوير','error');
   }
+}
+function _downloadImg(blob){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`مسترجعات-${currentDate}.png`;
+  a.click();URL.revokeObjectURL(url);
 }
 
 function printReturns(){
