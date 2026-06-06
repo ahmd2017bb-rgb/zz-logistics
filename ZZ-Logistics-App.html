@@ -834,6 +834,22 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
       <!-- ====== TASKS (المهام) ====== -->
       <section class="pv hidden" id="pv-orders">
+        <!-- Date navigator -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="shiftTaskDate(-1)">← السابق</button>
+          <input type="date" id="task-date-filter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;flex:1;min-width:140px" onchange="setTaskDate(this.value)">
+          <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="shiftTaskDate(1)">التالي →</button>
+          <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px;background:var(--blue);color:#fff;border-color:var(--blue)" onclick="setTaskDate(todayStr())">اليوم</button>
+        </div>
+        <!-- Memo (fixed, doesn't change with date) -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-weight:700;font-size:15px">📝 المذكرة</span>
+            <span style="font-size:12px;color:var(--muted)">تبقى دائماً — لا تتغير بالتاريخ</span>
+          </div>
+          <textarea id="task-memo-area" rows="3" placeholder="اكتب ملاحظاتك هنا..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;box-sizing:border-box" oninput="saveMemo(this.value)"></textarea>
+        </div>
+        <!-- Tasks toolbar -->
         <div class="toolbar">
           <input class="tb-inp" type="text" placeholder="🔍 بحث في المهام..." oninput="filterOrders(this.value)">
           <select class="tb-sel" onchange="filterByStatus(this.value)">
@@ -2010,7 +2026,11 @@ function goPage(name,btn){
   if(btn){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));btn.classList.add('active')}
   $('pageTitle').textContent=(titles[name]?titles[name]():name);
   if(name==='dashboard')renderDashboard();
-  if(name==='orders')renderOrders();
+  if(name==='orders'){
+    const df=$('task-date-filter');if(df)df.value=_taskDate;
+    const ma=$('task-memo-area');if(ma)ma.value=_taskMemo;
+    renderOrders();
+  }
   if(name==='sort'){}
   if(name==='routes')renderRoutes();
   if(name==='reports')renderReports();
@@ -2103,12 +2123,16 @@ function renderOrders(){
 }
 function filtered(){
   return orders.filter(t=>{
+    const matchDate=!_taskDate||t.taskDate===_taskDate;
     const mq=!fq||t.title.toLowerCase().includes(fq)||(t.body||'').toLowerCase().includes(fq)||(t.createdBy||'').toLowerCase().includes(fq);
-    return mq&&(!fst||t.status===fst);
+    return matchDate&&mq&&(!fst||t.status===fst);
   });
 }
 function filterOrders(q){fq=q.toLowerCase();renderOrders()}
 function filterByStatus(s){fst=s;renderOrders()}
+function setTaskDate(d){_taskDate=d;const el=$('task-date-filter');if(el)el.value=d;renderOrders();}
+function shiftTaskDate(delta){const d=new Date(_taskDate+'T12:00:00');d.setDate(d.getDate()+delta);setTaskDate(d.toISOString().slice(0,10));}
+function saveMemo(val){_taskMemo=val;try{localStorage.setItem(DB.memo,val);}catch(e){}}
 function openOrderModal(t){
   if(t){
     $('modal-order-h').textContent='تعديل المهمة';
@@ -2123,7 +2147,7 @@ function openOrderModal(t){
     $('ord-edit-id').value='';
     $('ord-title').value='';$('ord-body').value='';
     $('ord-author').value='';$('ord-notes').value='';
-    $('ord-date').value=todayStr();
+    $('ord-date').value=_taskDate;
   }
   openM('modal-order');
 }
@@ -3479,8 +3503,11 @@ function clearExcelPreview(){
 const DB={
   orders:'zzdata_orders',drivers:'zzdata_drivers',
   staff:'zzdata_staff',attendance:'zzdata_attendance',meta:'zzdata_meta',
-  payments:'zzdata_payments',staffArchive:'zzdata_staff_archive'
+  payments:'zzdata_payments',staffArchive:'zzdata_staff_archive',
+  memo:'zzdata_task_memo'
 };
+let _taskDate=todayStr();
+let _taskMemo='';
 let _firstLoad=true; // tracks if localStorage had no data (first-run)
 
 function loadAllData(){
@@ -3491,6 +3518,7 @@ function loadAllData(){
   try{const r=localStorage.getItem(DB.attendance);if(r){attendance=JSON.parse(r);loaded=true;}}catch(e){}
   try{const r=localStorage.getItem(DB.payments);if(r){payments=JSON.parse(r);loaded=true;}}catch(e){}
   try{const r=localStorage.getItem(DB.staffArchive);if(r){staffArchive=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=localStorage.getItem(DB.memo);if(r){_taskMemo=r;}}catch(e){}
   try{
     const r=localStorage.getItem(DB.meta);
     if(r){const m=JSON.parse(r);
