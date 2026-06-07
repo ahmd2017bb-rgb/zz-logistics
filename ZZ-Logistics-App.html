@@ -890,7 +890,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <label class="sort-drop-zone" id="sort-drop" for="sort-file-inp" ondragover="event.preventDefault()" ondrop="sortDropHandler(event)" style="display:block;cursor:pointer">
               <div style="font-size:36px;margin-bottom:8px">📂</div>
               <div style="font-weight:700;font-size:15px;margin-bottom:4px" id="sort-drop-lbl">اسحب الملف هنا أو اضغط للاختيار</div>
-              <div style="font-size:13px;color:var(--muted)">.xlsx / .xls / .pdf / صورة</div>
+              <div style="font-size:13px;color:var(--muted)" id="sort-drop-sub">.xlsx / .xls / .pdf / صورة</div>
             </label>
             <input type="file" id="sort-file-inp" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp" style="display:none" onchange="handleSortFile(this.files[0])">
           </div>
@@ -2398,6 +2398,8 @@ function setSortMode(mode,btn){
   if(btn)btn.classList.add('active');
   const lbl=$('sort-drop-lbl');
   if(lbl)lbl.textContent=mode==='disp'?'ارفع ملف التوزيع — DISPOSITION Excel':'اسحب الملف هنا أو اضغط للاختيار';
+  const sub=$('sort-drop-sub');
+  if(sub)sub.textContent=mode==='disp'?'.xlsx / .xls فقط — لضمان دقة الفرز':'.xlsx / .xls / .pdf / صورة';
 }
 
 function printSort(){
@@ -2447,13 +2449,20 @@ ${content}
 
 function handleSortFile(file){
   if(!file)return;
-  if(_sortMode==='disp'){_handleDispExcel(file);return;}
   if(!$('sort-date').value){
     const dm=file.name.match(/(\d{2})\.(\d{2})\.(\d{4})/)||file.name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);
     if(dm)$('sort-date').value=dm[3]+'-'+dm[2]+'-'+dm[1];
   }
   const ext=file.name.split('.').pop().toLowerCase();
   const imgExts=['jpg','jpeg','png','webp','gif','bmp'];
+  if(_sortMode==='disp'){
+    if(ext==='pdf'||imgExts.includes(ext)){
+      toast('لفرز جدول التوزيع بدقة، يرجى رفع ملف Excel (.xlsx / .xls) — ملفات PDF والصور تحتوي خلايا مدمجة لا يمكن قراءتها بشكل صحيح','error');
+      return;
+    }
+    _handleDispExcel(file);
+    return;
+  }
   if(imgExts.includes(ext)){_handleSortImage(file);return;}
   if(ext==='pdf'){_handleSortPDF(file);return;}
   _handleSortExcel(file);
