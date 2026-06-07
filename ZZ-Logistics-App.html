@@ -1584,6 +1584,8 @@ let fq='', fst='';
 let currentDate = todayStr();   // "YYYY-MM-DD"
 let currentDay  = {};           // loaded daily data
 let returnRows  = [];           // [{id,qty,driver,tour}] live rows
+const STAFF_PASSWORD='200010';
+let _staffUnlocked=false;
 
 function todayStr(){
   const d=new Date();
@@ -2224,6 +2226,12 @@ const titles={
   map:()=>t('nav.map'),staff:()=>t('nav.staff')
 };
 function goPage(name,btn){
+  if(name==='staff'&&!_staffUnlocked){
+    const pw=prompt('🔒 قسم الموظفين مخصص للمدير فقط — أدخل كلمة المرور:');
+    if(pw===null)return;
+    if(pw!==STAFF_PASSWORD){toast('كلمة المرور غير صحيحة','error');return;}
+    _staffUnlocked=true;
+  }
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
   if(btn){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));btn.classList.add('active')}
