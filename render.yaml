@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: zz-logistics
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /var/data/zzlogistics.db
+    disk:
+      name: zz-logistics-data
+      mountPath: /var/data
+      sizeGB: 1
