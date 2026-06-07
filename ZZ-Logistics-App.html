@@ -2646,6 +2646,75 @@ function _handleSortImage(file){
   $('sort-result').classList.remove('hidden');
 }
 
+// يبني بطاقات الفرز مباشرة من إحداثيات نص PDF (x,y) — يتجاوز مشكلة دمج الأعمدة في الصفوف
+// عند الترتيبات التي يمتد فيها سجل الجولة الواحدة على عدة أسطر (TOUR/COMPANY/NAME/ID مع عدة أزواج CODE/PLZ)
+function _buildToursFromPdfItems(items){
+  try{
+    const up=s=>String(s).toUpperCase().trim();
+    const hdrItem=items.find(it=>up(it.text).includes('TOUR'));
+    if(!hdrItem)return null;
+    const headerY=hdrItem.y;
+    const nearest=(arr,y,tol)=>{let best=null,bd=Infinity;for(const it of arr){const d=Math.abs(it.y-y);if(d<bd&&d<=tol){bd=d;best=it;}}return best;};
+    const compHdr=items.find(it=>Math.abs(it.y-headerY)<2&&up(it.text).includes('COMPANY'));
+    const nameHdr=items.find(it=>Math.abs(it.y-headerY)<2&&up(it.text)==='NAME');
+    const idHdr  =items.find(it=>Math.abs(it.y-headerY)<2&&up(it.text)==='ID');
+    if(!compHdr||!nameHdr||!idHdr)return null;
+    const xComp=compHdr.x,xName=nameHdr.x,xId=idHdr.x;
+    const data=items.filter(it=>it.y<headerY-2);
+    // الأعمدة الرقمية الثلاثة (TOUR / CODE / PLZ) تقع يسار عمود COMPANY — نكتشف مواقعها تلقائياً عبر التجميع حسب الفجوات بين قيم x
+    const numeric=data.filter(it=>it.x<xComp-10&&/^\d+$/.test(it.text));
+    const xs=[...new Set(numeric.map(it=>Math.round(it.x*10)/10))].sort((a,b)=>a-b);
+    const clusters=[];
+    for(const x of xs){
+      if(!clusters.length||x-clusters[clusters.length-1].max>6)clusters.push({min:x,max:x});
+      else clusters[clusters.length-1].max=x;
+    }
+    if(clusters.length<3)return null;
+    const inRange=(x,c)=>x>=c.min-2&&x<=c.max+2;
+    const[cTour,cCode,cPlz]=clusters;
+    const tourItems=numeric.filter(it=>inRange(it.x,cTour));
+    const codeItems=numeric.filter(it=>inRange(it.x,cCode));
+    const plzItems =numeric.filter(it=>inRange(it.x,cPlz));
+    const companyItems=data.filter(it=>Math.abs(it.x-xComp)<20&&!/^\d+$/.test(it.text));
+    const nameItems   =data.filter(it=>Math.abs(it.x-xName)<28&&!/^\d+$/.test(it.text));
+    const idItems     =data.filter(it=>Math.abs(it.x-xId)<12);
+    if(!tourItems.length||!codeItems.length)return null;
+    // كل CODE يُقرَن بأقرب PLZ له على نفس السطر (بالاعتماد على y)
+    const usedPlz=new Set();
+    const pairs=codeItems.map(c=>{
+      let best=null,bd=Infinity,bidx=-1;
+      plzItems.forEach((p,idx)=>{if(usedPlz.has(idx))return;const d=Math.abs(p.y-c.y);if(d<bd&&d<=3){bd=d;best=p;bidx=idx;}});
+      if(bidx>=0)usedPlz.add(bidx);
+      return{code:c.text,plz:best?best.text:'',y:c.y};
+    });
+    const tours=tourItems.map(t=>{
+      const comp=nearest(companyItems,t.y,2);
+      const idIt=nearest(idItems,t.y,2);
+      const tourRaw=t.text;
+      const tourNum=parseInt(String(tourRaw).replace(/[^\d]/g,''))||0;
+      return{tourRaw,tourNum,company:comp?comp.text:'',id:idIt?idIt.text:'',y:t.y,rows:[]};
+    });
+    // كل زوج CODE/PLZ يُسنَد إلى أقرب جولة (TOUR) له عمودياً — لأن خلية TOUR/COMPANY/NAME/ID تتوسط مجموعة أكوادها
+    pairs.forEach(pr=>{
+      let best=null,bd=Infinity;
+      tours.forEach(t=>{const d=Math.abs(t.y-pr.y);if(d<bd){bd=d;best=t;}});
+      if(best)best.rows.push({code:pr.code,plz:pr.plz,_y:pr.y});
+    });
+    const result=tours.filter(t=>t.rows.length>0||t.id);
+    if(!result.length)return null;
+    result.sort((a,b)=>a.tourNum-b.tourNum||a.tourRaw.localeCompare(b.tourRaw));
+    result.forEach(t=>{
+      t.rows.sort((a,b)=>b._y-a._y);
+      t.rows.forEach(r=>delete r._y);
+      if(!t.company)t.company=_dispCo(t.tourRaw);
+      if(t.id){const n=parseInt(t.id);t.outApp=isNaN(n)?t.id:'D'+String(n).padStart(3,'0');}
+      else t.outApp='—';
+      delete t.y;
+    });
+    return result;
+  }catch(e){console.error(e);return null;}
+}
+
 async function _handleSortPDF(file){
   toast('جاري قراءة PDF…','');
   const loadLib=(src)=>new Promise(res=>{if(document.querySelector(`script[src="${src}"]`)&&window.pdfjsLib)return res();const s=document.createElement('script');s.src=src;s.onload=res;document.head.appendChild(s);});
@@ -2662,6 +2731,14 @@ async function _handleSortPDF(file){
       tc.items.forEach(it=>{if(it.str&&it.str.trim())items.push({text:it.str.trim(),x:it.transform[4],y:it.transform[5]});});
     }
     items.sort((a,b)=>b.y-a.y||a.x-b.x);
+    const coordTours=_buildToursFromPdfItems(items);
+    if(coordTours&&coordTours.length){
+      _sortData={tours:coordTours,total:coordTours.length};
+      $('sort-upload-panel').classList.add('hidden');
+      $('sort-mapper').classList.add('hidden');
+      _renderSortierkarten();
+      return;
+    }
     const rows=[];let cur=[],curY=null;
     for(const it of items){
       if(curY===null||Math.abs(it.y-curY)<=4){cur.push(it);if(curY===null)curY=it.y;}
