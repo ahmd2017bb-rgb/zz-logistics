@@ -156,6 +156,7 @@ button,select,input{font-family:inherit;font-size:inherit}
 .r-del{background:#fee2e2;color:#991b1b;border:none;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:13px}
 .r-del:hover{opacity:.8}
 .returns-empty{text-align:center;padding:28px;color:var(--muted);font-size:14px}
+.returns-tbl tfoot .total-row td{font-weight:800;background:#fff8e1;border-top:2px solid var(--border)}
 .returns-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
 
 /* TABLES */
@@ -836,6 +837,43 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           </div>
         </div>
 
+        <!-- Company Packages Table -->
+        <div class="returns-section">
+          <div class="returns-card">
+            <div class="returns-header">
+              <div>
+                <div class="returns-title" data-i18n="dash.company_title">📊 جدول الشركات</div>
+                <div style="font-size:13px;color:var(--muted);margin-top:3px" data-i18n="dash.company_sub">إجمالي الطرود الواردة حسب كل شركة — يُحفظ تلقائياً عند الضغط على حفظ</div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <span class="returns-date-tag" id="co-date-tag"></span>
+                <button class="returns-add-btn" id="co-add-btn" data-i18n="dash.co_add" onclick="addCompanyRow()">＋ إضافة شركة</button>
+              </div>
+            </div>
+            <div class="returns-tbl-wrap">
+              <table class="returns-tbl">
+                <thead>
+                  <tr>
+                    <th style="width:40px">#</th>
+                    <th data-i18n="dash.co_name">اسم الشركة</th>
+                    <th style="width:120px" data-i18n="dash.co_qty">العدد</th>
+                    <th style="width:50px"></th>
+                  </tr>
+                </thead>
+                <tbody id="co-tbody"></tbody>
+                <tfoot>
+                  <tr class="total-row">
+                    <td colspan="2" data-i18n="dash.co_total">المجموع</td>
+                    <td id="co-total">0</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div id="co-empty" class="returns-empty hidden" data-i18n="dash.co_empty">لا توجد بيانات شركات لهذا اليوم</div>
+          </div>
+        </div>
+
       </section>
 
       <!-- ====== TASKS (المهام) ====== -->
@@ -1394,6 +1432,10 @@ Object.assign(T.ar,{
   'dash.returns_sub':'الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ',
   'dash.ret_add':'＋ إضافة صف','dash.ret_empty':'لا توجد مسترجعات لهذا اليوم',
   'dash.ret_qty':'الكمية','dash.ret_driver':'اسم الشفير','dash.ret_tour':'التور',
+  'dash.company_title':'📊 جدول الشركات',
+  'dash.company_sub':'إجمالي الطرود الواردة حسب كل شركة — يُحفظ تلقائياً عند الضغط على حفظ',
+  'dash.co_add':'＋ إضافة شركة','dash.co_empty':'لا توجد بيانات شركات لهذا اليوم',
+  'dash.co_name':'اسم الشركة','dash.co_qty':'العدد','dash.co_total':'المجموع',
   'orders.search_ph':'🔍 بحث...','orders.all_status':'كل الحالات',
   'orders.pending':'قيد الانتظار','orders.in_transit':'في الطريق',
   'orders.delivered':'تم التسليم','orders.failed':'فشل التسليم',
@@ -1509,6 +1551,10 @@ Object.assign(T.de,{
   'dash.returns_sub':'Zurückgegebene Pakete — wird automatisch beim Speichern gespeichert',
   'dash.ret_add':'＋ Zeile hinzufügen','dash.ret_empty':'Keine Retouren für diesen Tag',
   'dash.ret_qty':'Menge','dash.ret_driver':'Fahrername','dash.ret_tour':'Tour',
+  'dash.company_title':'📊 Firmentabelle',
+  'dash.company_sub':'Gesamtzahl der eingegangenen Pakete pro Firma — wird automatisch beim Speichern gespeichert',
+  'dash.co_add':'＋ Firma hinzufügen','dash.co_empty':'Keine Firmendaten für diesen Tag',
+  'dash.co_name':'Firmenname','dash.co_qty':'Anzahl','dash.co_total':'Gesamt',
   'orders.search_ph':'🔍 Suchen...','orders.all_status':'Alle Status',
   'orders.pending':'Ausstehend','orders.in_transit':'Unterwegs',
   'orders.delivered':'Zugestellt','orders.failed':'Fehlgeschlagen',
@@ -1653,6 +1699,7 @@ let fq='', fst='';
 let currentDate = todayStr();   // "YYYY-MM-DD"
 let currentDay  = {};           // loaded daily data
 let returnRows  = [];           // [{id,qty,driver,tour}] live rows
+let companyRows = [];           // [{company,qty}] live company-packages rows
 const STAFF_PASSWORD='200010';
 let _staffUnlocked=false;
 
@@ -1668,7 +1715,7 @@ function loadDay(dateStr){
   if(raw){
     try{return JSON.parse(raw)}catch(e){}
   }
-  return {packages:0, delivered:0, returns:[]};
+  return {packages:0, delivered:0, returns:[], companyPkgs:[]};
 }
 
 function saveDay(){
@@ -1679,15 +1726,26 @@ function saveDay(){
     rets.push({num:inps[0].value.trim(), qty:inps[1].value.trim()||'0', driver:inps[2].value.trim(), tour:inps[3].value.trim()});
   });
   currentDay.returns=rets;
+
+  // Collect company-packages rows from DOM
+  const companies=[];
+  document.querySelectorAll('.co-row').forEach(tr=>{
+    const inps=tr.querySelectorAll('input');
+    companies.push({company:inps[0].value.trim(), qty:inps[1].value.trim()||'0'});
+  });
+  currentDay.companyPkgs=companies;
+
   serverStorage.setItem(dateKey(currentDate),JSON.stringify(currentDay));
   toast('تم الحفظ بنجاح ✓','success');
   updateReturnCount();
+  updateCompanyTotal();
 }
 
 function loadDayUI(dateStr){
   currentDate=dateStr;
   currentDay=loadDay(dateStr);
   returnRows=[...currentDay.returns];
+  companyRows=[...(currentDay.companyPkgs||[])];
 
   const isPast=(dateStr<todayStr());
   const isFuture=(dateStr>todayStr());
@@ -1714,8 +1772,13 @@ function loadDayUI(dateStr){
   renderReturnRows();
   updateReturnCount();
 
+  // Render company-packages table
+  renderCompanyRows();
+  updateCompanyTotal();
+
   // Returns date tag
   $('ret-date-tag').textContent=d.toLocaleDateString('ar-EG',{day:'numeric',month:'long'});
+  $('co-date-tag').textContent=d.toLocaleDateString('ar-EG',{day:'numeric',month:'long'});
 }
 
 function changeDay(delta){
@@ -2019,6 +2082,64 @@ function renderReturnRows(){
 function updateReturnCount(){
   const count=$('ret-tbody').children.length;
   $('sc-returns').textContent=count;
+}
+
+// ══════════════════════════════════════════════════
+// COMPANY PACKAGES TABLE (per-day, manual entry)
+// ══════════════════════════════════════════════════
+let coRowId=1;
+
+function addCompanyRow(data){
+  const id=coRowId++;
+  const company=data?data.company||'':'';
+  const qty=data?data.qty:'';
+  const tbody=$('co-tbody');
+  const tr=document.createElement('tr');
+  tr.className='co-row';
+  tr.dataset.id=id;
+  tr.innerHTML=`
+    <td style="color:var(--muted);font-weight:700;font-size:13px;text-align:center">${tbody.children.length+1}</td>
+    <td><input class="r-inp" type="text" placeholder="اسم الشركة..." value="${company}"></td>
+    <td><input class="r-inp co-qty" type="number" placeholder="0" value="${qty}" min="0" style="width:90px" oninput="updateCompanyTotal()"></td>
+    <td><button class="r-del" onclick="delCompanyRow(this)">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  $('co-empty').classList.add('hidden');
+  updateCompanyTotal();
+  tr.querySelector('input').focus();
+}
+
+function delCompanyRow(btn){
+  btn.closest('tr').remove();
+  reIndexCompanyRows();
+  updateCompanyTotal();
+}
+
+function reIndexCompanyRows(){
+  document.querySelectorAll('.co-row').forEach((tr,i)=>{
+    tr.cells[0].textContent=i+1;
+  });
+  const count=$('co-tbody').children.length;
+  $('co-empty').classList.toggle('hidden',count>0);
+}
+
+function renderCompanyRows(){
+  $('co-tbody').innerHTML='';
+  coRowId=1;
+  if(companyRows.length===0){
+    $('co-empty').classList.remove('hidden');
+  }else{
+    $('co-empty').classList.add('hidden');
+    companyRows.forEach(r=>addCompanyRow(r));
+  }
+  updateCompanyTotal();
+}
+
+function updateCompanyTotal(){
+  let total=0;
+  document.querySelectorAll('.co-qty').forEach(inp=>{ total+=parseInt(inp.value)||0; });
+  const totalEl=$('co-total');
+  if(totalEl) totalEl.textContent=total;
 }
 
 // ══════════════════════════════════════════════════
