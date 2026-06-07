@@ -2905,43 +2905,105 @@ function _buildFromDispMapper(){
   _renderDisposition(objRows,useSub);
 }
 function _renderDisposition(rows,useSub){
-  // group by sub column OR by hardcoded tour-to-company mapping
+  // group by sub column (COMPANY) OR by hardcoded tour-to-company mapping
   const groups={};
   rows.forEach(r=>{
     const co=useSub?(r.sub||'OHNE FIRMA'):_dispCo(r.tour);
     if(!groups[co])groups[co]=[];
     groups[co].push(r);
   });
-  // order: if using sub column, sort alphabetically; else use DISP_ORDER
   const coKeys=useSub?Object.keys(groups).sort():DISP_ORDER.filter(c=>groups[c]).concat(Object.keys(groups).filter(c=>!DISP_ORDER.includes(c)));
   const date=_fmtDate($('sort-date').value);
-  const loc=($('sort-loc').value.trim())||'Z&Z GmbH · NRW005';
-  const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #bbb;padding:7px 10px;font-size:13px;white-space:nowrap">${t}</th>`;
-  const TD=(t)=>`<td style="border:1px solid #bbb;padding:7px 10px;text-align:center;font-size:13px">${t||'—'}</td>`;
-  let html=`<div id="disp-inner" style="font-family:Arial,sans-serif">
-    <div style="margin-bottom:14px">
-      <h2 style="color:#1F2C5C;margin:0 0 4px;font-size:18px">DISPOSITION – ${date}</h2>
-      <p style="margin:0;font-size:13px;color:#555"><b>Z&amp;Z GmbH Transporte</b> | Depot: NRW005 | ${loc}</p>
-    </div>`;
+  const loc=($('sort-loc').value.trim())||'Doktor-Berns-Str. 24, 47441 Moers';
+
+  // تقسيم الصفحات: الشركات الكبيرة (أكثر من 5 تورات) تأخذ صفحة مستقلة، والصغيرة تُجمّع معاً
+  const BIG=5,PAGE_MAX=12;
+  const pages=[];let acc=[],accN=0;
   coKeys.forEach(co=>{
-    if(!groups[co])return;
-    html+=`<div style="background:#0E7C3A;color:#fff;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px">Subunternehmer: ${co}</div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:0"><thead><tr>
-      ${TH('TOUR')}${TH('OUT-APP ID')}${TH('FAHRER / السائق')}${TH('3. CODE')}${TH('PLZ')}${TH('GEPLANT')}${TH('IST')}${TH('BEMERKUNG')}
-    </tr></thead><tbody>`;
-    groups[co].forEach(r=>{
-      const codes=r.code.split(/[,·\s]+/).filter(Boolean)
-        .map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${c}</span>`).join('');
-      html+=`<tr>
-        ${TD(r.tour)}${TD(r.appid)}${TD(r.fahrer)}
-        <td style="border:1px solid #bbb;padding:7px 10px;text-align:center">${codes||'—'}</td>
-        ${TD(r.plz)}${TD(r.geplant)}${TD(r.ist)}${TD(r.bemerk)}
+    const t=groups[co];
+    if(!t||!t.length)return;
+    if(t.length>BIG){
+      if(acc.length){pages.push(acc);acc=[];accN=0;}
+      pages.push([{co,rows:t}]);
+    }else{
+      if(acc.length&&accN+t.length>PAGE_MAX){pages.push(acc);acc=[];accN=0;}
+      acc.push({co,rows:t});accN+=t.length;
+    }
+  });
+  if(acc.length)pages.push(acc);
+
+  const tourRange=(rs)=>{
+    const nums=rs.map(r=>parseInt(String(r.tour).replace(/[^\d]/g,''))).filter(n=>!isNaN(n));
+    if(!nums.length)return '';
+    const mn=Math.min(...nums),mx=Math.max(...nums);
+    return mn===mx?`Tour ${mn}`:`Touren ${mn} – ${mx}`;
+  };
+  const buildSection=(co,rs,first)=>{
+    let h=`<div class="sub-band"${first?'':' style="margin-top:4mm"'}>Subunternehmer: ${co} &nbsp;(${tourRange(rs)})</div>
+    <table>
+      <colgroup><col class="c-tour"><col class="c-appid"><col class="c-driver"><col class="c-codes"><col class="c-plz"><col class="c-gep"><col class="c-ist"><col class="c-bem"></colgroup>
+      <tr class="hrow"><th>TOUR</th><th>OUT-APP ID</th><th>FAHRER / السائق</th><th>3. CODE</th><th>PLZ</th><th>GEPLANT</th><th>IST</th><th>BEMERKUNG</th></tr>`;
+    rs.forEach(r=>{
+      const codes=(r.code||'').split(/[,،\s]+/).filter(Boolean).map(c=>`<span class="pill">${c}</span>`).join('');
+      const plz=(r.plz||'').split(/[,،\s]+/).filter(Boolean).join(' · ');
+      h+=`<tr class="data-row">
+        <td class="c-tour">${r.tour||''}</td>
+        <td class="c-appid">${r.appid||''}</td>
+        <td class="c-driver">${r.fahrer||''}</td>
+        <td class="c-codes">${codes}</td>
+        <td class="c-plz">${plz}</td>
+        <td class="c-gep">${r.geplant||''}</td>
+        <td class="c-ist">${r.ist||''}</td>
+        <td class="c-bem">${r.bemerk||''}</td>
       </tr>`;
     });
-    html+=`<tr>
-      <td colspan="5" style="border:1px solid #bbb;padding:7px 10px;font-weight:bold;font-size:13px;background:#f8fafc">${co} GESAMT: ${groups[co].length} Touren</td>
-      <td colspan="3" style="border:1px solid #bbb;padding:7px;background:#f8fafc"></td>
-    </tr></tbody></table>`;
+    h+=`<tr><td class="tot" colspan="5">${co} GESAMT</td><td class="tot"></td><td class="tot"></td><td class="tot"></td></tr></table>`;
+    return h;
+  };
+  const buildHeader=()=>`<div class="doc-header">
+    <div class="htitle">DISPOSITION – ${date}</div>
+    <div class="hmeta">Z&amp;Z GmbH Transporte &nbsp;|&nbsp; Depot: NRW005<br>${loc}</div>
+  </div>`;
+
+  let html=`<div id="disp-inner"><style>
+    #disp-inner{font-family:Arial,sans-serif;font-size:9pt;background:#e0e0e0;padding:8mm}
+    #disp-inner .page{width:283mm;background:#fff;margin:0 auto 10mm;box-shadow:0 2px 10px rgba(0,0,0,.2);overflow:hidden}
+    #disp-inner .doc-header{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:3mm 5mm}
+    #disp-inner .doc-header .htitle{font-size:13pt;font-weight:bold}
+    #disp-inner .doc-header .hmeta{font-size:8.5pt;text-align:right;line-height:1.5}
+    #disp-inner .sub-band{background:#0E7C3A;color:#fff;font-weight:bold;font-size:11pt;padding:2.5mm 5mm;text-transform:uppercase}
+    #disp-inner table{width:100%;border-collapse:collapse;table-layout:fixed}
+    #disp-inner th,#disp-inner td{border:1px solid #bbb;padding:1.5mm 2mm;vertical-align:middle;word-wrap:break-word}
+    #disp-inner .c-tour{width:12mm;text-align:center}
+    #disp-inner .c-appid{width:18mm;text-align:center}
+    #disp-inner .c-driver{width:52mm}
+    #disp-inner .c-codes{width:48mm}
+    #disp-inner .c-plz{width:85mm}
+    #disp-inner .c-gep{width:24mm;text-align:center}
+    #disp-inner .c-ist{width:24mm;text-align:center}
+    #disp-inner .c-bem{width:20mm}
+    #disp-inner .hrow th{background:#1F2C5C;color:#fff;font-weight:bold;font-size:8pt;text-align:center;padding:1.5mm 2mm}
+    #disp-inner .data-row td{font-size:8.5pt;line-height:1.4}
+    #disp-inner .data-row .c-gep{background:#D9E1F2}
+    #disp-inner .data-row .c-ist{background:#FFF2CC}
+    #disp-inner .data-row .c-bem{background:#FFF2CC}
+    #disp-inner .data-row .c-tour{background:#F2F2F2;font-weight:bold;font-size:9pt}
+    #disp-inner .data-row .c-appid{font-weight:bold;color:#1F2C5C}
+    #disp-inner .data-row:nth-child(even) .c-driver,
+    #disp-inner .data-row:nth-child(even) .c-codes,
+    #disp-inner .data-row:nth-child(even) .c-plz{background:#F9F9F9}
+    #disp-inner .pill{display:inline-block;background:#C8102E;color:#fff;border-radius:3px;padding:0 3px;font-size:7.5pt;font-weight:bold;margin:1px 2px 1px 0}
+    #disp-inner .tot{background:#1F2C5C;color:#fff;font-weight:bold;font-size:9pt;text-align:center}
+    @media print{
+      #disp-inner{background:#fff;padding:0}
+      #disp-inner .page{box-shadow:none;margin:0;page-break-after:always}
+      #disp-inner .page:last-child{page-break-after:avoid}
+    }
+  </style>`;
+  pages.forEach(pg=>{
+    html+=`<div class="page">${buildHeader()}`;
+    pg.forEach((sec,i)=>{html+=buildSection(sec.co,sec.rows,i===0);});
+    html+=`</div>`;
   });
   html+=`</div>`;
   $('dp-pages').innerHTML=html;
@@ -2951,18 +3013,13 @@ function printDisp(){
   const el=document.getElementById('disp-inner');
   if(!el){toast('لا يوجد جدول توزيع للطباعة','error');return;}
   const date=_fmtDate($('sort-date').value);
-  const win=window.open('','_blank','width=1100,height=800');
+  const win=window.open('','_blank','width=1200,height=900');
   win.document.write(`<!DOCTYPE html><html lang="de"><head>
 <meta charset="UTF-8"><title>Disposition ${date}</title>
 <style>
+@page{size:A4 landscape;margin:7mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#fff;padding:14px;font-size:13px}
-table{width:100%;border-collapse:collapse;margin-bottom:0}
-th{background:#1F2C5C;color:white;border:1px solid #bbb;padding:7px 10px;text-align:center;white-space:nowrap}
-td{border:1px solid #bbb;padding:7px 10px;text-align:center}
-.pill{background:#C8102E;color:white;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px}
-.sub-hdr{background:#0E7C3A;color:white;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px}
-@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}}
+body{background:#fff}
 </style></head><body>
 ${el.innerHTML}
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
