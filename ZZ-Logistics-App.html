@@ -2669,7 +2669,7 @@ async function _handleSortPDF(file){
     }
     if(cur.length)rows.push(cur.sort((a,b)=>a.x-b.x).map(i=>i.text));
     if(!rows.length){toast('لم يتم استخراج نص من PDF','error');return;}
-    _parseSortRows(rows);
+    if(!_autoCardsAndRender(rows,true))_parseSortRows(rows);
   }catch(e){
     console.error(e);
     toast('تعذّر قراءة PDF — جرّب حفظه كـ Excel أولاً','error');
@@ -2686,7 +2686,7 @@ function _handleSortExcel(file){
         const ws=wb.Sheets[wb.SheetNames[0]];
         const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
         if(!rows.length){toast('الملف فارغ','error');return;}
-        _autoCardsAndRender(rows);
+        if(!_autoCardsAndRender(rows,true))_parseSortRows(rows);
       }catch(err){
         const r2=new FileReader();
         r2.onload=e2=>{
@@ -2695,7 +2695,7 @@ function _handleSortExcel(file){
             const ws=wb.Sheets[wb.SheetNames[0]];
             const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
             if(!rows.length){toast('الملف فارغ','error');return;}
-            _autoCardsAndRender(rows);
+            if(!_autoCardsAndRender(rows,true))_parseSortRows(rows);
           }catch(e2){toast('خطأ في قراءة الملف — تأكد أن الملف xlsx أو xls','error');}
         };
         r2.readAsArrayBuffer(file);
@@ -2713,7 +2713,7 @@ function _handleSortExcel(file){
   }else doRead();
 }
 
-function _autoCardsAndRender(rows){
+function _autoCardsAndRender(rows,silent){
   let hdrIdx=0,hdr=[];
   for(let i=0;i<Math.min(8,rows.length);i++){
     const r=rows[i].map(c=>String(c).toUpperCase().trim());
@@ -2736,7 +2736,7 @@ function _autoCardsAndRender(rows){
   // company: only explicit subcontractor column names — not "SUB" (that's stop number)
   const iComp=ci('SUBUNTERNEHMER','UNTERNEHMER','COMPANY','FIRMA');
   const iId  =ci('OUT-APP ID','OUT-APP','APP-ID','APP ID','APP');
-  if(iTour<0){toast('لم يتم العثور على عمود TOUR في الملف','error');return;}
+  if(iTour<0){if(!silent)toast('لم يتم العثور على عمود TOUR في الملف','error');return false;}
   const tourMap={};
   for(let i=hdrIdx+1;i<rows.length;i++){
     const r=rows[i];
@@ -2758,7 +2758,7 @@ function _autoCardsAndRender(rows){
     if(code||plz)t.rows.push({code,plz});
   }
   const tours=Object.values(tourMap).filter(t=>t.rows.length>0||t.id);
-  if(!tours.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
+  if(!tours.length){if(!silent)toast('لم يتم العثور على بيانات في الملف','error');return false;}
   tours.sort((a,b)=>a.tourNum-b.tourNum||a.tourRaw.localeCompare(b.tourRaw));
   tours.forEach(t=>{
     // assign company from DISP_COMPANIES if not found in file
@@ -2770,6 +2770,7 @@ function _autoCardsAndRender(rows){
   $('sort-upload-panel').classList.add('hidden');
   $('sort-mapper').classList.add('hidden');
   _renderSortierkarten();
+  return true;
 }
 
 function _parseSortRows(rows){
