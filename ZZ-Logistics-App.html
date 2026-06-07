@@ -1165,6 +1165,24 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   </div>
 </div>
 
+<!-- MODAL: STAFF PASSWORD -->
+<div class="modal-bg hidden" id="modal-staff-pw">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-top"><h3>🔒 دخول المدير</h3><button class="modal-x" onclick="closeModal('modal-staff-pw')">✕</button></div>
+    <div class="modal-bd">
+      <p style="color:#374151;font-size:14px;margin:0 0 12px">قسم الموظفين مخصص للمدير فقط — أدخل كلمة المرور للمتابعة</p>
+      <input type="password" id="staff-pw-inp" placeholder="كلمة المرور" autocomplete="off"
+        style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;outline:none"
+        onkeydown="if(event.key==='Enter')checkStaffPassword()">
+      <p id="staff-pw-err" class="hidden" style="color:#dc2626;font-size:13px;margin:8px 0 0">❌ كلمة المرور غير صحيحة</p>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-staff-pw')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 28px" onclick="checkStaffPassword()">دخول</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: STAFF -->
 <div class="modal-bg hidden" id="modal-staff">
   <div class="modal">
@@ -2225,13 +2243,30 @@ const titles={
   routes:()=>t('nav.routes'),reports:()=>t('nav.reports'),
   map:()=>t('nav.map'),staff:()=>t('nav.staff')
 };
+let _pendingStaffBtn=null;
 function goPage(name,btn){
   if(name==='staff'&&!_staffUnlocked){
-    const pw=prompt('🔒 قسم الموظفين مخصص للمدير فقط — أدخل كلمة المرور:');
-    if(pw===null)return;
-    if(pw!==STAFF_PASSWORD){toast('كلمة المرور غير صحيحة','error');return;}
-    _staffUnlocked=true;
+    _pendingStaffBtn=btn;
+    $('staff-pw-inp').value='';
+    $('staff-pw-err').classList.add('hidden');
+    openM('modal-staff-pw');
+    setTimeout(()=>$('staff-pw-inp').focus(),100);
+    return;
   }
+  _goPageReal(name,btn);
+}
+function checkStaffPassword(){
+  const pw=$('staff-pw-inp').value;
+  if(pw===STAFF_PASSWORD){
+    _staffUnlocked=true;
+    closeModal('modal-staff-pw');
+    _goPageReal('staff',_pendingStaffBtn);
+  }else{
+    $('staff-pw-err').classList.remove('hidden');
+    $('staff-pw-inp').focus();
+  }
+}
+function _goPageReal(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
   if(btn){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));btn.classList.add('active')}
