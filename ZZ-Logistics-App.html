@@ -2089,6 +2089,11 @@ function updateCompanyTotal(){
   document.querySelectorAll('.co-qty').forEach(inp=>{ total+=parseInt(inp.value)||0; });
   const totalEl=$('co-total');
   if(totalEl) totalEl.textContent=total;
+
+  // Auto-link grand total to "تم التسليم" stat card
+  const delEl=$('sc-delivered');
+  if(delEl) delEl.textContent=total;
+  currentDay.delivered=total;
 }
 
 // ══════════════════════════════════════════════════
