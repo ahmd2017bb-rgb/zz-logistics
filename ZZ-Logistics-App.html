@@ -525,28 +525,9 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 .sh-num{text-align:center;}
 .sh-nv{display:block;font-size:14px;font-weight:700;}
 .sh-nl{display:block;font-size:10px;color:var(--muted);white-space:nowrap;}
-/* ══ DAILY REFERENCE TABLE ══ */
-.ref-tbl-wrap{overflow-x:auto}
-.ref-tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:700px}
-.ref-tbl th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:center;border:1px solid #3a6fa0;font-size:12px;white-space:nowrap}
-.ref-tbl th.sub{background:#2d5a8e}
-.ref-tbl td{border:1px solid #d1d5db;padding:0;vertical-align:middle}
-.ref-tbl td.tour-num{text-align:center;font-weight:800;font-size:15px;color:#1e3a5f;background:#f0f4ff;min-width:60px}
-.ref-tbl td.stop-num{text-align:center;font-weight:700;color:#374151;background:#f9fafb;min-width:55px}
-.ref-tbl td.stop-plz{text-align:center;color:#555;background:#f9fafb;min-width:70px}
-.ref-tbl td.co-cell{text-align:center;font-weight:700;font-size:12px;min-width:80px}
-.ref-tbl td.name-cell{text-align:center;font-weight:600;min-width:100px}
-.ref-tbl td.id-cell{text-align:center;font-size:12px;color:#555;min-width:70px}
-.ref-tbl td.zero-cell{text-align:center;font-weight:700;color:#166534;background:#f0fdf4;min-width:45px}
-.ref-inp{width:100%;padding:5px 8px;border:none;background:transparent;font-size:13px;font-family:inherit;text-align:center;outline:none}
-.ref-inp:focus{background:#fffbeb}
-.ref-co-inp{font-weight:700;text-transform:uppercase}
-.ref-add-stop{background:none;border:1px dashed #93c5fd;color:#1d4ed8;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;margin:2px 4px;white-space:nowrap}
-.ref-del{background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;padding:2px 6px;opacity:.6}
-.ref-del:hover{opacity:1}
-.ref-tour-sep td{background:#1e3a5f!important;height:4px;padding:0}
-.ref-footer-row td{background:#fff8e1;font-weight:700;text-align:center;padding:6px;border:1px solid #d1d5db}
-
+.sh-body{padding:0 14px 14px;border-top:1px solid var(--border);}
+.sh-sec{font-size:12px;font-weight:700;color:var(--primary);margin:12px 0 6px;}
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -889,51 +870,13 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
       <!-- ====== SORT / DISPATCH PLAN ====== -->
       <section class="pv hidden" id="pv-sort">
-
-        <!-- ══ DAILY REFERENCE TABLE ══ -->
-        <div class="card" style="margin-bottom:16px" id="ref-table-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-            <div>
-              <div style="font-weight:700;font-size:16px">📋 جدول المرجع اليومي</div>
-              <div style="font-size:12px;color:var(--muted)" id="ref-date-lbl">يُملأ يومياً — البيانات تُحفظ لكل تاريخ</div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
-              <button class="returns-add-btn" style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac" onclick="printRefTable()">🖨️ طباعة</button>
-              <button class="returns-add-btn" style="background:#eff6ff;color:#1d4ed8;border:1.5px solid #93c5fd" onclick="shareRefTable()">📤 مشاركة</button>
-              <button class="returns-add-btn" style="background:#fef9c3;color:#854d0e;border:1.5px solid #fde047" onclick="clearRefTable()">🗑 مسح اليوم</button>
-              <button class="returns-add-btn" onclick="addRefTour()">＋ إضافة تور</button>
-            </div>
-          </div>
-          <div class="ref-tbl-wrap">
-            <table class="ref-tbl" id="ref-main-tbl">
-              <thead>
-                <tr>
-                  <th rowspan="2">TOUR NO</th>
-                  <th colspan="2" class="sub">CODES</th>
-                  <th rowspan="2">COMPANY</th>
-                  <th rowspan="2">NAME</th>
-                  <th rowspan="2">ID</th>
-                  <th rowspan="2">0</th>
-                  <th rowspan="2" style="width:30px"></th>
-                </tr>
-                <tr>
-                  <th class="sub">رقم</th>
-                  <th class="sub">PLZ</th>
-                </tr>
-              </thead>
-              <tbody id="ref-tbody"></tbody>
-            </table>
-          </div>
-          <div id="ref-empty-msg" style="text-align:center;padding:28px;color:var(--muted);font-size:14px">لا توجد بيانات — اضغط ＋ إضافة تور</div>
-        </div>
-
         <div id="sort-upload-panel">
           <div class="card sort-upload-card">
             <h3 class="card-title" style="margin-bottom:16px" data-i18n="sort.title">📋 فرز حطة التوزيع اليومية</h3>
             <div class="frow" style="margin-bottom:14px">
               <div class="form-group">
                 <label data-i18n="sort.date_lbl">التاريخ</label>
-                <input type="date" id="sort-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px" onchange="loadRefTable();$('ref-date-lbl').textContent='بيانات: '+this.value">
+                <input type="date" id="sort-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px">
               </div>
               <div class="form-group">
                 <label data-i18n="sort.location_lbl">الموقع / Location</label>
@@ -2291,7 +2234,7 @@ function goPage(name,btn){
     const ma=$('task-memo-area');if(ma)ma.value=_taskMemo;
     renderOrders();
   }
-  if(name==='sort'){loadRefTable();}
+  if(name==='sort'){}
   if(name==='routes')renderRoutes();
   if(name==='reports')renderReports();
   if(name==='map')initNRWMapPage();
@@ -2428,220 +2371,6 @@ function setTaskStatus(id,status){
   if(t){t.status=status;renderOrders();renderDashboard();autosave();}
 }
 function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();renderDashboard();toast('تم حذف المهمة','success');autosave()}
-
-// ══════════════════════════════════════════════════
-// ══════════════════════════════════════════════════
-// DAILY REFERENCE TABLE
-// ══════════════════════════════════════════════════
-let _refTours=[];   // [{id, tourNo, company, name, driverId, stops:[{code,plz},...]}]
-let _refTourId=1;
-
-const CO_COLORS={
-  'ZZ':'#fffde7','DAREEN':'#e3f2fd','HUC':'#ffebee','ABU ALI':'#f3e5f5',
-  'PRIVAT':'#ede7f6','ALSHIKH':'#e8f5e9','DEFAULT':'#f9fafb'
-};
-function _coColor(name){
-  const u=(name||'').toUpperCase();
-  for(const k of Object.keys(CO_COLORS)){if(u.includes(k))return CO_COLORS[k];}
-  return CO_COLORS.DEFAULT;
-}
-
-function _refKey(){
-  const d=$('sort-date').value||todayStr();
-  return 'zzlg_ref_'+d;
-}
-function saveRefTable(){
-  const tours=[];
-  document.querySelectorAll('.ref-tour-block').forEach(blk=>{
-    const inps=blk.querySelectorAll('.ref-tour-inp');
-    const tourNo=inps[0].value.trim();
-    const company=inps[1].value.trim();
-    const name=inps[2].value.trim();
-    const driverId=inps[3].value.trim();
-    const zero=inps[4].value.trim();
-    const stops=[];
-    blk.querySelectorAll('.ref-stop-row').forEach(row=>{
-      const si=row.querySelectorAll('.ref-stop-inp');
-      stops.push({code:si[0].value.trim(),plz:si[1].value.trim()});
-    });
-    tours.push({tourNo,company,name,driverId,zero:zero||'0',stops});
-  });
-  try{localStorage.setItem(_refKey(),JSON.stringify(tours));}catch(e){}
-}
-function loadRefTable(){
-  try{
-    const d=localStorage.getItem(_refKey());
-    if(d){_refTours=JSON.parse(d);}else{_refTours=[];}
-  }catch(e){_refTours=[];}
-  renderRefTable();
-}
-function renderRefTable(){
-  const tbody=$('ref-tbody');tbody.innerHTML='';
-  const empty=$('ref-empty-msg');
-  if(_refTours.length===0){empty.style.display='';return;}
-  empty.style.display='none';
-  _refTours.forEach((t,ti)=>{
-    const bg=_coColor(t.company);
-    const stopCount=Math.max(t.stops.length,1);
-    // Tour separator
-    if(ti>0){
-      const sep=document.createElement('tr');
-      sep.className='ref-tour-sep';
-      sep.innerHTML='<td colspan="8"></td>';
-      tbody.appendChild(sep);
-    }
-    // For each stop row
-    (t.stops.length?t.stops:[{code:'',plz:''}]).forEach((s,si)=>{
-      const tr=document.createElement('tr');
-      tr.className='ref-stop-row';
-      tr.dataset.ti=ti;tr.dataset.si=si;
-      let html='';
-      if(si===0){
-        // First row of tour: show tour no, company, name, id, 0 with rowspan
-        html+=`<td class="tour-num" rowspan="${stopCount}" style="background:${bg}" data-ti="${ti}">
-          <input class="ref-inp ref-tour-inp" value="${t.tourNo}" placeholder="Tour" oninput="saveRefTable()" style="font-weight:800;font-size:15px;color:#1e3a5f">
-        </td>`;
-      }
-      html+=`<td class="stop-num"><input class="ref-inp ref-stop-inp" value="${s.code}" placeholder="رقم" oninput="saveRefTable()"></td>`;
-      html+=`<td class="stop-plz"><input class="ref-inp ref-stop-inp" value="${s.plz}" placeholder="PLZ" oninput="saveRefTable()"></td>`;
-      if(si===0){
-        html+=`<td class="co-cell" rowspan="${stopCount}" style="background:${bg}">
-          <input class="ref-inp ref-tour-inp ref-co-inp" value="${t.company}" placeholder="COMPANY" oninput="this.closest('tr').closest('tbody').querySelectorAll('[data-ti=\\'${ti}\\']').forEach(r=>r.style.background=_coColor(this.value));saveRefTable()" style="font-weight:700;color:#222">
-        </td>
-        <td class="name-cell" rowspan="${stopCount}" style="background:${bg}">
-          <input class="ref-inp ref-tour-inp" value="${t.name}" placeholder="NAME" oninput="saveRefTable()">
-        </td>
-        <td class="id-cell" rowspan="${stopCount}" style="background:${bg}">
-          <input class="ref-inp ref-tour-inp" value="${t.driverId}" placeholder="ID" oninput="saveRefTable()">
-        </td>
-        <td class="zero-cell" rowspan="${stopCount}" style="background:${bg}">
-          <input class="ref-inp ref-tour-inp" value="${t.zero||'0'}" placeholder="0" oninput="saveRefTable()" style="width:40px;color:#166534;font-weight:700">
-        </td>
-        <td rowspan="${stopCount}" style="text-align:center;background:${bg}">
-          <div style="display:flex;flex-direction:column;gap:2px;align-items:center;padding:4px">
-            <button class="ref-add-stop" onclick="addRefStop(${ti})">+ Stop</button>
-            <button class="ref-del" onclick="delRefTour(${ti})" title="حذف التور">🗑</button>
-          </div>
-        </td>`;
-      }
-      html+=si>0?`<td style="text-align:center;padding:2px"><button class="ref-del" onclick="delRefStop(${ti},${si})">✕</button></td>`:'';
-      tr.innerHTML=html;
-      tbody.appendChild(tr);
-    });
-  });
-}
-function addRefTour(){
-  _refTours.push({tourNo:String(_refTours.length+1),company:'',name:'',driverId:'',zero:'0',stops:[{code:'',plz:''}]});
-  renderRefTable();saveRefTable();
-  // focus first input of new tour
-  const rows=document.querySelectorAll('.ref-tour-inp');
-  if(rows.length)rows[rows.length-5].focus();
-}
-function addRefStop(ti){
-  if(!_refTours[ti])return;
-  saveRefTable();
-  // re-read current data first
-  loadRefFromDOM();
-  _refTours[ti].stops.push({code:'',plz:''});
-  renderRefTable();saveRefTable();
-}
-function delRefStop(ti,si){
-  loadRefFromDOM();
-  if(_refTours[ti]&&_refTours[ti].stops.length>1){
-    _refTours[ti].stops.splice(si,1);
-    renderRefTable();saveRefTable();
-  }
-}
-function delRefTour(ti){
-  loadRefFromDOM();
-  _refTours.splice(ti,1);
-  renderRefTable();saveRefTable();
-}
-function loadRefFromDOM(){
-  const tours=[];
-  document.querySelectorAll('.ref-tour-block').forEach(blk=>{});
-  // Read from _refTours structure via DOM
-  const tbody=$('ref-tbody');
-  // Re-collect by reading current DOM inputs
-  _refTours=[];
-  let curTour=null;
-  tbody.querySelectorAll('tr:not(.ref-tour-sep)').forEach(tr=>{
-    const ti=tr.dataset.ti;
-    if(ti===undefined)return;
-    const si=parseInt(tr.dataset.si||'0');
-    if(si===0){
-      const tinps=tr.querySelectorAll('.ref-tour-inp');
-      curTour={tourNo:tinps[0]?.value.trim()||'',company:tinps[1]?.value.trim()||'',name:tinps[2]?.value.trim()||'',driverId:tinps[3]?.value.trim()||'',zero:tinps[4]?.value.trim()||'0',stops:[]};
-      _refTours.push(curTour);
-    }
-    const sinps=tr.querySelectorAll('.ref-stop-inp');
-    if(sinps.length>=2&&curTour){
-      curTour.stops.push({code:sinps[0].value.trim(),plz:sinps[1].value.trim()});
-    }
-  });
-}
-function clearRefTable(){
-  if(!confirm('هل تريد مسح جدول اليوم؟'))return;
-  _refTours=[];renderRefTable();saveRefTable();
-}
-async function shareRefTable(){
-  loadRefFromDOM();saveRefTable();
-  if(_refTours.length===0){toast('الجدول فارغ','error');return;}
-  toast('جاري تصوير الجدول...','');
-  const el=document.getElementById('ref-main-tbl');
-  try{
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff'});
-    canvas.toBlob(async(blob)=>{
-      const d=$('sort-date').value||todayStr();
-      const file=new File([blob],`جدول-المرجع-${d}.png`,{type:'image/png'});
-      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:'جدول المرجع اليومي'});}
-        catch(e){if(e.name!=='AbortError')_downloadImg(blob);}
-      }else{_downloadImg(blob);toast('تم حفظ الصورة','success');}
-    },'image/png');
-  }catch(e){toast('حدث خطأ','error');}
-}
-function printRefTable(){
-  loadRefFromDOM();saveRefTable();
-  if(_refTours.length===0){toast('الجدول فارغ','error');return;}
-  const d=$('sort-date').value||todayStr();
-  let rows='';
-  _refTours.forEach((t,ti)=>{
-    const bg=_coColor(t.company);
-    const stops=t.stops.length?t.stops:[{code:'',plz:''}];
-    if(ti>0)rows+=`<tr><td colspan="8" style="height:4px;background:#1e3a5f;padding:0"></td></tr>`;
-    stops.forEach((s,si)=>{
-      rows+=`<tr>`;
-      if(si===0)rows+=`<td rowspan="${stops.length}" style="text-align:center;font-weight:800;font-size:15px;background:${bg};border:1px solid #ccc">${t.tourNo}</td>`;
-      rows+=`<td style="text-align:center;border:1px solid #ccc;padding:6px 10px">${s.code}</td>`;
-      rows+=`<td style="text-align:center;border:1px solid #ccc;padding:6px 10px">${s.plz}</td>`;
-      if(si===0){
-        rows+=`<td rowspan="${stops.length}" style="text-align:center;font-weight:700;background:${bg};border:1px solid #ccc">${t.company}</td>`;
-        rows+=`<td rowspan="${stops.length}" style="text-align:center;font-weight:600;background:${bg};border:1px solid #ccc">${t.name}</td>`;
-        rows+=`<td rowspan="${stops.length}" style="text-align:center;background:${bg};border:1px solid #ccc">${t.driverId}</td>`;
-        rows+=`<td rowspan="${stops.length}" style="text-align:center;font-weight:700;color:#166534;background:${bg};border:1px solid #ccc">${t.zero||'0'}</td>`;
-      }
-      rows+=`</tr>`;
-    });
-  });
-  const html=`<html dir="ltr"><head><meta charset="utf-8"><title>جدول المرجع — ${d}</title>
-  <style>body{font-family:Arial,sans-serif;padding:16px}h2{text-align:center;color:#1e3a5f}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th{background:#1e3a5f;color:#fff;padding:7px 10px;border:1px solid #3a6fa0;text-align:center}
-  th.sub{background:#2d5a8e}@media print{body{padding:6px}}
-  </style></head><body>
-  <h2>📋 جدول المرجع اليومي — ${d}</h2>
-  <table>
-    <thead>
-      <tr><th rowspan="2">TOUR NO</th><th colspan="2" class="sub">CODES</th><th rowspan="2">COMPANY</th><th rowspan="2">NAME</th><th rowspan="2">ID</th><th rowspan="2">0</th></tr>
-      <tr><th class="sub">رقم</th><th class="sub">PLZ</th></tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <script>setTimeout(()=>{window.print();},300);<\/script>
-  </body></html>`;
-  const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}
-}
 
 // ══════════════════════════════════════════════════
 // SORT / DISPATCH PLAN
@@ -3044,9 +2773,9 @@ function _autoDispAndRender(rawRows){
   const iTour   =ci('TOUR');
   // only explicit subcontractor column — "SUB" alone is stop-number in Amazon files
   const iSub    =ci('SUBUNTERNEHMER','UNTERNEHMER','COMPANY','FIRMA');
-  const iFahrer =ci('FAHRERNAME','FAHRER','DRIVER','NAME');
-  const iAppid  =ci('OUT-APP ID','OUT-APP','APP-ID','APP','ID');
-  const iCode   =ci('3. CODE','3.CODE','CODES','CODE','COD');
+  const iFahrer =ci('FAHRERNAME','FAHRER','DRIVER');
+  const iAppid  =ci('OUT-APP ID','OUT-APP','APP-ID','APP');
+  const iCode   =ci('3. CODE','3.CODE','CODE','COD');
   const iPlz    =ci('PLZ','POSTLEITZAHL','POSTAL','ZIP');
   const iGeplant=ci('GEPLANT','PLANNED','PLAN');
   const iIst    =ci('IST','ACTUAL');
@@ -3161,70 +2890,45 @@ function _buildFromDispMapper(){
   _renderDisposition(objRows,useSub);
 }
 function _renderDisposition(rows,useSub){
-  // aggregate by (company, tour)
-  const coMap={};
+  // group by sub column OR by hardcoded tour-to-company mapping
+  const groups={};
   rows.forEach(r=>{
     const co=useSub?(r.sub||'OHNE FIRMA'):_dispCo(r.tour);
-    if(!coMap[co])coMap[co]=new Map();
-    const key=String(r.tour);
-    if(!coMap[co].has(key))coMap[co].set(key,{tour:r.tour,fahrer:r.fahrer,appid:r.appid,codes:[],plzs:[],geplant:r.geplant,ist:r.ist||'',bemerk:r.bemerk});
-    const e=coMap[co].get(key);
-    if(r.code)r.code.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean).forEach(p=>{if(!e.codes.includes(p))e.codes.push(p);});
-    if(r.plz) r.plz.split(/[,،\s]+/).map(s=>s.trim()).filter(Boolean).forEach(p=>{if(!e.plzs.includes(p))e.plzs.push(p);});
-    if(!e.fahrer&&r.fahrer)e.fahrer=r.fahrer;
-    if(!e.appid&&r.appid)e.appid=r.appid;
-    if(!e.geplant&&r.geplant)e.geplant=r.geplant;
-    if(!e.ist&&r.ist)e.ist=r.ist;
-    if(!e.bemerk&&r.bemerk)e.bemerk=r.bemerk;
+    if(!groups[co])groups[co]=[];
+    groups[co].push(r);
   });
-  const coKeys=useSub
-    ?Object.keys(coMap).sort()
-    :DISP_ORDER.filter(c=>coMap[c]).concat(Object.keys(coMap).filter(c=>!DISP_ORDER.includes(c)));
-  const srt=(a,b)=>{const na=parseInt(String(a.tour).replace(/[^\d]/g,'')),nb=parseInt(String(b.tour).replace(/[^\d]/g,''));return(!isNaN(na)&&!isNaN(nb))?na-nb:String(a.tour).localeCompare(String(b.tour));};
-  const byKey={};
-  coKeys.forEach(co=>{if(coMap[co])byKey[co]=Array.from(coMap[co].values()).sort(srt);});
+  // order: if using sub column, sort alphabetically; else use DISP_ORDER
+  const coKeys=useSub?Object.keys(groups).sort():DISP_ORDER.filter(c=>groups[c]).concat(Object.keys(groups).filter(c=>!DISP_ORDER.includes(c)));
   const date=_fmtDate($('sort-date').value);
   const loc=($('sort-loc').value.trim())||'Z&Z GmbH · NRW005';
-  const totalDrv=coKeys.reduce((s,co)=>s+(byKey[co]?byKey[co].length:0),0);
-  // paginate: large companies own page; small ones share
-  const PAGE_MAX=12;
-  const pages=[];let cur=[],curN=0;
+  const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #bbb;padding:7px 10px;font-size:13px;white-space:nowrap">${t}</th>`;
+  const TD=(t)=>`<td style="border:1px solid #bbb;padding:7px 10px;text-align:center;font-size:13px">${t||'—'}</td>`;
+  let html=`<div id="disp-inner" style="font-family:Arial,sans-serif">
+    <div style="margin-bottom:14px">
+      <h2 style="color:#1F2C5C;margin:0 0 4px;font-size:18px">DISPOSITION – ${date}</h2>
+      <p style="margin:0;font-size:13px;color:#555"><b>Z&amp;Z GmbH Transporte</b> | Depot: NRW005 | ${loc}</p>
+    </div>`;
   coKeys.forEach(co=>{
-    if(!byKey[co])return;
-    const t=byKey[co];
-    if(t.length>PAGE_MAX){
-      if(cur.length){pages.push(cur);cur=[];curN=0;}
-      for(let i=0;i<t.length;i+=PAGE_MAX)pages.push([{co,tours:t.slice(i,i+PAGE_MAX)}]);
-    }else if(t.length>6||curN+t.length>PAGE_MAX){
-      if(cur.length){pages.push(cur);cur=[];curN=0;}
-      pages.push([{co,tours:t}]);
-    }else{cur.push({co,tours:t});curN+=t.length;}
-  });
-  if(cur.length)pages.push(cur);
-  const COLS=`<colgroup><col style="width:10mm"><col style="width:16mm"><col style="width:50mm"><col style="width:46mm"><col><col style="width:22mm"><col style="width:22mm"><col style="width:20mm"></colgroup>`;
-  const THEAD=`<tr class="dhr"><th>رقم</th><th>آوت آب<br><span style="font-size:6.5pt;font-weight:normal">OUT-APP</span></th><th>السائق<br><span style="font-size:6.5pt;font-weight:normal">Driver</span></th><th>الأكواد<br><span style="font-size:6.5pt;font-weight:normal">Codes</span></th><th>البريدي<br><span style="font-size:6.5pt;font-weight:normal">PLZ</span></th><th>المخطط<br><span style="font-size:6.5pt;font-weight:normal">Planned</span></th><th>الفعلي<br><span style="font-size:6.5pt;font-weight:normal">Actual</span></th><th>ملاحظات<br><span style="font-size:6.5pt;font-weight:normal">Notes</span></th></tr>`;
-  const buildSec=(co,tours,first)=>{
-    const t0=tours[0]?.tour,tN=tours[tours.length-1]?.tour;
-    const rng=tours.length>1?`Tours ${t0}–${tN}`:`Tour ${t0}`;
-    let s=`<div class="dsp-bd${first?'':' dsp-bdm'}">${co} &nbsp;·&nbsp; ${rng} &nbsp;·&nbsp; ${tours.length} Drivers</div>
-    <table class="dsp-tb">${COLS}<thead>${THEAD}</thead><tbody>`;
-    tours.forEach(t=>{
-      const pills=t.codes.map(c=>`<span class="dpil">${c}</span>`).join('');
-      const plzStr=t.plzs.join(' · ')||'—';
-      s+=`<tr class="ddr"><td class="dn">${t.tour}</td><td class="da">${t.appid||'—'}</td><td class="dd">${t.fahrer||'—'}</td><td class="dc">${pills||'—'}</td><td class="dp">${plzStr}</td><td class="dg">${t.geplant||''}</td><td class="di">${t.ist||''}</td><td class="dbm">${t.bemerk||''}</td></tr>`;
+    if(!groups[co])return;
+    html+=`<div style="background:#0E7C3A;color:#fff;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px">Subunternehmer: ${co}</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:0"><thead><tr>
+      ${TH('TOUR')}${TH('OUT-APP ID')}${TH('FAHRER / السائق')}${TH('3. CODE')}${TH('PLZ')}${TH('GEPLANT')}${TH('IST')}${TH('BEMERKUNG')}
+    </tr></thead><tbody>`;
+    groups[co].forEach(r=>{
+      const codes=r.code.split(/[,·\s]+/).filter(Boolean)
+        .map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${c}</span>`).join('');
+      html+=`<tr>
+        ${TD(r.tour)}${TD(r.appid)}${TD(r.fahrer)}
+        <td style="border:1px solid #bbb;padding:7px 10px;text-align:center">${codes||'—'}</td>
+        ${TD(r.plz)}${TD(r.geplant)}${TD(r.ist)}${TD(r.bemerk)}
+      </tr>`;
     });
-    s+=`<tr><td class="dtot" colspan="5">${co} GESAMT &nbsp;·&nbsp; ${tours.length} Touren</td><td class="dtot"></td><td class="dtot"></td><td class="dtot"></td></tr></tbody></table>`;
-    return s;
-  };
-  const buildHdr=()=>`<div class="dsp-hd"><div class="dsp-ht">DISPOSITION – ${date}</div><div class="dsp-hm">Z&amp;Z GmbH Transporte &nbsp;|&nbsp; NRW005 &nbsp;|&nbsp; ${totalDrv} Drivers<br>${loc}</div></div>`;
-  const style=`<style id="ds">.dsp{font-family:Arial,sans-serif;font-size:9pt;background:#d0d0d0;padding:8px}.dsp-pg{background:#fff;margin:0 auto 10px;box-shadow:0 2px 8px rgba(0,0,0,.18);overflow:hidden}.dsp-hd{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:6px 10px}.dsp-ht{font-size:12.5pt;font-weight:bold}.dsp-hm{font-size:8pt;text-align:right;line-height:1.6}.dsp-bd{background:#0E7C3A;color:#fff;font-weight:bold;font-size:10pt;padding:5px 10px;text-transform:uppercase}.dsp-bdm{margin-top:5px}.dsp-tb{width:100%;border-collapse:collapse;table-layout:fixed}.dsp-tb th,.dsp-tb td{border:1px solid #bbb;padding:2px 4px;vertical-align:middle;word-wrap:break-word;overflow:hidden}.dhr th{background:#1F2C5C;color:#fff;font-size:7.5pt;text-align:center;font-weight:bold}.ddr .dn{width:10mm;background:#F2F2F2;font-weight:bold;text-align:center;font-size:9pt}.ddr .da{width:16mm;font-weight:bold;color:#1F2C5C;text-align:center;font-size:8.5pt}.ddr .dd{width:50mm;font-size:8.5pt}.ddr .dc{width:46mm;font-size:8pt}.ddr .dp{font-size:7.5pt}.ddr .dg{background:#D9E1F2;text-align:center;width:22mm;font-size:8.5pt}.ddr .di{background:#FFF2CC;text-align:center;width:22mm;font-size:8.5pt}.ddr .dbm{background:#FFF2CC;width:20mm;font-size:8.5pt}.ddr:nth-child(even) .dd,.ddr:nth-child(even) .dc,.ddr:nth-child(even) .dp{background:#F9F9F9}.dpil{display:inline-block;background:#C8102E;color:#fff;border-radius:3px;padding:0 3px;font-size:7pt;font-weight:bold;margin:0 2px 1px 0}.dtot{background:#1F2C5C;color:#fff;font-weight:bold;font-size:8.5pt;text-align:center;border-color:#1F2C5C!important}</style>`;
-  let html=`<div id="disp-inner"><div class="dsp">${style}`;
-  pages.forEach(pg=>{
-    html+=`<div class="dsp-pg">${buildHdr()}`;
-    pg.forEach((item,i)=>{html+=buildSec(item.co,item.tours,i===0);});
-    html+=`</div>`;
+    html+=`<tr>
+      <td colspan="5" style="border:1px solid #bbb;padding:7px 10px;font-weight:bold;font-size:13px;background:#f8fafc">${co} GESAMT: ${groups[co].length} Touren</td>
+      <td colspan="3" style="border:1px solid #bbb;padding:7px;background:#f8fafc"></td>
+    </tr></tbody></table>`;
   });
-  html+=`</div></div>`;
+  html+=`</div>`;
   $('dp-pages').innerHTML=html;
   $('sort-result').classList.remove('hidden');
 }
@@ -3232,38 +2936,20 @@ function printDisp(){
   const el=document.getElementById('disp-inner');
   if(!el){toast('لا يوجد جدول توزيع للطباعة','error');return;}
   const date=_fmtDate($('sort-date').value);
-  const win=window.open('','_blank','width=1200,height=900');
-  const content=el.innerHTML.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'');
-  win.document.write(`<!DOCTYPE html><html lang="ar"><head>
+  const win=window.open('','_blank','width=1100,height=800');
+  win.document.write(`<!DOCTYPE html><html lang="de"><head>
 <meta charset="UTF-8"><title>Disposition ${date}</title>
 <style>
-@page{size:A4 landscape;margin:7mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;font-size:9pt;background:#fff}
-.dsp{padding:0;background:#fff}
-.dsp-pg{background:#fff;width:100%;margin:0 auto;page-break-after:always;overflow:hidden}
-.dsp-pg:last-child{page-break-after:avoid}
-.dsp-hd{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:3mm 5mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.dsp-ht{font-size:13pt;font-weight:bold}
-.dsp-hm{font-size:8pt;text-align:right;line-height:1.6}
-.dsp-bd{background:#0E7C3A;color:#fff;font-weight:bold;font-size:10pt;padding:2.5mm 5mm;text-transform:uppercase;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.dsp-bdm{margin-top:2mm}
-.dsp-tb{width:100%;border-collapse:collapse;table-layout:fixed}
-.dsp-tb th,.dsp-tb td{border:1px solid #bbb;padding:1.5mm 2mm;vertical-align:middle;word-wrap:break-word;overflow:hidden}
-.dhr th{background:#1F2C5C;color:#fff;font-size:7.5pt;text-align:center;font-weight:bold;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.ddr .dn{width:12mm;background:#F2F2F2;font-weight:bold;text-align:center;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.ddr .da{width:18mm;font-weight:bold;color:#1F2C5C;text-align:center;font-size:8.5pt}
-.ddr .dd{width:52mm;font-size:8.5pt}
-.ddr .dc{width:48mm;font-size:8pt}
-.ddr .dp{width:85mm;font-size:7.5pt}
-.ddr .dg{width:24mm;background:#D9E1F2;text-align:center;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.ddr .di{width:24mm;background:#FFF2CC;text-align:center;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.ddr .dbm{width:20mm;background:#FFF2CC;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.ddr:nth-child(even) .dd,.ddr:nth-child(even) .dc,.ddr:nth-child(even) .dp{background:#F9F9F9;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.dpil{display:inline-block;background:#C8102E;color:#fff;border-radius:3px;padding:0 3px;font-size:7pt;font-weight:bold;margin:0 2px 1px 0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.dtot{background:#1F2C5C;color:#fff;font-weight:bold;font-size:8.5pt;text-align:center;border-color:#1F2C5C!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+body{font-family:Arial,sans-serif;background:#fff;padding:14px;font-size:13px}
+table{width:100%;border-collapse:collapse;margin-bottom:0}
+th{background:#1F2C5C;color:white;border:1px solid #bbb;padding:7px 10px;text-align:center;white-space:nowrap}
+td{border:1px solid #bbb;padding:7px 10px;text-align:center}
+.pill{background:#C8102E;color:white;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px}
+.sub-hdr{background:#0E7C3A;color:white;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px}
+@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}}
 </style></head><body>
-<div class="dsp">${content}</div>
+${el.innerHTML}
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
 </body></html>`);
   win.document.close();
