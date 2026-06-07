@@ -2758,7 +2758,7 @@ function _autoDispAndRender(rawRows){
   let hdrIdx=0,hdr=[];
   for(let i=0;i<Math.min(8,rawRows.length);i++){
     const r=rawRows[i].map(c=>String(c).toUpperCase().trim());
-    if(r.some(c=>c.includes('TOUR')||c.includes('FAHRER')||c.includes('PLZ')||c.includes('SUBUNTERN'))){hdrIdx=i;hdr=r;break;}
+    if(r.some(c=>c.includes('TOUR')||c.includes('CODES')||c.includes('COMPANY'))){hdrIdx=i;hdr=r;break;}
   }
   if(!hdr.length){hdr=rawRows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
   _sortHdrIdx=hdrIdx;
@@ -2770,42 +2770,57 @@ function _autoDispAndRender(rawRows){
     }
     return -1;
   };
-  const iTour   =ci('TOUR');
-  // only explicit subcontractor column — "SUB" alone is stop-number in Amazon files
-  const iSub    =ci('SUBUNTERNEHMER','UNTERNEHMER','COMPANY','FIRMA');
-  const iFahrer =ci('FAHRERNAME','FAHRER','DRIVER');
-  const iAppid  =ci('OUT-APP ID','OUT-APP','APP-ID','APP');
-  const iCode   =ci('3. CODE','3.CODE','CODE','COD');
+  // مطابقة أعمدة الملف اليومي: TOUR NO / CODES (رقم + رمز بريدي) / COMPANY / NAME / ID
+  const iTour   =ci('TOUR NO','TOUR');
+  const iCode   =ci('CODES','CODE');
   const iPlz    =ci('PLZ','POSTLEITZAHL','POSTAL','ZIP');
-  const iGeplant=ci('GEPLANT','PLANNED','PLAN');
-  const iIst    =ci('IST','ACTUAL');
-  const iBemerk =ci('BEMERKUNG','BEMERK','REMARK','NOTE');
-  if(iTour<0){toast('لم يتم العثور على عمود TOUR في الملف','error');return;}
-  const objRows=[];
+  const iCompany=ci('COMPANY','FIRMA','UNTERNEHMEN');
+  const iName   =ci('NAME');
+  const iId     =ci('ID');
+  if(iTour<0||iCode<0){toast('لم يتم العثور على أعمدة TOUR NO / CODES في الملف','error');return;}
+
+  // الأعمدة COMPANY/NAME/ID تكون مدمجة (Merged Cells) لكل مجموعة تور — لذلك نملأ القيم للأسفل (Forward-fill)
+  // ونجمع كل أكواد (الرقم فقط بدون الرمز البريدي) التابعة لنفس رقم التور في صف واحد
+  const tourMap=new Map();
+  let curTour='',curCo='',curName='',curId='';
   for(let i=hdrIdx+1;i<rawRows.length;i++){
     const r=rawRows[i];
-    const tour=String(r[iTour]||'').trim();
-    if(!tour)continue;
-    // get sub value; if it's a pure number it's a stop-number not a company
-    let subVal=iSub>=0?String(r[iSub]||'').trim():'';
-    if(subVal&&!isNaN(Number(subVal)))subVal='';
-    objRows.push({
-      tour, sub:subVal,
-      fahrer :iFahrer>=0 ?String(r[iFahrer] ||'').trim():'',
-      appid  :iAppid>=0  ?String(r[iAppid]  ||'').trim():'',
-      code   :iCode>=0   ?String(r[iCode]   ||'').trim():'',
-      plz    :iPlz>=0    ?String(r[iPlz]    ||'').trim():'',
-      geplant:iGeplant>=0?String(r[iGeplant]||'').trim():'',
-      ist    :iIst>=0    ?String(r[iIst]    ||'').trim():'',
-      bemerk :iBemerk>=0 ?String(r[iBemerk] ||'').trim():''
-    });
+    const tourRaw=String(r[iTour]||'').trim();
+    let codeRaw =String(r[iCode]||'').trim();
+    let plzRaw  =iPlz>=0?String(r[iPlz]||'').trim():'';
+    const coRaw =iCompany>=0?String(r[iCompany]||'').trim():'';
+    const nmRaw =iName>=0?String(r[iName]||'').trim():'';
+    const idRaw =iId>=0?String(r[iId]||'').trim():'';
+    if(tourRaw)curTour=tourRaw;
+    if(coRaw)curCo=coRaw;
+    if(nmRaw)curName=nmRaw;
+    if(idRaw)curId=idRaw;
+    if(!curTour)continue;
+    // إن لم يوجد عمود PLZ منفصل، قد يكون الكود والرمز البريدي بنفس الخلية مفصولين بمسافة
+    if(!plzRaw&&codeRaw){
+      const m=codeRaw.match(/^(\S+)\s+(\d{4,5})$/);
+      if(m){codeRaw=m[1];plzRaw=m[2];}
+    }
+    if(!codeRaw&&!plzRaw&&!tourRaw)continue;
+    if(!tourMap.has(curTour))tourMap.set(curTour,{tour:curTour,company:curCo,fahrer:curName,appid:curId,codes:[],plzs:[]});
+    const e=tourMap.get(curTour);
+    if(!e.company&&curCo)e.company=curCo;
+    if(!e.fahrer&&curName)e.fahrer=curName;
+    if(!e.appid&&curId)e.appid=curId;
+    if(codeRaw&&!e.codes.includes(codeRaw))e.codes.push(codeRaw);
+    if(plzRaw&&!e.plzs.includes(plzRaw))e.plzs.push(plzRaw);
   }
+  const objRows=Array.from(tourMap.values()).map(e=>({
+    tour:e.tour, sub:e.company, fahrer:e.fahrer, appid:e.appid,
+    code:e.codes.join(', '), plz:e.plzs.join(', '),
+    geplant:'', ist:'', bemerk:''
+  }));
   if(!objRows.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
   objRows.sort((a,b)=>{
     const na=parseInt(String(a.tour).replace(/[^\d]/g,'')),nb=parseInt(String(b.tour).replace(/[^\d]/g,''));
     return(!isNaN(na)&&!isNaN(nb))?na-nb:String(a.tour).localeCompare(String(b.tour));
   });
-  // useSub: only if we found a real company column with non-numeric values
+  // useSub: التجميع حسب اسم شركة إدارة الشوفيرية (COMPANY) كما هو مطلوب
   const useSub=objRows.some(r=>r.sub&&r.sub.length>1);
   $('sort-upload-panel').classList.add('hidden');
   $('sort-disp-mapper').classList.add('hidden');
