@@ -212,13 +212,6 @@ button,select,input{font-family:inherit;font-size:inherit}
 .sort-upload-card{max-width:560px;margin:40px auto 0}
 .sort-drop-zone{border:2px dashed var(--blue);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:background .2s}
 .sort-drop-zone:hover{background:#eff6ff}
-@media print{
-  .no-print{display:none!important}
-  .dp-page{box-shadow:none;margin:0;border-radius:0;page-break-after:always}
-  .dp-inp{border:none;background:transparent;padding:0}
-  #sort-upload-panel{display:none!important}
-  #sort-result .no-print{display:none!important}
-}
 
 /* SORTIERKARTEN */
 .sk-page{width:283mm;min-height:196mm;background:#fff;margin:0 auto 10mm;padding:3mm;box-shadow:0 2px 10px rgba(0,0,0,.2);display:flex;flex-direction:column;box-sizing:border-box}
@@ -239,6 +232,14 @@ button,select,input{font-family:inherit;font-size:inherit}
 .sk-cb td{padding:1.2mm 2mm;border-bottom:1px solid #e8e8e8;vertical-align:middle}
 .sk-cd{background:#C8102E;color:#fff;font-size:16pt;font-weight:bold;text-align:center;width:14mm;padding:1.5mm 2mm;line-height:1}
 .sk-pz{font-size:12pt;font-weight:bold;color:#1F2C5C;letter-spacing:.5px;padding-left:3mm}
+
+@media print{
+  .no-print{display:none!important}
+  .dp-page{box-shadow:none;margin:0;border-radius:0;page-break-after:always}
+  .dp-inp{border:none;background:transparent;padding:0}
+  #sort-upload-panel{display:none!important}
+  #sort-result .no-print{display:none!important}
+}
 
 /* DASHBOARD DRIVER LIST */
 .db-drv-row{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--bg);border-radius:11px;margin-bottom:9px}
@@ -464,7 +465,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   /* ── dispatch plan print ── */
   body.print-sort #pv-sort{display:block !important}
   body.print-sort #sort-upload-panel,body.print-sort #sort-mapper,body.print-sort .no-print{display:none !important}
-  body.print-sort .dp-page{page-break-after:always;box-shadow:none !important;border-radius:0 !important;margin:0 !important}
+  body.print-sort .dp-page{page-break-after:always;box-shadow:none !important;border-radius:0 !important;margin:0 0 0 0 !important}
   body.print-sort .dp-inp{border:none !important;background:transparent !important;padding:0 !important}
   body.print-sort .dp-tbl td,body.print-sort .dp-tbl th{font-size:10px !important;padding:5px 6px !important}
   body.print-sort .dp-codes{font-size:12px !important}
@@ -527,6 +528,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 .sh-body{padding:0 14px 14px;border-top:1px solid var(--border);}
 .sh-sec{font-size:12px;font-weight:700;color:var(--primary);margin:12px 0 6px;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -578,42 +580,42 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
     <div class="sep"></div>
 
     <div class="form-group">
-      <label>اسم المستخدم *</label>
+      <label data-i18n="signup.username">اسم المستخدم *</label>
       <input type="text" id="su-name" placeholder="مثال: أحمد أو Manager">
     </div>
     <div class="frow">
       <div class="form-group">
-        <label>📧 بريد Gmail / iCloud</label>
+        <label data-i18n="signup.email">📧 بريد Gmail / iCloud</label>
         <input type="email" id="su-email" placeholder="name@gmail.com أو @icloud.com">
       </div>
       <div class="form-group">
-        <label>📱 رقم الهاتف</label>
+        <label data-i18n="signup.phone">📱 رقم الهاتف</label>
         <input type="text" id="su-phone" placeholder="+49 176 xxxxxxxx">
       </div>
     </div>
     <div class="form-group">
-      <label> Apple ID (iCloud)</label>
+      <label data-i18n="signup.apple"> Apple ID (iCloud)</label>
       <input type="text" id="su-apple" placeholder="name@icloud.com أو @me.com">
     </div>
     <div class="frow">
       <div class="form-group">
-        <label>كلمة المرور *</label>
+        <label data-i18n="signup.password">كلمة المرور *</label>
         <input type="password" id="su-pass" placeholder="4 أحرف على الأقل">
       </div>
       <div class="form-group">
-        <label>تأكيد كلمة المرور *</label>
+        <label data-i18n="signup.confirm_pw">تأكيد كلمة المرور *</label>
         <input type="password" id="su-pass2" placeholder="أعد الكتابة">
       </div>
     </div>
     <div class="form-group">
-      <label>سؤال الأمان (لاسترجاع الحساب) *</label>
+      <label data-i18n="signup.sec_q">سؤال الأمان (لاسترجاع الحساب) *</label>
       <select id="su-sec-q" class="form-select">
         <option value="">— اختر سؤالاً —</option>
       </select>
     </div>
     <div class="form-group">
-      <label>إجابة سؤال الأمان *</label>
-      <input type="text" id="su-sec-a" placeholder="إجابتك السرية"
+      <label data-i18n="signup.sec_a">إجابة سؤال الأمان *</label>
+      <input type="text" id="su-sec-a" data-i18n-ph="signup.sec_a_ph" placeholder="إجابتك السرية"
         onkeydown="if(event.key==='Enter')submitSetup()">
     </div>
     <button class="btn btn-primary fw" data-i18n="signup.submit" onclick="submitSetup()">إنشاء الحساب والدخول ←</button>
@@ -630,52 +632,28 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   <div class="login-card" style="max-width:460px">
     <div class="login-logo">Z&amp;Z</div>
     <h1 data-i18n="forgot.title">استرجاع الحساب</h1>
-    <p class="login-sub">أدخل معرفك ثم أجب على سؤال الأمان أو استقبل كوداً على بريدك الإلكتروني</p>
+    <p class="login-sub">أدخل معرفك ثم أجب على سؤال الأمان لإعادة تعيين كلمة المرور</p>
     <div class="sep"></div>
 
     <!-- Step 1: find account -->
     <div id="frg-step1">
       <div class="form-group">
-        <label>المعرف (اسم / بريد / هاتف / Apple ID)</label>
-        <input type="text" id="frg-id" placeholder="أدخل أي معرف مرتبط بحسابك"
+        <label data-i18n="forgot.id_lbl">المعرف (اسم / بريد / هاتف / Apple ID)</label>
+        <input type="text" id="frg-id" data-i18n-ph="forgot.id_ph" placeholder="أدخل أي معرف مرتبط بحسابك"
           onkeydown="if(event.key==='Enter')forgotFindAccount()">
       </div>
       <button class="btn btn-primary fw" data-i18n="forgot.find" onclick="forgotFindAccount()">بحث عن الحساب ←</button>
     </div>
 
-    <!-- Step 2: verify identity -->
+    <!-- Step 2: security question -->
     <div id="frg-step2" class="hidden">
       <div class="frg-account-badge" id="frg-account-name"></div>
-
-      <!-- 2A: security question -->
-      <div id="frg-sec-block">
-        <div class="form-group">
-          <label id="frg-sec-q-label">سؤال الأمان</label>
-          <input type="text" id="frg-sec-a" placeholder="إجابتك السرية"
-            onkeydown="if(event.key==='Enter')forgotVerifyAnswer()">
-        </div>
-        <button class="btn btn-primary fw" data-i18n="forgot.verify" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
-        <div id="frg-email-opt" class="hidden" style="text-align:center;margin-top:14px">
-          <div class="auth-or"><span>أو</span></div>
-          <button class="btn btn-outline-green fw" onclick="forgotSendCode()">📧 أرسل كود على البريد الإلكتروني</button>
-        </div>
+      <div class="form-group">
+        <label id="frg-sec-q-label">سؤال الأمان</label>
+        <input type="text" id="frg-sec-a" data-i18n-ph="forgot.sec_a_ph" placeholder="إجابتك السرية"
+          onkeydown="if(event.key==='Enter')forgotVerifyAnswer()">
       </div>
-
-      <!-- 2B: email code input (shown after sending) -->
-      <div id="frg-code-block" class="hidden">
-        <div class="frg-ok-badge" id="frg-code-sent-msg">📧 تم إرسال الكود</div>
-        <div class="form-group">
-          <label>أدخل الكود المكوّن من 6 أرقام</label>
-          <input type="text" id="frg-code" placeholder="000000" maxlength="6"
-            style="text-align:center;font-size:22px;letter-spacing:8px;font-weight:700"
-            onkeydown="if(event.key==='Enter')forgotVerifyCode()">
-        </div>
-        <button class="btn btn-primary fw" onclick="forgotVerifyCode()">تحقق من الكود ←</button>
-        <div style="display:flex;justify-content:center;gap:16px;margin-top:10px">
-          <button class="reset-link" onclick="forgotSendCode()">⟳ إعادة الإرسال</button>
-          <button class="reset-link" onclick="forgotBackToSecQ()">← سؤال الأمان</button>
-        </div>
-      </div>
+      <button class="btn btn-primary fw" data-i18n="forgot.verify" onclick="forgotVerifyAnswer()">تحقق من الإجابة ←</button>
     </div>
 
     <!-- Step 3: new password -->
@@ -683,11 +661,11 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <div class="frg-ok-badge">✅ تم التحقق من الهوية</div>
       <div class="frow">
         <div class="form-group">
-          <label>كلمة المرور الجديدة *</label>
+          <label data-i18n="forgot.new_pw">كلمة المرور الجديدة *</label>
           <input type="password" id="frg-pw" placeholder="4 أحرف على الأقل">
         </div>
         <div class="form-group">
-          <label>تأكيد كلمة المرور *</label>
+          <label data-i18n="forgot.confirm_pw">تأكيد كلمة المرور *</label>
           <input type="password" id="frg-pw2" placeholder="أعد الكتابة"
             onkeydown="if(event.key==='Enter')forgotResetPassword()">
         </div>
@@ -769,6 +747,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="date-nav-title" id="dn-label">...</div>
           <span id="dn-past-tag" class="date-is-past hidden" data-i18n="date.past_view">عرض سابق (قراءة فقط)</span>
           <button class="date-nav-btn date-nav-save" data-i18n="date.save" onclick="saveDay()">💾 حفظ</button>
+          <button class="date-nav-btn" style="background:#f0fdf4;color:#166534;border-color:#86efac" onclick="printDashboard()">🖨️ طباعة</button>
+          <button class="date-nav-btn" style="background:#eff6ff;color:#1d4ed8;border-color:#93c5fd" onclick="shareDashboard()">📤 مشاركة</button>
           <button class="date-nav-btn" data-i18n="date.next" onclick="changeDay(+1)" id="dn-next-btn">اليوم التالي ←</button>
         </div>
 
@@ -828,10 +808,12 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <div class="returns-header">
               <div>
                 <div class="returns-title" data-i18n="dash.returns_title">↩ جدول المسترجعات</div>
-                <div style="font-size:13px;color:var(--muted);margin-top:3px">الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ</div>
+                <div style="font-size:13px;color:var(--muted);margin-top:3px" data-i18n="dash.returns_sub">الطرود المُعادة — يُحفظ تلقائياً عند الضغط على حفظ</div>
               </div>
-              <div style="display:flex;gap:10px;align-items:center">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                 <span class="returns-date-tag" id="ret-date-tag"></span>
+                <button class="returns-add-btn" style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac" onclick="printReturns()">🖨️ طباعة</button>
+                <button class="returns-add-btn" style="background:#eff6ff;color:#1d4ed8;border:1.5px solid #93c5fd" onclick="shareReturns()">📤 مشاركة</button>
                 <button class="returns-add-btn" id="ret-add-btn" data-i18n="dash.ret_add" onclick="addReturnRow()">＋ إضافة صف</button>
               </div>
             </div>
@@ -839,7 +821,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
               <table class="returns-tbl">
                 <thead>
                   <tr>
-                    <th style="width:50px">#</th>
+                    <th style="width:40px">#</th>
+                    <th style="width:80px">الرقم</th>
                     <th data-i18n="dash.ret_qty">الكمية</th>
                     <th data-i18n="dash.ret_driver">اسم الشفير</th>
                     <th data-i18n="dash.ret_tour">التور</th>
@@ -857,6 +840,22 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
       <!-- ====== TASKS (المهام) ====== -->
       <section class="pv hidden" id="pv-orders">
+        <!-- Date navigator -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="shiftTaskDate(-1)">← السابق</button>
+          <input type="date" id="task-date-filter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;flex:1;min-width:140px" onchange="setTaskDate(this.value)">
+          <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="shiftTaskDate(1)">التالي →</button>
+          <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px;background:var(--blue);color:#fff;border-color:var(--blue)" onclick="setTaskDate(todayStr())">اليوم</button>
+        </div>
+        <!-- Memo (fixed, doesn't change with date) -->
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-weight:700;font-size:15px">📝 المذكرة</span>
+            <span style="font-size:12px;color:var(--muted)">تبقى دائماً — لا تتغير بالتاريخ</span>
+          </div>
+          <textarea id="task-memo-area" rows="3" placeholder="اكتب ملاحظاتك هنا..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;box-sizing:border-box" oninput="saveMemo(this.value)"></textarea>
+        </div>
+        <!-- Tasks toolbar -->
         <div class="toolbar">
           <input class="tb-inp" type="text" placeholder="🔍 بحث في المهام..." oninput="filterOrders(this.value)">
           <select class="tb-sel" onchange="filterByStatus(this.value)">
@@ -891,7 +890,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
             <label class="sort-drop-zone" id="sort-drop" for="sort-file-inp" ondragover="event.preventDefault()" ondrop="sortDropHandler(event)" style="display:block;cursor:pointer">
               <div style="font-size:36px;margin-bottom:8px">📂</div>
               <div style="font-weight:700;font-size:15px;margin-bottom:4px" id="sort-drop-lbl">اسحب الملف هنا أو اضغط للاختيار</div>
-              <div style="font-size:13px;color:var(--muted)">.xlsx / .xls / .pdf / صورة</div>
+              <div style="font-size:13px;color:var(--muted)" id="sort-drop-sub">.xlsx / .xls / .pdf / صورة</div>
             </label>
             <input type="file" id="sort-file-inp" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,.gif,.bmp" style="display:none" onchange="handleSortFile(this.files[0])">
           </div>
@@ -904,7 +903,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <h3 class="card-title" data-i18n="sort.mapper_title">⚙️ تعيين الأعمدة</h3>
       <button class="btn btn-ghost" style="width:auto;padding:8px 16px;font-size:13px" data-i18n="sort.cancel_mapper" onclick="clearSortResult()">↩ إلغاء</button>
     </div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">معاينة أول صفوف من الملف — اختر الأعمدة الصحيحة لكل حقل:</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px" data-i18n="sort.mapper_hint">معاينة أول صفوف من الملف — اختر الأعمدة الصحيحة لكل حقل:</div>
     <div id="sort-preview" style="overflow-x:auto;margin-bottom:18px;border:1px solid var(--border);border-radius:6px;font-size:11px"></div>
     <div class="frow">
       <div class="form-group">
@@ -996,7 +995,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
         <div class="stat-row">
           <div class="stat-card c-blue"><div class="sc-ico">📊</div><div class="sc-body"><div class="sc-num" id="rp-total">0</div><div class="sc-lbl" data-i18n="reports.week_orders">طلبات الأسبوع</div></div></div>
           <div class="stat-card c-green"><div class="sc-ico">📈</div><div class="sc-body"><div class="sc-num" id="rp-rate">0%</div><div class="sc-lbl" data-i18n="reports.delivery_rate">معدل التسليم</div></div></div>
-          <div class="stat-card c-purple"><div class="sc-ico">↩️</div><div class="sc-body"><div class="sc-num" id="rp-returns">0</div><div class="sc-lbl">مسترجع</div></div></div>
+          <div class="stat-card c-purple"><div class="sc-ico">↩️</div><div class="sc-body"><div class="sc-num" id="rp-returns">0</div><div class="sc-lbl" data-i18n="reports.returned">مسترجع</div></div></div>
         </div>
         <div class="card" style="margin-top:16px">
           <div class="card-top" style="flex-wrap:wrap;gap:10px">
@@ -1047,6 +1046,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           <div class="staff-grid" id="staff-grid"></div>
         </div>
 
+        <!-- Tab: Attendance + Monthly Sheet (merged) -->
         <!-- Tab: Monthly Sheet -->
         <div id="stab-attendance" class="stab-content hidden">
           <div class="sheet-nav">
@@ -1059,7 +1059,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
           </div>
           <div class="card no-pad">
             <div class="sheet-tbl-wrap" id="sheet-tbl-wrap">
-              <div style="padding:40px;text-align:center;color:var(--muted)">جاري تحميل الجدول…</div>
+              <div style="padding:40px;text-align:center;color:var(--muted)" data-i18n="sheet.loading">جاري تحميل الجدول…</div>
             </div>
           </div>
         </div>
@@ -1109,9 +1109,9 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
               <span>PLZ-Gebiete</span>
               <span id="nrw-ccount" style="background:#2a2a4e;border-radius:10px;padding:1px 8px;font-size:10px;color:#fff">0</span>
             </span>
-            <div id="nrw-clist"><div style="font-size:11px;color:#4a4a6e;text-align:center;padding:16px">الخريطة لم تُفتح بعد</div></div>
+            <div id="nrw-clist"><div style="font-size:11px;color:#4a4a6e;text-align:center;padding:16px" data-i18n="nrw.map_not_loaded">الخريطة لم تُفتح بعد</div></div>
           </div>
-          <div id="nrw-pfoot">⏳ اضغط "تحميل الخريطة" للبدء</div>
+          <div id="nrw-pfoot" data-i18n="nrw.load_hint">⏳ اضغط "تحميل الخريطة" للبدء</div>
         </div>
         <!-- MAP AREA -->
         <div id="nrw-map-wrap">
@@ -1132,7 +1132,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   </div><!-- /app-main -->
 </div><!-- /app-shell -->
 
-<!-- MODAL: TASK -->
+<!-- MODAL: ORDER -->
 <div class="modal-bg hidden" id="modal-order">
   <div class="modal">
     <div class="modal-top"><h3 id="modal-order-h">مهمة جديدة</h3><button class="modal-x" onclick="closeModal('modal-order')">✕</button></div>
@@ -1140,7 +1140,10 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <input type="hidden" id="ord-edit-id">
       <div class="form-group"><label>عنوان المهمة *</label><input type="text" id="ord-title" placeholder="اكتب عنوان المهمة..."></div>
       <div class="form-group"><label>تفاصيل المهمة *</label><textarea id="ord-body" placeholder="اكتب تفاصيل المهمة للموظف التالي..." rows="4" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical"></textarea></div>
-      <div class="form-group"><label>كتبها</label><input type="text" id="ord-author" placeholder="اسم الموظف"></div>
+      <div class="frow">
+        <div class="form-group"><label>كتبها</label><input type="text" id="ord-author" placeholder="اسم الموظف"></div>
+        <div class="form-group"><label>التاريخ</label><input type="date" id="ord-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"></div>
+      </div>
       <div class="form-group"><label>ملاحظة</label><input type="text" id="ord-notes" placeholder="أي ملاحظة إضافية..."></div>
     </div>
     <div class="modal-ft">
@@ -1162,24 +1165,42 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
   </div>
 </div>
 
+<!-- MODAL: STAFF PASSWORD -->
+<div class="modal-bg hidden" id="modal-staff-pw">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-top"><h3>🔒 دخول المدير</h3><button class="modal-x" onclick="closeModal('modal-staff-pw')">✕</button></div>
+    <div class="modal-bd">
+      <p style="color:#374151;font-size:14px;margin:0 0 12px">قسم الموظفين مخصص للمدير فقط — أدخل كلمة المرور للمتابعة</p>
+      <input type="password" id="staff-pw-inp" placeholder="كلمة المرور" autocomplete="off"
+        style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;outline:none"
+        onkeydown="if(event.key==='Enter')checkStaffPassword()">
+      <p id="staff-pw-err" class="hidden" style="color:#dc2626;font-size:13px;margin:8px 0 0">❌ كلمة المرور غير صحيحة</p>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('modal-staff-pw')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 28px" onclick="checkStaffPassword()">دخول</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: STAFF -->
 <div class="modal-bg hidden" id="modal-staff">
   <div class="modal">
-    <div class="modal-top"><h3 id="modal-staff-h">موظف جديد</h3><button class="modal-x" onclick="closeModal('modal-staff')">✕</button></div>
+    <div class="modal-top"><h3 id="modal-staff-h" data-i18n="stf.title_new">موظف جديد</h3><button class="modal-x" onclick="closeModal('modal-staff')">✕</button></div>
     <div class="modal-bd">
       <div class="frow">
-        <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="st-name" placeholder="اسم الموظف"></div>
-        <div class="form-group"><label>المسمى الوظيفي</label><input type="text" id="st-role" placeholder="مثال: سائق، مساعد"></div>
+        <div class="form-group"><label data-i18n="stf.name">الاسم الكامل *</label><input type="text" id="st-name" data-i18n-ph="stf.name_ph" placeholder="اسم الموظف"></div>
+        <div class="form-group"><label data-i18n="stf.role">المسمى الوظيفي</label><input type="text" id="st-role" data-i18n-ph="stf.role_ph" placeholder="مثال: سائق، مساعد"></div>
       </div>
       <div class="frow">
-        <div class="form-group"><label>رقم الهاتف</label><input type="text" id="st-phone" placeholder="+49 xxxxxxxx"></div>
-        <div class="form-group"><label>الأجر بالساعة (€)</label><input type="number" id="st-rate" placeholder="13.50" min="0" step="0.01"></div>
+        <div class="form-group"><label data-i18n="stf.phone">رقم الهاتف</label><input type="text" id="st-phone" placeholder="+49 xxxxxxxx"></div>
+        <div class="form-group"><label data-i18n="stf.rate">الأجر بالساعة (€)</label><input type="number" id="st-rate" placeholder="13.50" min="0" step="0.01"></div>
       </div>
-      <div class="form-group"><label>ساعات العمل الأسبوعية</label><input type="number" id="st-whours" placeholder="40" min="1" max="60"></div>
+      <div class="form-group"><label data-i18n="stf.whours">ساعات العمل الأسبوعية</label><input type="number" id="st-whours" placeholder="40" min="1" max="60"></div>
     </div>
     <div class="modal-ft">
-      <button class="btn btn-ghost" onclick="closeModal('modal-staff')">إلغاء</button>
-      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveStaffMember()">حفظ الموظف</button>
+      <button class="btn btn-ghost" data-i18n="modal.cancel" onclick="closeModal('modal-staff')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" data-i18n="stf.save" onclick="saveStaffMember()">حفظ الموظف</button>
     </div>
   </div>
 </div>
@@ -1187,22 +1208,22 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <!-- MODAL: ATTENDANCE -->
 <div class="modal-bg hidden" id="modal-att">
   <div class="modal">
-    <div class="modal-top"><h3 id="modal-att-h">إضافة دوام</h3><button class="modal-x" onclick="closeModal('modal-att')">✕</button></div>
+    <div class="modal-top"><h3 id="modal-att-h" data-i18n="att.title_new">إضافة دوام</h3><button class="modal-x" onclick="closeModal('modal-att')">✕</button></div>
     <div class="modal-bd">
-      <div class="form-group"><label>الموظف *</label><select id="att-staff-sel"></select></div>
+      <div class="form-group"><label data-i18n="att.employee">الموظف *</label><select id="att-staff-sel"></select></div>
       <div class="frow">
-        <div class="form-group"><label>التاريخ *</label><input type="date" id="att-date"></div>
-        <div class="form-group"><label>استراحة (دقيقة)</label><input type="number" id="att-break" placeholder="0" min="0"></div>
+        <div class="form-group"><label data-i18n="att.date">التاريخ *</label><input type="date" id="att-date"></div>
+        <div class="form-group"><label data-i18n="att.break">استراحة (دقيقة)</label><input type="number" id="att-break" placeholder="0" min="0"></div>
       </div>
       <div class="frow">
-        <div class="form-group"><label>بداية العمل *</label><input type="time" id="att-start" lang="de"></div>
-        <div class="form-group"><label>نهاية العمل *</label><input type="time" id="att-end" lang="de"></div>
+        <div class="form-group"><label data-i18n="att.start">بداية العمل *</label><input type="time" id="att-start" lang="de"></div>
+        <div class="form-group"><label data-i18n="att.end">نهاية العمل *</label><input type="time" id="att-end" lang="de"></div>
       </div>
-      <div class="form-group"><label>ملاحظات</label><input type="text" id="att-notes" placeholder="ملاحظات اختيارية..."></div>
+      <div class="form-group"><label data-i18n="att.notes">ملاحظات</label><input type="text" id="att-notes" data-i18n-ph="att.notes_ph" placeholder="ملاحظات اختيارية..."></div>
     </div>
     <div class="modal-ft">
-      <button class="btn btn-ghost" onclick="closeModal('modal-att')">إلغاء</button>
-      <button class="btn btn-primary" style="width:auto;padding:11px 30px" onclick="saveAttendance()">حفظ الدوام</button>
+      <button class="btn btn-ghost" data-i18n="modal.cancel" onclick="closeModal('modal-att')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 30px" data-i18n="att.save" onclick="saveAttendance()">حفظ الدوام</button>
     </div>
   </div>
 </div>
@@ -1211,7 +1232,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <div class="modal-bg hidden" id="modal-profile">
   <div class="modal" style="max-width:560px">
     <div class="modal-top">
-      <h3>👤 إعدادات الحساب</h3>
+      <h3 data-i18n="prof.title">👤 إعدادات الحساب</h3>
       <button class="modal-x" onclick="closeModal('modal-profile')">✕</button>
     </div>
     <div class="modal-bd">
@@ -1262,14 +1283,14 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 <!-- MODAL: SHEET EMPLOYEE -->
 <div class="modal-bg hidden" id="modal-sheet-emp">
   <div class="modal" style="max-width:380px">
-    <div class="modal-top"><h3 id="sh-emp-modal-h">موظف في الجدول</h3><button class="modal-x" onclick="closeModal('modal-sheet-emp')">✕</button></div>
+    <div class="modal-top"><h3 id="sh-emp-modal-h" data-i18n="shemp.title">موظف في الجدول</h3><button class="modal-x" onclick="closeModal('modal-sheet-emp')">✕</button></div>
     <div class="modal-bd">
-      <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="sh-emp-name" placeholder="مثال: طه"></div>
-      <div class="form-group"><label>الأجر بالساعة (€)</label><input type="number" id="sh-emp-rate" placeholder="13.50" step="0.01" min="0" value="13.50"></div>
+      <div class="form-group"><label data-i18n="shemp.name">الاسم الكامل *</label><input type="text" id="sh-emp-name" data-i18n-ph="shemp.name_ph" placeholder="مثال: طه"></div>
+      <div class="form-group"><label data-i18n="shemp.rate">الأجر بالساعة (€)</label><input type="number" id="sh-emp-rate" placeholder="13.50" step="0.01" min="0" value="13.50"></div>
     </div>
     <div class="modal-ft">
-      <button class="btn btn-ghost" onclick="closeModal('modal-sheet-emp')">إلغاء</button>
-      <button class="btn btn-primary" style="width:auto;padding:11px 28px" onclick="saveSheetEmp()">حفظ</button>
+      <button class="btn btn-ghost" data-i18n="modal.cancel" onclick="closeModal('modal-sheet-emp')">إلغاء</button>
+      <button class="btn btn-primary" style="width:auto;padding:11px 28px" data-i18n="shemp.save" onclick="saveSheetEmp()">حفظ</button>
     </div>
   </div>
 </div>
@@ -1298,23 +1319,54 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
 <script>
 // ══════════════════════════════════════════════════
-// SERVER API LAYER
+// SERVER API LAYER — replaces localStorage with per-account server storage
 // ══════════════════════════════════════════════════
-let _sd = {};           // in-memory mirror of server data
-let _saveTimer = null;  // debounce handle
+let _sd={};          // in-memory mirror of all server-stored keys (synced with /api/data)
+let _saveTimer=null; // debounce handle for pushing _sd to the server
 
-async function api(method, url, body) {
-  const opts = { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } };
-  if (body !== undefined) opts.body = JSON.stringify(body);
-  const r = await fetch(url, opts);
-  if (r.status === 401) { _doLogoutUI(); throw new Error('session-expired'); }
+async function api(method,url,body){
+  const opts={method,credentials:'same-origin',headers:{'Content-Type':'application/json'}};
+  if(body!==undefined)opts.body=JSON.stringify(body);
+  const r=await fetch(url,opts);
+  if(r.status===401){_doLogoutUI();throw new Error('session-expired');}
   return r;
 }
-function _doLogoutUI() {
-  currentUser = null;
+function _doLogoutUI(){
+  currentUser=null;
   $('mainApp').classList.add('hidden');
   $('loginScreen').classList.remove('hidden');
-  $('login-identifier').value = ''; $('login-pass').value = ''; $('msg').textContent = '⚠️ انتهت الجلسة — يرجى تسجيل الدخول مجدداً';
+  $('login-identifier').value='';$('login-pass').value='';$('msg').textContent='⚠️ انتهت الجلسة — يرجى تسجيل الدخول مجدداً';
+}
+
+// Drop-in replacement for window.localStorage, backed by the server (per account).
+// Mirrors the Storage interface (getItem/setItem/removeItem/key/length) so the
+// rest of the app can keep using its existing localStorage-style persistence code.
+const serverStorage={
+  getItem(key){return Object.prototype.hasOwnProperty.call(_sd,key)?_sd[key]:null;},
+  setItem(key,val){_sd[key]=String(val);_scheduleSave();},
+  removeItem(key){delete _sd[key];_scheduleSave();},
+  key(i){return Object.keys(_sd)[i]??null;},
+  get length(){return Object.keys(_sd).length;}
+};
+function _scheduleSave(){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(_pushToServer,300);
+}
+async function _pushToServer(){
+  _saveTimer=null;
+  try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
+}
+window.addEventListener('beforeunload',()=>{
+  if(_saveTimer){
+    clearTimeout(_saveTimer);_saveTimer=null;
+    fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
+  }
+});
+async function _loadServerData(){
+  try{
+    const r=await api('GET','/api/data');
+    _sd=r.ok?(await r.json()):{};
+  }catch(e){_sd={};}
 }
 
 // ══════════════════════════════════════════════════
@@ -1601,29 +1653,33 @@ let fq='', fst='';
 let currentDate = todayStr();   // "YYYY-MM-DD"
 let currentDay  = {};           // loaded daily data
 let returnRows  = [];           // [{id,qty,driver,tour}] live rows
+const STAFF_PASSWORD='200010';
+let _staffUnlocked=false;
 
 function todayStr(){
   const d=new Date();
   return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 }
 function pad(n){return String(n).padStart(2,'0')}
+function dateKey(s){return 'zzlg_'+s}
+
 function loadDay(dateStr){
-  return (_sd.days && _sd.days[dateStr]) || {packages:0, delivered:0, returns:[]};
+  const raw=serverStorage.getItem(dateKey(dateStr));
+  if(raw){
+    try{return JSON.parse(raw)}catch(e){}
+  }
+  return {packages:0, delivered:0, returns:[]};
 }
 
-async function saveDay(){
+function saveDay(){
+  // Collect return rows from DOM
   const rets=[];
   document.querySelectorAll('.ret-row').forEach(tr=>{
     const inps=tr.querySelectorAll('input');
-    rets.push({qty:inps[0].value.trim()||'0', driver:inps[1].value.trim(), tour:inps[2].value.trim()});
+    rets.push({num:inps[0].value.trim(), qty:inps[1].value.trim()||'0', driver:inps[2].value.trim(), tour:inps[3].value.trim()});
   });
   currentDay.returns=rets;
-  if(!_sd.days)_sd.days={};
-  _sd.days[currentDate]=currentDay;
-  _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;_sd.attendance=attendance;
-  _sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
-  clearTimeout(_saveTimer);_saveTimer=null;
-  await _pushToServer();
+  serverStorage.setItem(dateKey(currentDate),JSON.stringify(currentDay));
   toast('تم الحفظ بنجاح ✓','success');
   updateReturnCount();
 }
@@ -1715,8 +1771,205 @@ document.addEventListener('keydown',function(e){
 // ══════════════════════════════════════════════════
 let retRowId=1;
 
+async function shareReturns(){
+  const rows=document.querySelectorAll('.ret-row');
+  if(rows.length===0){toast('لا توجد بيانات للمشاركة','error');return;}
+
+  // Collect data
+  let total=0;
+  const data=[];
+  rows.forEach((tr,i)=>{
+    const inp=tr.querySelectorAll('input');
+    const num=inp[0].value.trim()||'—';
+    const qty=parseInt(inp[1].value)||0;
+    const drv=inp[2].value.trim()||'—';
+    const tour=inp[3].value.trim()||'—';
+    total+=qty;
+    data.push({i:i+1,num,qty,drv,tour});
+  });
+
+  // Build hidden table for screenshot
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;left:-9999px;top:0;background:#fff;padding:0;font-family:Arial,sans-serif;direction:rtl;width:560px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)';
+  wrap.innerHTML=`
+    <div style="background:#1e3a5f;color:#fff;padding:16px 20px;text-align:center">
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">↩ جدول المسترجعات</div>
+      <div style="font-size:13px;opacity:.8">Z&amp;Z Logistics — ${currentDate}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      <thead>
+        <tr style="background:#2d5a8e;color:#fff">
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">#</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">الرقم</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">الكمية</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:right">اسم الشفير</th>
+          <th style="padding:10px 12px;border:1px solid #3a6fa0;text-align:center">التور</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map((r,i)=>`
+        <tr style="background:${i%2===0?'#fff':'#f8fafc'}">
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center;color:#6b7280;font-weight:700">${r.i}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center">${r.num}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center;font-weight:700;color:#1d4ed8">${r.qty}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:right">${r.drv}</td>
+          <td style="padding:9px 12px;border:1px solid #e5e7eb;text-align:center">${r.tour}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="background:#fff8e1;font-weight:700">
+          <td colspan="2" style="padding:10px 12px;border:1px solid #e5e7eb;text-align:center">المجموع</td>
+          <td style="padding:10px 12px;border:1px solid #e5e7eb;text-align:center;color:#92400e;font-size:16px">${total}</td>
+          <td colspan="2" style="padding:10px 12px;border:1px solid #e5e7eb;color:#92400e">طرد</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div style="background:#f1f5f9;padding:8px 16px;font-size:11px;color:#94a3b8;text-align:center">Z&amp;Z Logistics App</div>
+  `;
+  document.body.appendChild(wrap);
+
+  try{
+    const canvas=await html2canvas(wrap,{scale:2,useCORS:true,backgroundColor:'#fff'});
+    document.body.removeChild(wrap);
+    canvas.toBlob(async(blob)=>{
+      const file=new File([blob],`مسترجعات-${currentDate}.png`,{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'جدول المسترجعات'});}
+        catch(e){if(e.name!=='AbortError')_downloadImg(blob);}
+      }else{
+        _downloadImg(blob);
+        toast('تم حفظ الصورة — شاركها من جهازك','success');
+      }
+    },'image/png');
+  }catch(e){
+    if(document.body.contains(wrap))document.body.removeChild(wrap);
+    toast('حدث خطأ أثناء التصوير','error');
+  }
+}
+function _downloadImg(blob){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`مسترجعات-${currentDate}.png`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+async function shareDashboard(){
+  toast('جاري تصوير اللوحة...','');
+  const el=document.getElementById('pv-dashboard');
+  try{
+    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#f8fafc',
+      ignoreElements:e=>e.classList.contains('sc-edit-wrap')||e.classList.contains('sc-edit-btn')||e.id==='dn-past-tag'&&e.classList.contains('hidden')});
+    canvas.toBlob(async(blob)=>{
+      const file=new File([blob],`لوحة-التحكم-${currentDate}.png`,{type:'image/png'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:`لوحة التحكم — ${currentDate}`});}
+        catch(e){if(e.name!=='AbortError')_downloadImg(blob);}
+      }else{
+        _downloadImg(blob);
+        toast('تم حفظ الصورة — شاركها من جهازك','success');
+      }
+    },'image/png');
+  }catch(e){toast('حدث خطأ أثناء التصوير','error');}
+}
+
+function printDashboard(){
+  const pkgs=$('sc-packages').textContent||'0';
+  const del=$('sc-delivered').textContent||'0';
+  const ret=$('sc-returns').textContent||'0';
+  const retRows=document.querySelectorAll('.ret-row');
+  let retTotal=0, retTrs='';
+  retRows.forEach((tr,i)=>{
+    const inp=tr.querySelectorAll('input');
+    const num=inp[0].value||'—';
+    const qty=parseInt(inp[1].value)||0;
+    const drv=inp[2].value||'—';
+    const tour=inp[3].value||'—';
+    retTotal+=qty;
+    retTrs+=`<tr><td>${i+1}</td><td>${num}</td><td>${qty}</td><td>${drv}</td><td>${tour}</td></tr>`;
+  });
+  const taskRows=document.querySelectorAll('#db-orders tr');
+  let taskTrs='';
+  taskRows.forEach(tr=>{taskTrs+=`<tr>${[...tr.cells].map(c=>`<td>${c.innerHTML}</td>`).join('')}</tr>`;});
+
+  const html=`<html dir="rtl"><head><meta charset="utf-8"><title>لوحة التحكم — ${currentDate}</title>
+  <style>
+    *{box-sizing:border-box}body{font-family:Arial,sans-serif;padding:24px;direction:rtl;color:#111;background:#f8fafc}
+    h1{text-align:center;color:#1e3a5f;margin-bottom:4px;font-size:22px}
+    .sub{text-align:center;color:#666;font-size:13px;margin-bottom:20px}
+    .stats{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+    .stat{flex:1;min-width:140px;padding:16px;border-radius:10px;text-align:center}
+    .stat.blue{background:#dbeafe;color:#1d4ed8}.stat.green{background:#dcfce7;color:#166534}.stat.purple{background:#ede9fe;color:#7c3aed}
+    .stat-num{font-size:32px;font-weight:800}.stat-lbl{font-size:13px;margin-top:4px;opacity:.8}
+    h3{color:#1e3a5f;margin:16px 0 8px;font-size:15px}
+    table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px}
+    th,td{border:1px solid #d1d5db;padding:8px 10px;text-align:right}
+    th{background:#1e3a5f;color:#fff}
+    tr:nth-child(even){background:#f1f5f9}
+    .total-row td{font-weight:700;background:#fff8e1}
+    @media print{body{padding:10px}}
+  </style></head><body>
+  <h1>📊 لوحة التحكم — Z&amp;Z Logistics</h1>
+  <p class="sub">${currentDate}</p>
+  <div class="stats">
+    <div class="stat blue"><div class="stat-num">${pkgs}</div><div class="stat-lbl">📦 كمية الطرود</div></div>
+    <div class="stat green"><div class="stat-num">${del}</div><div class="stat-lbl">✅ تم التسليم</div></div>
+    <div class="stat purple"><div class="stat-num">${ret}</div><div class="stat-lbl">↩ مسترجع</div></div>
+  </div>
+  <h3>📋 المهام المعلقة</h3>
+  <table><thead><tr><th>المهمة</th><th>كتبها</th><th>الحالة</th></tr></thead><tbody>${taskTrs||'<tr><td colspan="3" style="text-align:center;color:#999">لا توجد مهام معلقة</td></tr>'}</tbody></table>
+  <h3>↩ جدول المسترجعات</h3>
+  <table>
+    <thead><tr><th>#</th><th>الرقم</th><th>الكمية</th><th>اسم الشفير</th><th>التور</th></tr></thead>
+    <tbody>${retTrs||'<tr><td colspan="5" style="text-align:center;color:#999">لا توجد مسترجعات</td></tr>'}</tbody>
+    <tfoot><tr class="total-row"><td colspan="2">المجموع</td><td>${retTotal}</td><td colspan="2">طرد</td></tr></tfoot>
+  </table>
+  <script>setTimeout(()=>{window.print();},300);<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+
+function printReturns(){
+  const rows=document.querySelectorAll('.ret-row');
+  const date=currentDate;
+  let total=0;
+  let trs='';
+  rows.forEach((tr,i)=>{
+    const inp=tr.querySelectorAll('input');
+    const num=inp[0].value||'—';
+    const qty=parseInt(inp[1].value)||0;
+    const drv=inp[2].value||'—';
+    const tour=inp[3].value||'—';
+    total+=qty;
+    trs+=`<tr><td>${i+1}</td><td>${num}</td><td>${qty}</td><td>${drv}</td><td>${tour}</td></tr>`;
+  });
+  const html=`<html dir="rtl"><head><meta charset="utf-8"><title>جدول المسترجعات</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:24px;direction:rtl;color:#111}
+    h2{text-align:center;margin-bottom:4px}
+    p.sub{text-align:center;color:#666;font-size:13px;margin-top:0}
+    table{width:100%;border-collapse:collapse;margin-top:16px}
+    th,td{border:1px solid #bbb;padding:8px 12px;text-align:right;font-size:14px}
+    th{background:#f4f4f4;font-weight:700}
+    tr:nth-child(even){background:#fafafa}
+    .total-row td{font-weight:700;background:#fff8e1;border-top:2px solid #bbb}
+  </style></head><body>
+  <h2>↩ جدول المسترجعات</h2>
+  <p class="sub">${date}</p>
+  <table>
+    <thead><tr><th>#</th><th>الرقم</th><th>الكمية</th><th>اسم الشفير</th><th>التور</th></tr></thead>
+    <tbody>${trs}</tbody>
+    <tfoot><tr class="total-row"><td colspan="2">المجموع</td><td>${total}</td><td colspan="2">طرد</td></tr></tfoot>
+  </table>
+  <script>setTimeout(()=>{window.print();},300);<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+
 function addReturnRow(data){
   const id=retRowId++;
+  const num=data?data.num||'':'';
   const qty=data?data.qty:'';
   const drv=data?data.driver:'';
   const tour=data?data.tour:'';
@@ -1726,7 +1979,8 @@ function addReturnRow(data){
   tr.dataset.id=id;
   tr.innerHTML=`
     <td style="color:var(--muted);font-weight:700;font-size:13px;text-align:center">${tbody.children.length+1}</td>
-    <td><input class="r-inp" type="number" placeholder="0" value="${qty}" min="0" style="width:80px"></td>
+    <td><input class="r-inp" type="text"   placeholder="رقم..." value="${num}" style="width:70px"></td>
+    <td><input class="r-inp" type="number" placeholder="0" value="${qty}" min="0" style="width:70px"></td>
     <td><input class="r-inp" type="text"   placeholder="اسم الشفير" value="${drv}"></td>
     <td><input class="r-inp" type="text"   placeholder="Tour 1" value="${tour}"></td>
     <td><button class="r-del" onclick="delReturnRow(this)">✕</button></td>
@@ -1734,7 +1988,6 @@ function addReturnRow(data){
   tbody.appendChild(tr);
   $('ret-empty').classList.add('hidden');
   updateReturnCount();
-  // focus qty
   tr.querySelector('input').focus();
 }
 
@@ -1769,10 +2022,12 @@ function updateReturnCount(){
 }
 
 // ══════════════════════════════════════════════════
+// AUTH
 // ══════════════════════════════════════════════════
-// AUTH SYSTEM  (server-based)
 // ══════════════════════════════════════════════════
-let currentUser = null;
+// AUTH SYSTEM — backed by the server (/api/auth/*)
+// ══════════════════════════════════════════════════
+let currentUser=null;
 
 // Login method selector
 const methodHints={user:'اسم المستخدم',email:'البريد الإلكتروني (Gmail / iCloud)',phone:'رقم الهاتف (+49...)',apple:'Apple ID (iCloud)'};
@@ -1787,6 +2042,13 @@ function switchMethod(m,btn){
   $('login-identifier').focus();
 }
 
+async function _afterAuth(acct){
+  currentUser=acct;
+  await _loadServerData();
+  loadAllData();
+  enterApp(acct);
+}
+
 async function doLogin(){
   const id=$('login-identifier').value.trim();
   const pw=$('login-pass').value;
@@ -1797,10 +2059,8 @@ async function doLogin(){
     const r=await api('POST','/api/auth/login',{identifier:id,password:pw});
     const data=await r.json();
     if(!r.ok){$('msg').textContent='❌ '+data.error;return;}
-    currentUser=data;
-    await loadAllData();
-    enterApp(data);
-  }catch(e){if(e.message!=='session-expired')$('msg').textContent='❌ خطأ في الاتصال بالسيرفر';}
+    await _afterAuth(data);
+  }catch(e){if(e.message!=='session-expired')$('msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 function enterApp(acct){
@@ -1846,18 +2106,13 @@ function populateSecQuestions(){
   SEC_QUESTIONS.forEach(q=>{const o=document.createElement('option');o.value=q;o.textContent=q;sel.appendChild(o);});
 }
 
-// ── STARTUP ────────────────────────────────────
+// ── FIRST RUN / STARTUP ────────────────────────
 async function checkFirstRun(){
   populateSecQuestions();
   try{
     const r=await fetch('/api/auth/status',{credentials:'same-origin'});
     const s=await r.json();
-    if(s.loggedIn){
-      currentUser=s.user;
-      await loadAllData();
-      enterApp(s.user);
-      return;
-    }
+    if(s.loggedIn){await _afterAuth(s.user);return;}
     if(s.firstRun){
       $('loginScreen').classList.add('hidden');
       $('setupScreen').classList.remove('hidden');
@@ -1887,31 +2142,29 @@ async function submitSetup(){
   const name=$('su-name').value.trim(),email=$('su-email').value.trim();
   const phone=$('su-phone').value.trim(),apple=$('su-apple').value.trim();
   const pw=$('su-pass').value,pw2=$('su-pass2').value;
-  const secQuestion=$('su-sec-q').value,secAnswer=$('su-sec-a').value.trim();
+  const secQ=$('su-sec-q').value,secA=$('su-sec-a').value.trim();
   $('su-msg').textContent='';
   if(!name){$('su-msg').textContent='يرجى إدخال اسم المستخدم';return;}
   if(!pw){$('su-msg').textContent='يرجى إدخال كلمة المرور';return;}
   if(pw.length<4){$('su-msg').textContent='كلمة المرور قصيرة جداً (4 أحرف على الأقل)';return;}
   if(pw!==pw2){$('su-msg').textContent='كلمتا المرور غير متطابقتين';return;}
-  if(!secQuestion){$('su-msg').textContent='يرجى اختيار سؤال الأمان';return;}
-  if(!secAnswer){$('su-msg').textContent='يرجى إدخال إجابة سؤال الأمان';return;}
+  if(!secQ){$('su-msg').textContent='يرجى اختيار سؤال الأمان';return;}
+  if(!secA){$('su-msg').textContent='يرجى إدخال إجابة سؤال الأمان';return;}
   $('su-msg').textContent='⏳ جاري الإنشاء…';
   try{
-    const r=await api('POST','/api/auth/signup',{name,email,phone,apple,password:pw,secQuestion,secAnswer});
+    const r=await api('POST','/api/auth/signup',{name,email,phone,apple,password:pw,secQuestion:secQ,secAnswer:secA});
     const data=await r.json();
     if(!r.ok){$('su-msg').textContent='❌ '+data.error;return;}
-    currentUser=data;
-    await loadAllData();
-    enterApp(data);
-  }catch(e){if(e.message!=='session-expired')$('su-msg').textContent='❌ خطأ في الاتصال بالسيرفر';}
+    await _afterAuth(data);
+  }catch(e){if(e.message!=='session-expired')$('su-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 // ── FORGOT PASSWORD ────────────────────────────
-let _frgAccountId=null, _frgToken=null;
+let _frgAccountId=null,_frgToken=null;
 function showForgot(){
   _frgAccountId=null;_frgToken=null;
   resetForgotSteps();
-  $('frg-id').value='';$('frg-sec-a').value='';$('frg-code').value='';
+  $('frg-id').value='';$('frg-sec-a').value='';
   $('frg-pw').value='';$('frg-pw2').value='';
   $('frg-msg').textContent='';
   $('loginScreen').classList.add('hidden');
@@ -1921,14 +2174,6 @@ function resetForgotSteps(){
   $('frg-step1').classList.remove('hidden');
   $('frg-step2').classList.add('hidden');
   $('frg-step3').classList.add('hidden');
-  $('frg-sec-block').classList.remove('hidden');
-  $('frg-code-block').classList.add('hidden');
-  $('frg-email-opt').classList.add('hidden');
-  $('frg-msg').textContent='';
-}
-function forgotBackToSecQ(){
-  $('frg-code-block').classList.add('hidden');
-  $('frg-sec-block').classList.remove('hidden');
   $('frg-msg').textContent='';
 }
 async function forgotFindAccount(){
@@ -1937,45 +2182,17 @@ async function forgotFindAccount(){
   if(!id){$('frg-msg').textContent='يرجى إدخال المعرف';return;}
   $('frg-msg').textContent='⏳ جاري البحث…';
   try{
-    const r=await fetch('/api/auth/forgot/find',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier:id}),credentials:'same-origin'});
+    const r=await api('POST','/api/auth/forgot/find',{identifier:id});
     const data=await r.json();
     if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
     _frgAccountId=data.accountId;
     $('frg-account-name').textContent='👤 '+data.accountName;
     $('frg-sec-q-label').textContent=data.secQuestion;
-    if(data.hasEmail)$('frg-email-opt').classList.remove('hidden');
     $('frg-msg').textContent='';
     $('frg-step1').classList.add('hidden');
     $('frg-step2').classList.remove('hidden');
     $('frg-sec-a').focus();
-  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
-}
-async function forgotSendCode(){
-  $('frg-msg').textContent='⏳ جاري الإرسال…';
-  try{
-    const r=await fetch('/api/auth/forgot/send-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:_frgAccountId}),credentials:'same-origin'});
-    const data=await r.json();
-    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
-    $('frg-code-sent-msg').textContent='📧 تم إرسال الكود على '+data.maskedEmail;
-    $('frg-sec-block').classList.add('hidden');
-    $('frg-code-block').classList.remove('hidden');
-    $('frg-code').value='';$('frg-code').focus();
-    $('frg-msg').textContent='';
-  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
-}
-async function forgotVerifyCode(){
-  const code=$('frg-code').value.trim();
-  if(!code){$('frg-msg').textContent='يرجى إدخال الكود';return;}
-  $('frg-msg').textContent='⏳ جاري التحقق…';
-  try{
-    const r=await fetch('/api/auth/forgot/verify-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:_frgAccountId,code}),credentials:'same-origin'});
-    const data=await r.json();
-    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
-    _frgToken=data.token;
-    $('frg-step2').classList.add('hidden');
-    $('frg-step3').classList.remove('hidden');
-    $('frg-pw').focus();$('frg-msg').textContent='';
-  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
+  }catch(e){if(e.message!=='session-expired')$('frg-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 async function forgotVerifyAnswer(){
   const ans=$('frg-sec-a').value.trim();
@@ -1983,7 +2200,7 @@ async function forgotVerifyAnswer(){
   if(!ans){$('frg-msg').textContent='يرجى إدخال الإجابة';return;}
   $('frg-msg').textContent='⏳ جاري التحقق…';
   try{
-    const r=await fetch('/api/auth/forgot/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountId:_frgAccountId,answer:ans}),credentials:'same-origin'});
+    const r=await api('POST','/api/auth/forgot/verify',{accountId:_frgAccountId,answer:ans});
     const data=await r.json();
     if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
     _frgToken=data.token;
@@ -1991,7 +2208,7 @@ async function forgotVerifyAnswer(){
     $('frg-step2').classList.add('hidden');
     $('frg-step3').classList.remove('hidden');
     $('frg-pw').focus();
-  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
+  }catch(e){if(e.message!=='session-expired')$('frg-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 async function forgotResetPassword(){
   const pw=$('frg-pw').value,pw2=$('frg-pw2').value;
@@ -2001,23 +2218,14 @@ async function forgotResetPassword(){
   if(pw!==pw2){$('frg-msg').textContent='كلمتا المرور غير متطابقتين';return;}
   $('frg-msg').textContent='⏳ جاري الحفظ…';
   try{
-    const r=await fetch('/api/auth/forgot/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:_frgToken,password:pw}),credentials:'same-origin'});
+    const r=await api('POST','/api/auth/forgot/reset',{token:_frgToken,password:pw});
     const data=await r.json();
     if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
     _frgAccountId=null;_frgToken=null;
+    $('frg-msg').textContent='';
     backToLogin();
     $('msg').textContent='✅ تم تغيير كلمة المرور — يمكنك تسجيل الدخول الآن';
-  }catch(e){$('frg-msg').textContent='❌ خطأ في الاتصال';}
-}
-
-function showResetAccount(){
-  $('confirm-msg').textContent='سيتم حذف بيانات الدخول (الحسابات) وجميع البيانات. هل تريد المتابعة؟';
-  $('confirm-ok').onclick=async()=>{
-    closeModal('modal-confirm');
-    try{await api('DELETE','/api/data');}catch(e){}
-    location.reload();
-  };
-  openM('modal-confirm');
+  }catch(e){if(e.message!=='session-expired')$('frg-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 // ── PROFILE SETTINGS ───────────────────────────
@@ -2048,7 +2256,7 @@ async function saveProfile(){
     $('sbAv').textContent=av;$('tbAv').textContent=av;
     $('sbName').textContent=name;$('tbName').textContent=name;
     closeModal('modal-profile');toast('تم تحديث الحساب ✓','success');
-  }catch(e){$('pr-msg').textContent='❌ خطأ في الاتصال';}
+  }catch(e){if(e.message!=='session-expired')$('pr-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 // ══════════════════════════════════════════════════
@@ -2059,13 +2267,40 @@ const titles={
   routes:()=>t('nav.routes'),reports:()=>t('nav.reports'),
   map:()=>t('nav.map'),staff:()=>t('nav.staff')
 };
+let _pendingStaffBtn=null;
 function goPage(name,btn){
+  if(name==='staff'&&!_staffUnlocked){
+    _pendingStaffBtn=btn;
+    $('staff-pw-inp').value='';
+    $('staff-pw-err').classList.add('hidden');
+    openM('modal-staff-pw');
+    setTimeout(()=>$('staff-pw-inp').focus(),100);
+    return;
+  }
+  _goPageReal(name,btn);
+}
+function checkStaffPassword(){
+  const pw=$('staff-pw-inp').value;
+  if(pw===STAFF_PASSWORD){
+    _staffUnlocked=true;
+    closeModal('modal-staff-pw');
+    _goPageReal('staff',_pendingStaffBtn);
+  }else{
+    $('staff-pw-err').classList.remove('hidden');
+    $('staff-pw-inp').focus();
+  }
+}
+function _goPageReal(name,btn){
   document.querySelectorAll('.pv').forEach(p=>p.classList.add('hidden'));
   $('pv-'+name).classList.remove('hidden');
   if(btn){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));btn.classList.add('active')}
   $('pageTitle').textContent=(titles[name]?titles[name]():name);
   if(name==='dashboard')renderDashboard();
-  if(name==='orders')renderOrders();
+  if(name==='orders'){
+    const df=$('task-date-filter');if(df)df.value=_taskDate;
+    const ma=$('task-memo-area');if(ma)ma.value=_taskMemo;
+    renderOrders();
+  }
   if(name==='sort'){}
   if(name==='routes')renderRoutes();
   if(name==='reports')renderReports();
@@ -2158,12 +2393,16 @@ function renderOrders(){
 }
 function filtered(){
   return orders.filter(t=>{
+    const matchDate=!_taskDate||t.taskDate===_taskDate;
     const mq=!fq||t.title.toLowerCase().includes(fq)||(t.body||'').toLowerCase().includes(fq)||(t.createdBy||'').toLowerCase().includes(fq);
-    return mq&&(!fst||t.status===fst);
+    return matchDate&&mq&&(!fst||t.status===fst);
   });
 }
 function filterOrders(q){fq=q.toLowerCase();renderOrders()}
 function filterByStatus(s){fst=s;renderOrders()}
+function setTaskDate(d){_taskDate=d;const el=$('task-date-filter');if(el)el.value=d;renderOrders();}
+function shiftTaskDate(delta){const d=new Date(_taskDate+'T12:00:00');d.setDate(d.getDate()+delta);setTaskDate(d.toISOString().slice(0,10));}
+function saveMemo(val){_taskMemo=val;try{serverStorage.setItem(DB.memo,val);}catch(e){}}
 function openOrderModal(t){
   if(t){
     $('modal-order-h').textContent='تعديل المهمة';
@@ -2171,12 +2410,14 @@ function openOrderModal(t){
     $('ord-title').value=t.title;
     $('ord-body').value=t.body;
     $('ord-author').value=t.createdBy||'';
+    $('ord-date').value=t.taskDate||todayStr();
     $('ord-notes').value=t.notes||'';
   }else{
     $('modal-order-h').textContent='مهمة جديدة';
     $('ord-edit-id').value='';
     $('ord-title').value='';$('ord-body').value='';
     $('ord-author').value='';$('ord-notes').value='';
+    $('ord-date').value=_taskDate;
   }
   openM('modal-order');
 }
@@ -2186,17 +2427,17 @@ function saveOrder(){
   const body=$('ord-body').value.trim();
   if(!title||!body){toast('يرجى ملء العنوان والتفاصيل *','error');return}
   const eid=$('ord-edit-id').value;
-  const now=new Date().toLocaleDateString('ar-SA',{year:'numeric',month:'2-digit',day:'2-digit'})+' '+new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
-  const data={title,body,createdBy:$('ord-author').value.trim(),notes:$('ord-notes').value.trim(),createdAt:now};
+  const now=new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+  const data={title,body,createdBy:$('ord-author').value.trim(),taskDate:$('ord-date').value||todayStr(),notes:$('ord-notes').value.trim(),createdAt:($('ord-date').value||todayStr())+' '+now};
   if(eid){const i=orders.findIndex(o=>o.id===parseInt(eid));if(i!==-1)orders[i]={...orders[i],...data};toast('تم تحديث المهمة','success')}
   else{orders.push({id:nextOId++,status:'pending',...data});toast('تم إضافة المهمة','success')}
-  closeModal('modal-order');renderOrders();autosaveNow();
+  closeModal('modal-order');renderOrders();autosave();
 }
 function setTaskStatus(id,status){
   const t=orders.find(x=>x.id===id);
-  if(t){t.status=status;renderOrders();renderDashboard();autosaveNow();}
+  if(t){t.status=status;renderOrders();renderDashboard();autosave();}
 }
-function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();renderDashboard();toast('تم حذف المهمة','success');autosaveNow()}
+function delOrder(id){orders=orders.filter(o=>o.id!==id);renderOrders();renderDashboard();toast('تم حذف المهمة','success');autosave()}
 
 // ══════════════════════════════════════════════════
 // SORT / DISPATCH PLAN
@@ -2224,6 +2465,8 @@ function setSortMode(mode,btn){
   if(btn)btn.classList.add('active');
   const lbl=$('sort-drop-lbl');
   if(lbl)lbl.textContent=mode==='disp'?'ارفع ملف التوزيع — DISPOSITION Excel':'اسحب الملف هنا أو اضغط للاختيار';
+  const sub=$('sort-drop-sub');
+  if(sub)sub.textContent=mode==='disp'?'.xlsx / .xls فقط — لضمان دقة الفرز':'.xlsx / .xls / .pdf / صورة';
 }
 
 function printSort(){
@@ -2273,13 +2516,20 @@ ${content}
 
 function handleSortFile(file){
   if(!file)return;
-  if(_sortMode==='disp'){_handleDispExcel(file);return;}
   if(!$('sort-date').value){
     const dm=file.name.match(/(\d{2})\.(\d{2})\.(\d{4})/)||file.name.match(/(\d{2})[_\-](\d{2})[_\-](\d{4})/);
     if(dm)$('sort-date').value=dm[3]+'-'+dm[2]+'-'+dm[1];
   }
   const ext=file.name.split('.').pop().toLowerCase();
   const imgExts=['jpg','jpeg','png','webp','gif','bmp'];
+  if(_sortMode==='disp'){
+    if(ext==='pdf'||imgExts.includes(ext)){
+      toast('لفرز جدول التوزيع بدقة، يرجى رفع ملف Excel (.xlsx / .xls) — ملفات PDF والصور تحتوي خلايا مدمجة لا يمكن قراءتها بشكل صحيح','error');
+      return;
+    }
+    _handleDispExcel(file);
+    return;
+  }
   if(imgExts.includes(ext)){_handleSortImage(file);return;}
   if(ext==='pdf'){_handleSortPDF(file);return;}
   _handleSortExcel(file);
@@ -2369,6 +2619,7 @@ function _autoCardsAndRender(rows){
   }
   if(!hdr.length){hdr=rows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
   _sortHdrIdx=hdrIdx;
+  // strict match: exact first, then startsWith, then includes — to avoid false matches
   const ci=(...keys)=>{
     for(const k of keys){
       let i=hdr.findIndex(h=>h===k); if(i>=0)return i;
@@ -2380,6 +2631,7 @@ function _autoCardsAndRender(rows){
   const iTour=ci('TOUR NO','TOUR NR','TOUR_NO','TOUR');
   const iCode=ci('3. CODE','3.CODE','CODES','CODE','COD');
   const iPlz =ci('PLZ','POSTLEITZAHL','POSTAL','ZIP');
+  // company: only explicit subcontractor column names — not "SUB" (that's stop number)
   const iComp=ci('SUBUNTERNEHMER','UNTERNEHMER','COMPANY','FIRMA');
   const iId  =ci('OUT-APP ID','OUT-APP','APP-ID','APP ID','APP');
   if(iTour<0){toast('لم يتم العثور على عمود TOUR في الملف','error');return;}
@@ -2395,6 +2647,7 @@ function _autoCardsAndRender(rows){
     const t=tourMap[tourRaw];
     if(iComp>=0&&!t.company){
       const cv=String(r[iComp]||'').trim();
+      // only use as company if it's not a pure number (stop number check)
       if(cv&&isNaN(Number(cv)))t.company=cv;
     }
     if(iId>=0&&!t.id)t.id=String(r[iId]||'').trim();
@@ -2406,6 +2659,7 @@ function _autoCardsAndRender(rows){
   if(!tours.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
   tours.sort((a,b)=>a.tourNum-b.tourNum||a.tourRaw.localeCompare(b.tourRaw));
   tours.forEach(t=>{
+    // assign company from DISP_COMPANIES if not found in file
     if(!t.company)t.company=_dispCo(t.tourRaw);
     if(t.id){const n=parseInt(t.id);t.outApp=isNaN(n)?t.id:'D'+String(n).padStart(3,'0');}
     else t.outApp='—';
@@ -2580,7 +2834,7 @@ function _autoDispAndRender(rawRows){
   let hdrIdx=0,hdr=[];
   for(let i=0;i<Math.min(8,rawRows.length);i++){
     const r=rawRows[i].map(c=>String(c).toUpperCase().trim());
-    if(r.some(c=>c.includes('TOUR')||c.includes('FAHRER')||c.includes('PLZ')||c.includes('SUBUNTERN'))){hdrIdx=i;hdr=r;break;}
+    if(r.some(c=>c.includes('TOUR')||c.includes('CODES')||c.includes('COMPANY'))){hdrIdx=i;hdr=r;break;}
   }
   if(!hdr.length){hdr=rawRows[0].map(c=>String(c).toUpperCase().trim());hdrIdx=0;}
   _sortHdrIdx=hdrIdx;
@@ -2592,45 +2846,64 @@ function _autoDispAndRender(rawRows){
     }
     return -1;
   };
-  const iTour   =ci('TOUR');
-  const iSub    =ci('SUBUNTERNEHMER','UNTERNEHMER','COMPANY','FIRMA');
-  const iFahrer =ci('FAHRERNAME','FAHRER','DRIVER');
-  const iAppid  =ci('OUT-APP ID','OUT-APP','APP-ID','APP');
-  const iCode   =ci('3. CODE','3.CODE','CODE','COD');
+  // مطابقة أعمدة الملف اليومي: TOUR NO / CODES (رقم + رمز بريدي) / COMPANY / NAME / ID
+  const iTour   =ci('TOUR NO','TOUR');
+  const iCode   =ci('CODES','CODE');
   const iPlz    =ci('PLZ','POSTLEITZAHL','POSTAL','ZIP');
-  const iGeplant=ci('GEPLANT','PLANNED','PLAN');
-  const iIst    =ci('IST','ACTUAL');
-  const iBemerk =ci('BEMERKUNG','BEMERK','REMARK','NOTE');
-  if(iTour<0){toast('لم يتم العثور على عمود TOUR في الملف','error');return;}
-  const objRows=[];
+  const iCompany=ci('COMPANY','FIRMA','UNTERNEHMEN');
+  const iName   =ci('NAME');
+  const iId     =ci('ID');
+  if(iTour<0||iCode<0){toast('لم يتم العثور على أعمدة TOUR NO / CODES في الملف','error');return;}
+
+  // الأعمدة COMPANY/NAME/ID تكون مدمجة (Merged Cells) لكل مجموعة تور — لذلك نملأ القيم للأسفل (Forward-fill)
+  // ونجمع كل أكواد (الرقم فقط بدون الرمز البريدي) التابعة لنفس رقم التور في صف واحد
+  const tourMap=new Map();
+  let curTour='',curCo='',curName='',curId='';
   for(let i=hdrIdx+1;i<rawRows.length;i++){
     const r=rawRows[i];
-    const tour=String(r[iTour]||'').trim();
-    if(!tour)continue;
-    let subVal=iSub>=0?String(r[iSub]||'').trim():'';
-    if(subVal&&!isNaN(Number(subVal)))subVal='';
-    objRows.push({
-      tour, sub:subVal,
-      fahrer :iFahrer>=0 ?String(r[iFahrer] ||'').trim():'',
-      appid  :iAppid>=0  ?String(r[iAppid]  ||'').trim():'',
-      code   :iCode>=0   ?String(r[iCode]   ||'').trim():'',
-      plz    :iPlz>=0    ?String(r[iPlz]    ||'').trim():'',
-      geplant:iGeplant>=0?String(r[iGeplant]||'').trim():'',
-      ist    :iIst>=0    ?String(r[iIst]    ||'').trim():'',
-      bemerk :iBemerk>=0 ?String(r[iBemerk] ||'').trim():''
-    });
+    const tourRaw=String(r[iTour]||'').trim();
+    let codeRaw =String(r[iCode]||'').trim();
+    let plzRaw  =iPlz>=0?String(r[iPlz]||'').trim():'';
+    const coRaw =iCompany>=0?String(r[iCompany]||'').trim():'';
+    const nmRaw =iName>=0?String(r[iName]||'').trim():'';
+    const idRaw =iId>=0?String(r[iId]||'').trim():'';
+    if(tourRaw)curTour=tourRaw;
+    if(coRaw)curCo=coRaw;
+    if(nmRaw)curName=nmRaw;
+    if(idRaw)curId=idRaw;
+    if(!curTour)continue;
+    // إن لم يوجد عمود PLZ منفصل، قد يكون الكود والرمز البريدي بنفس الخلية مفصولين بمسافة
+    if(!plzRaw&&codeRaw){
+      const m=codeRaw.match(/^(\S+)\s+(\d{4,5})$/);
+      if(m){codeRaw=m[1];plzRaw=m[2];}
+    }
+    if(!codeRaw&&!plzRaw&&!tourRaw)continue;
+    if(!tourMap.has(curTour))tourMap.set(curTour,{tour:curTour,company:curCo,fahrer:curName,appid:curId,codes:[],plzs:[]});
+    const e=tourMap.get(curTour);
+    if(!e.company&&curCo)e.company=curCo;
+    if(!e.fahrer&&curName)e.fahrer=curName;
+    if(!e.appid&&curId)e.appid=curId;
+    if(codeRaw&&!e.codes.includes(codeRaw))e.codes.push(codeRaw);
+    if(plzRaw&&!e.plzs.includes(plzRaw))e.plzs.push(plzRaw);
   }
+  const objRows=Array.from(tourMap.values()).map(e=>({
+    tour:e.tour, sub:e.company, fahrer:e.fahrer, appid:e.appid,
+    code:e.codes.join(', '), plz:e.plzs.join(', '),
+    geplant:'', ist:'', bemerk:''
+  }));
   if(!objRows.length){toast('لم يتم العثور على بيانات في الملف','error');return;}
   objRows.sort((a,b)=>{
     const na=parseInt(String(a.tour).replace(/[^\d]/g,'')),nb=parseInt(String(b.tour).replace(/[^\d]/g,''));
     return(!isNaN(na)&&!isNaN(nb))?na-nb:String(a.tour).localeCompare(String(b.tour));
   });
+  // useSub: التجميع حسب اسم شركة إدارة الشوفيرية (COMPANY) كما هو مطلوب
   const useSub=objRows.some(r=>r.sub&&r.sub.length>1);
   $('sort-upload-panel').classList.add('hidden');
   $('sort-disp-mapper').classList.add('hidden');
   _renderDisposition(objRows,useSub);
 }
 function _showDispMapper(rawRows){
+  // find header row
   let hdrIdx=0,hdr=[];
   for(let i=0;i<Math.min(6,rawRows.length);i++){
     const r=rawRows[i].map(c=>String(c).toUpperCase().trim());
@@ -2642,7 +2915,7 @@ function _showDispMapper(rawRows){
   const ci=(keys)=>{for(const k of keys){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
   const iTour =ci(['TOUR']);
   const iSub  =ci(['SUB','FIRMA','COMPANY','UNTERN']);
-  const iFahrer=ci(['FAHRER','DRIVER']);
+  const iFahrer=ci(['FAHRER','DRIVER','FAHRER']);
   const iAppid =ci(['OUT-APP','APP-ID','APPID','APP ID']);
   const iCode  =ci(['CODE','COD']);
   const iPlz   =ci(['PLZ','POSTAL','ZIP']);
@@ -2661,6 +2934,7 @@ function _showDispMapper(rawRows){
   if(iGeplant>=0)$('dm-geplant').value=iGeplant;
   if(iIst>=0)$('dm-ist').value=iIst;
   if(iBemerk>=0)$('dm-bemerk').value=iBemerk;
+  // preview table
   const pvRows=rawRows.slice(hdrIdx,Math.min(hdrIdx+5,rawRows.length));
   let pv=`<table style="width:100%;border-collapse:collapse"><thead><tr>`;
   origHdr.forEach(h=>pv+=`<th style="background:#1F2C5C;color:#fff;padding:5px 8px;white-space:nowrap;font-size:11px">${h||'—'}</th>`);
@@ -2689,7 +2963,8 @@ function _buildFromDispMapper(){
     const tour=String(r[iTour]||'').trim();
     if(!tour)continue;
     objRows.push({
-      tour,sub:iSub>=0?String(r[iSub]||'').trim():'',
+      tour,
+      sub:iSub>=0?String(r[iSub]||'').trim():'',
       fahrer:iFahrer>=0?String(r[iFahrer]||'').trim():'',
       appid:iAppid>=0?String(r[iAppid]||'').trim():'',
       code:iCode>=0?String(r[iCode]||'').trim():'',
@@ -2706,6 +2981,7 @@ function _buildFromDispMapper(){
   _renderDisposition(objRows,useSub);
 }
 function _renderDisposition(rows,useSub){
+  // group by sub column (COMPANY) OR by hardcoded tour-to-company mapping
   const groups={};
   rows.forEach(r=>{
     const co=useSub?(r.sub||'OHNE FIRMA'):_dispCo(r.tour);
@@ -2714,33 +2990,96 @@ function _renderDisposition(rows,useSub){
   });
   const coKeys=useSub?Object.keys(groups).sort():DISP_ORDER.filter(c=>groups[c]).concat(Object.keys(groups).filter(c=>!DISP_ORDER.includes(c)));
   const date=_fmtDate($('sort-date').value);
-  const loc=($('sort-loc').value.trim())||'Z&Z GmbH · NRW005';
-  const TH=(t)=>`<th style="background:#1F2C5C;color:#fff;border:1px solid #bbb;padding:7px 10px;font-size:13px;white-space:nowrap">${t}</th>`;
-  const TD=(t)=>`<td style="border:1px solid #bbb;padding:7px 10px;text-align:center;font-size:13px">${t||'—'}</td>`;
-  let html=`<div id="disp-inner" style="font-family:Arial,sans-serif">
-    <div style="margin-bottom:14px">
-      <h2 style="color:#1F2C5C;margin:0 0 4px;font-size:18px">DISPOSITION – ${date}</h2>
-      <p style="margin:0;font-size:13px;color:#555"><b>Z&amp;Z GmbH Transporte</b> | Depot: NRW005 | ${loc}</p>
-    </div>`;
+  const loc=($('sort-loc').value.trim())||'Doktor-Berns-Str. 24, 47441 Moers';
+
+  // تقسيم الصفحات: الشركات الكبيرة (أكثر من 5 تورات) تأخذ صفحة مستقلة، والصغيرة تُجمّع معاً
+  const BIG=5,PAGE_MAX=12;
+  const pages=[];let acc=[],accN=0;
   coKeys.forEach(co=>{
-    if(!groups[co])return;
-    html+=`<div style="background:#0E7C3A;color:#fff;font-weight:bold;padding:8px 12px;margin-top:14px;border-radius:4px;font-size:14px">Subunternehmer: ${co}</div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:0"><thead><tr>
-      ${TH('TOUR')}${TH('OUT-APP ID')}${TH('FAHRER / السائق')}${TH('3. CODE')}${TH('PLZ')}${TH('GEPLANT')}${TH('IST')}${TH('BEMERKUNG')}
-    </tr></thead><tbody>`;
-    groups[co].forEach(r=>{
-      const codes=r.code.split(/[,·\s]+/).filter(Boolean)
-        .map(c=>`<span style="background:#C8102E;color:#fff;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px">${c}</span>`).join('');
-      html+=`<tr>
-        ${TD(r.tour)}${TD(r.appid)}${TD(r.fahrer)}
-        <td style="border:1px solid #bbb;padding:7px 10px;text-align:center">${codes||'—'}</td>
-        ${TD(r.plz)}${TD(r.geplant)}${TD(r.ist)}${TD(r.bemerk)}
+    const t=groups[co];
+    if(!t||!t.length)return;
+    if(t.length>BIG){
+      if(acc.length){pages.push(acc);acc=[];accN=0;}
+      pages.push([{co,rows:t}]);
+    }else{
+      if(acc.length&&accN+t.length>PAGE_MAX){pages.push(acc);acc=[];accN=0;}
+      acc.push({co,rows:t});accN+=t.length;
+    }
+  });
+  if(acc.length)pages.push(acc);
+
+  const tourRange=(rs)=>{
+    const nums=rs.map(r=>parseInt(String(r.tour).replace(/[^\d]/g,''))).filter(n=>!isNaN(n));
+    if(!nums.length)return '';
+    const mn=Math.min(...nums),mx=Math.max(...nums);
+    return mn===mx?`Tour ${mn}`:`Touren ${mn} – ${mx}`;
+  };
+  const buildSection=(co,rs,first)=>{
+    let h=`<div class="sub-band"${first?'':' style="margin-top:4mm"'}>Subunternehmer: ${co} &nbsp;(${tourRange(rs)})</div>
+    <table>
+      <colgroup><col class="c-tour"><col class="c-appid"><col class="c-driver"><col class="c-codes"><col class="c-plz"><col class="c-gep"><col class="c-ist"><col class="c-bem"></colgroup>
+      <tr class="hrow"><th>TOUR</th><th>OUT-APP ID</th><th>FAHRER / السائق</th><th>3. CODE</th><th>PLZ</th><th>GEPLANT</th><th>IST</th><th>BEMERKUNG</th></tr>`;
+    rs.forEach(r=>{
+      const codes=(r.code||'').split(/[,،\s]+/).filter(Boolean).map(c=>`<span class="pill">${c}</span>`).join('');
+      const plz=(r.plz||'').split(/[,،\s]+/).filter(Boolean).join(' · ');
+      h+=`<tr class="data-row">
+        <td class="c-tour">${r.tour||''}</td>
+        <td class="c-appid">${r.appid||''}</td>
+        <td class="c-driver">${r.fahrer||''}</td>
+        <td class="c-codes">${codes}</td>
+        <td class="c-plz">${plz}</td>
+        <td class="c-gep">${r.geplant||''}</td>
+        <td class="c-ist">${r.ist||''}</td>
+        <td class="c-bem">${r.bemerk||''}</td>
       </tr>`;
     });
-    html+=`<tr>
-      <td colspan="5" style="border:1px solid #bbb;padding:7px 10px;font-weight:bold;font-size:13px;background:#f8fafc">${co} GESAMT: ${groups[co].length} Touren</td>
-      <td colspan="3" style="border:1px solid #bbb;padding:7px;background:#f8fafc"></td>
-    </tr></tbody></table>`;
+    h+=`<tr><td class="tot" colspan="5">${co} GESAMT</td><td class="tot"></td><td class="tot"></td><td class="tot"></td></tr></table>`;
+    return h;
+  };
+  const buildHeader=()=>`<div class="doc-header">
+    <div class="htitle">DISPOSITION – ${date}</div>
+    <div class="hmeta">Z&amp;Z GmbH Transporte &nbsp;|&nbsp; Depot: NRW005<br>${loc}</div>
+  </div>`;
+
+  let html=`<div id="disp-inner"><style>
+    #disp-inner{font-family:Arial,sans-serif;font-size:9pt;background:#e0e0e0;padding:8mm}
+    #disp-inner .page{width:283mm;background:#fff;margin:0 auto 10mm;box-shadow:0 2px 10px rgba(0,0,0,.2);overflow:hidden}
+    #disp-inner .doc-header{background:#1F2C5C;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:3mm 5mm}
+    #disp-inner .doc-header .htitle{font-size:13pt;font-weight:bold}
+    #disp-inner .doc-header .hmeta{font-size:8.5pt;text-align:right;line-height:1.5}
+    #disp-inner .sub-band{background:#0E7C3A;color:#fff;font-weight:bold;font-size:11pt;padding:2.5mm 5mm;text-transform:uppercase}
+    #disp-inner table{width:100%;border-collapse:collapse;table-layout:fixed}
+    #disp-inner th,#disp-inner td{border:1px solid #bbb;padding:1.5mm 2mm;vertical-align:middle;word-wrap:break-word}
+    #disp-inner .c-tour{width:12mm;text-align:center}
+    #disp-inner .c-appid{width:18mm;text-align:center}
+    #disp-inner .c-driver{width:52mm}
+    #disp-inner .c-codes{width:48mm}
+    #disp-inner .c-plz{width:85mm}
+    #disp-inner .c-gep{width:24mm;text-align:center}
+    #disp-inner .c-ist{width:24mm;text-align:center}
+    #disp-inner .c-bem{width:20mm}
+    #disp-inner .hrow th{background:#1F2C5C;color:#fff;font-weight:bold;font-size:8pt;text-align:center;padding:1.5mm 2mm}
+    #disp-inner .data-row td{font-size:8.5pt;line-height:1.4}
+    #disp-inner .data-row .c-gep{background:#D9E1F2}
+    #disp-inner .data-row .c-ist{background:#FFF2CC}
+    #disp-inner .data-row .c-bem{background:#FFF2CC}
+    #disp-inner .data-row .c-tour{background:#F2F2F2;font-weight:bold;font-size:9pt}
+    #disp-inner .data-row .c-appid{font-weight:bold;color:#1F2C5C}
+    #disp-inner .data-row:nth-child(even) .c-driver,
+    #disp-inner .data-row:nth-child(even) .c-codes,
+    #disp-inner .data-row:nth-child(even) .c-plz{background:#F9F9F9}
+    #disp-inner .pill{display:inline-block;background:#C8102E;color:#fff;border-radius:3px;padding:0 3px;font-size:7.5pt;font-weight:bold;margin:1px 2px 1px 0}
+    #disp-inner .tot{background:#1F2C5C;color:#fff;font-weight:bold;font-size:9pt;text-align:center}
+    @media print{
+      #disp-inner{background:#fff;padding:0}
+      #disp-inner .page{box-shadow:none;margin:0;page-break-after:always}
+      #disp-inner .page:last-child{page-break-after:avoid}
+    }
+  </style>`;
+  pages.forEach(pg=>{
+    html+=`<div class="page">${buildHeader()}`;
+    pg.forEach((sec,i)=>{html+=buildSection(sec.co,sec.rows,i===0);});
+    html+=`</div>`;
   });
   html+=`</div>`;
   $('dp-pages').innerHTML=html;
@@ -2750,19 +3089,15 @@ function printDisp(){
   const el=document.getElementById('disp-inner');
   if(!el){toast('لا يوجد جدول توزيع للطباعة','error');return;}
   const date=_fmtDate($('sort-date').value);
-  const win=window.open('','_blank','width=1100,height=800');
+  const win=window.open('','_blank','width=1200,height=900');
   win.document.write(`<!DOCTYPE html><html lang="de"><head>
 <meta charset="UTF-8"><title>Disposition ${date}</title>
 <style>
+@page{size:A4 landscape;margin:7mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#fff;padding:14px;font-size:13px}
-table{width:100%;border-collapse:collapse;margin-bottom:0}
-th{background:#1F2C5C;color:white;border:1px solid #bbb;padding:7px 10px;text-align:center;white-space:nowrap}
-td{border:1px solid #bbb;padding:7px 10px;text-align:center}
-.pill{background:#C8102E;color:white;padding:2px 6px;border-radius:4px;margin:1px;display:inline-block;font-size:11px}
-@media print{@page{size:A4 landscape;margin:8mm}body{padding:0}}
+body{background:#fff}
 </style></head><body>
-${el.innerHTML}
+${el.outerHTML}
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
 </body></html>`);
   win.document.close();
@@ -2789,18 +3124,26 @@ function renderRoutes(){
 function renderReports(){
   const tot=orders.length,del=orders.filter(o=>o.status==='delivered').length,
         rate=tot?Math.round(del/tot*100):0;
+  // Count all returns across all saved days
   let totalReturns=0;
-  Object.values(_sd.days||{}).forEach(d=>{totalReturns+=(d.returns||[]).length;});
+  for(let i=0;i<serverStorage.length;i++){
+    const k=serverStorage.key(i);
+    if(k&&k.startsWith('zzlg_')){
+      try{const d=JSON.parse(serverStorage.getItem(k));totalReturns+=(d.returns||[]).length}catch(e){}
+    }
+  }
   $('rp-total').textContent=tot;$('rp-rate').textContent=rate+'%';$('rp-returns').textContent=totalReturns;
   renderStaffHistory();
 }
 
 // ── STAFF HISTORY ────────────────────────────────
 function _iterSheetMonths(cb){
-  Object.entries(_sd.sheets||{}).forEach(([mo,d])=>{
-    if(mo===sheetMonthKey)return;
-    try{cb(mo,d);}catch(e){}
-  });
+  for(let i=0;i<serverStorage.length;i++){
+    const k=serverStorage.key(i);
+    if(k&&k.startsWith('zzsheet_')&&k!=='zzsheet_'+sheetMonthKey){
+      try{const d=JSON.parse(serverStorage.getItem(k));cb(k.replace('zzsheet_',''),d);}catch(e){}
+    }
+  }
 }
 function getEmpAllTimeStats(staffId){
   let totDays=0,totH=0;
@@ -2900,10 +3243,10 @@ function savePayment(){
   if(!date){toast('يرجى تحديد تاريخ الدفعة','error');return;}
   payments.push({id:nextPayId++,staffId,staffName:$('pay-staff-name').value,amount,date,notes:$('pay-notes').value.trim()});
   closeModal('modal-payment');toast('تم تسجيل الدفعة','success');
-  autosaveNow();renderStaffHistory();
+  autosave();renderStaffHistory();
 }
 function delPayment(id){
-  payments=payments.filter(p=>p.id!==id);autosaveNow();toast('تم حذف الدفعة','success');renderStaffHistory();
+  payments=payments.filter(p=>p.id!==id);autosave();toast('تم حذف الدفعة','success');renderStaffHistory();
 }
 
 // ══════════════════════════════════════════════════
@@ -3028,9 +3371,29 @@ async function startNRWLoad(){
   if(!nrwLeafletReady){toast('جاري تحميل الخريطة، انتظر لحظة...','error');return;}
   $('nrw-start-btn').style.display='none';
   $('nrw-spin').style.display='block';
+
+  // Load cache from localStorage
+  let cache={};
+  try{const c=localStorage.getItem('zzlg_nrw_cache');if(c)cache=JSON.parse(c);}catch(e){}
+
   const total=NRW_PLZ.length;let done=0,ok=0;
   $('nrw-obar').style.width='0';$('nrw-opct').textContent=`0 / ${total}`;
-  for(const plz of NRW_PLZ){
+
+  const toFetch=NRW_PLZ.filter(plz=>!cache[plz]);
+  const fromCache=NRW_PLZ.filter(plz=>!!cache[plz]);
+
+  // Render cached zones instantly
+  for(const plz of fromCache){
+    const {geojson,city}=cache[plz];
+    nrwAddZone(plz,city,geojson,nrwColorForPLZ(plz));
+    done++;ok++;
+    $('nrw-obar').style.width=Math.round((done/total)*100)+'%';
+    $('nrw-opct').textContent=`${done} / ${total}`;
+  }
+  if(fromCache.length>0)$('nrw-otxt').textContent=`⚡ ${fromCache.length} منطقة من الذاكرة`;
+
+  // Fetch missing zones from Nominatim
+  for(const plz of toFetch){
     try{
       $('nrw-otxt').textContent=`جاري تحميل PLZ ${plz}…`;
       const res=await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${plz}&country=de&format=json&limit=1&polygon_geojson=1`,{headers:{'Accept-Language':'de'}});
@@ -3038,16 +3401,20 @@ async function startNRWLoad(){
       const data=await res.json();
       if(!data.length||!data[0].geojson)throw new Error('لا نتائج');
       const city=data[0].display_name.split(',')[0].trim();
-      const color=nrwColorForPLZ(plz);
-      nrwAddZone(plz,city,data[0].geojson,color);
+      const geojson=data[0].geojson;
+      cache[plz]={geojson,city};
+      nrwAddZone(plz,city,geojson,nrwColorForPLZ(plz));
       ok++;
     }catch(e){console.warn('PLZ',plz,e.message);}
     done++;
-    const pct=Math.round((done/total)*100);
-    $('nrw-obar').style.width=pct+'%';
+    $('nrw-obar').style.width=Math.round((done/total)*100)+'%';
     $('nrw-opct').textContent=`${done} / ${total}`;
-    await new Promise(r=>setTimeout(r,1100)); // Nominatim rate limit
+    await new Promise(r=>setTimeout(r,1100));
   }
+
+  // Save updated cache
+  try{localStorage.setItem('zzlg_nrw_cache',JSON.stringify(cache));}catch(e){}
+
   $('nrw-spin').style.display='none';
   $('nrw-obar').style.background='#66BB6A';
   $('nrw-otxt').textContent=`✅ ${ok} من ${total} منطقة تم تحميلها`;
@@ -3298,7 +3665,7 @@ function saveStaffMember(){
   else{staff.push({id:nextStaffId++,...data});toast('تم إضافة الموظف','success');}
   closeModal('modal-staff');
   if(sheetMonthKey){_syncSheetStaff();_sheetAutoSave();}
-  renderStaffPage();autosaveNow();
+  renderStaffPage();autosave();
 }
 function delStaff(id){
   const s=staff.find(x=>x.id===id);
@@ -3307,7 +3674,7 @@ function delStaff(id){
   attendance=attendance.filter(a=>a.staffId!==id);
   if(sheetMonthKey){_syncSheetStaff();_sheetAutoSave();}
   renderStaffPage();
-  toast('تم حذف الموظف','success');autosaveNow();
+  toast('تم حذف الموظف','success');autosave();
 }
 
 // ── ATTENDANCE ───────────────────────────────────
@@ -3363,11 +3730,11 @@ function saveAttendance(){
   const data={staffId:sid,date,start,end,break:parseInt($('att-break').value)||0,notes:$('att-notes').value.trim()};
   if(eid){const i=attendance.findIndex(a=>a.id===parseInt(eid));if(i!==-1)attendance[i]={...attendance[i],...data};delete $('att-date').dataset.eid;toast('تم تحديث الدوام','success');}
   else{attendance.push({id:nextAttId++,...data});toast('تم إضافة الدوام','success');}
-  closeModal('modal-att');renderStaffPage();autosaveNow();
+  closeModal('modal-att');renderStaffPage();autosave();
 }
 function delAttendance(id){
   attendance=attendance.filter(a=>a.id!==id);
-  renderStaffPage();toast('تم حذف السجل','success');autosaveNow();
+  renderStaffPage();toast('تم حذف السجل','success');autosave();
 }
 
 // ── SALARY REPORT ────────────────────────────────
@@ -3489,7 +3856,7 @@ function importExcelData(){
   });
   clearExcelPreview();
   renderStaffPage();
-  // Switch to attendance (sheet) tab
+  // Switch to attendance tab
   document.querySelectorAll('.stab-content').forEach(t=>t.classList.add('hidden'));
   $('stab-attendance').classList.remove('hidden');
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
@@ -3505,58 +3872,55 @@ function clearExcelPreview(){
 }
 
 // ══════════════════════════════════════════════════
-// PERSISTENCE — SERVER SYNC
+// PERSISTENCE — AUTO SAVE / LOAD ALL DATA
+// Keys: zzdata_orders / zzdata_drivers / zzdata_staff / zzdata_attendance / zzdata_meta
 // ══════════════════════════════════════════════════
-async function loadAllData(){
+const DB={
+  orders:'zzdata_orders',drivers:'zzdata_drivers',
+  staff:'zzdata_staff',attendance:'zzdata_attendance',meta:'zzdata_meta',
+  payments:'zzdata_payments',staffArchive:'zzdata_staff_archive',
+  memo:'zzdata_task_memo'
+};
+let _taskDate=todayStr();
+let _taskMemo='';
+let _firstLoad=true; // tracks if localStorage had no data (first-run)
+
+function loadAllData(){
+  let loaded=false;
+  try{const r=serverStorage.getItem(DB.orders);if(r){orders=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.drivers);if(r){drivers=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.staff);if(r){staff=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.attendance);if(r){attendance=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.payments);if(r){payments=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.staffArchive);if(r){staffArchive=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.memo);if(r){_taskMemo=r;}}catch(e){}
   try{
-    const r=await api('GET','/api/data');
-    _sd=r.ok?(await r.json()):{};
-  }catch(e){_sd={};}
-  if(_sd.orders){orders=_sd.orders;}
-  if(_sd.drivers){drivers=_sd.drivers;}
-  if(_sd.staff){staff=_sd.staff;}
-  if(_sd.attendance){attendance=_sd.attendance;}
-  if(_sd.payments){payments=_sd.payments;}
-  if(_sd.staffArchive){staffArchive=_sd.staffArchive;}
-  const m=_sd.meta||{};
-  if(m.nextOId)nextOId=m.nextOId;
-  if(m.nextDId)nextDId=m.nextDId;
-  if(m.nextStaffId)nextStaffId=m.nextStaffId;
-  if(m.nextAttId)nextAttId=m.nextAttId;
-  if(m.nextPayId)nextPayId=m.nextPayId;
-  // First use: persist the sample data to the server
-  if(!_sd.orders){autosave();}
+    const r=serverStorage.getItem(DB.meta);
+    if(r){const m=JSON.parse(r);
+      if(m.nextOId)nextOId=m.nextOId;if(m.nextDId)nextDId=m.nextDId;
+      if(m.nextStaffId)nextStaffId=m.nextStaffId;if(m.nextAttId)nextAttId=m.nextAttId;
+      if(m.nextPayId)nextPayId=m.nextPayId;
+    }
+  }catch(e){}
+  _firstLoad=!loaded;
+  // On very first run, save the sample data so it's persisted
+  if(_firstLoad)autosave();
 }
 
-function _syncSD(){
-  _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;
-  _sd.attendance=attendance;_sd.payments=payments;_sd.staffArchive=staffArchive;
-  _sd.meta={nextOId,nextDId,nextStaffId,nextAttId,nextPayId};
-}
 function autosave(){
-  _syncSD();
-  clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(()=>_pushToServer(),200);
-}
-// For CRUD operations — saves immediately, no debounce
-function autosaveNow(){
-  _syncSD();
-  clearTimeout(_saveTimer);_saveTimer=null;
-  _pushToServer();
-}
-
-async function _pushToServer(){
-  try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
+  try{
+    serverStorage.setItem(DB.orders,JSON.stringify(orders));
+    serverStorage.setItem(DB.drivers,JSON.stringify(drivers));
+    serverStorage.setItem(DB.staff,JSON.stringify(staff));
+    serverStorage.setItem(DB.attendance,JSON.stringify(attendance));
+    serverStorage.setItem(DB.payments,JSON.stringify(payments));
+    serverStorage.setItem(DB.staffArchive,JSON.stringify(staffArchive));
+    serverStorage.setItem(DB.meta,JSON.stringify({nextOId,nextDId,nextStaffId,nextAttId,nextPayId}));
+    showSaveIndicator();
+  }catch(e){console.warn('autosave:',e);}
 }
 
-// Called before page closes — flushes any pending save immediately
-window.addEventListener('beforeunload',()=>{
-  if(_saveTimer){
-    clearTimeout(_saveTimer);
-    fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
-  }
-});
-
+// Brief green flash on the topbar to confirm save
 function showSaveIndicator(){
   const el=document.getElementById('save-indicator');
   if(!el)return;
@@ -3567,16 +3931,24 @@ function showSaveIndicator(){
 
 function resetAllData(){
   $('confirm-msg').textContent='سيتم حذف جميع البيانات (الطلبات، السائقون، الموظفون، الدوام). هل أنت متأكد؟';
-  $('confirm-ok').onclick=async()=>{
+  $('confirm-ok').onclick=()=>{
     closeModal('modal-confirm');
-    try{await api('DELETE','/api/data');}catch(e){}
+    [DB.orders,DB.drivers,DB.staff,DB.attendance,DB.meta].forEach(k=>serverStorage.removeItem(k));
+    // also clear daily and sheet data
+    const toRemove=[];
+    for(let i=0;i<serverStorage.length;i++){const k=serverStorage.key(i);if(k&&(k.startsWith('zzlg_')||k.startsWith('zzsheet_')))toRemove.push(k);}
+    toRemove.forEach(k=>serverStorage.removeItem(k));
     location.reload();
   };
   openM('modal-confirm');
 }
 
 function exportData(){
-  const blob=new Blob([JSON.stringify({..._sd,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({
+    orders,drivers,staff,attendance,
+    meta:{nextOId,nextDId,nextStaffId,nextAttId},
+    exported:new Date().toISOString()
+  },null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='ZZ-Logistics-Backup-'+todayStr()+'.json';
@@ -3589,15 +3961,14 @@ function importData(){
   inp.onchange=e=>{
     const file=e.target.files[0];if(!file)return;
     const reader=new FileReader();
-    reader.onload=async ev=>{
+    reader.onload=ev=>{
       try{
         const d=JSON.parse(ev.target.result);
         if(!d.orders||!d.drivers){toast('ملف غير صالح','error');return;}
-        _sd=d;
         orders=d.orders||orders;drivers=d.drivers||drivers;
         staff=d.staff||staff;attendance=d.attendance||attendance;
         if(d.meta){nextOId=d.meta.nextOId||nextOId;nextDId=d.meta.nextDId||nextDId;nextStaffId=d.meta.nextStaffId||nextStaffId;nextAttId=d.meta.nextAttId||nextAttId;}
-        await api('PUT','/api/data',_sd);
+        autosave();
         toast('تم استيراد البيانات ✓ — جاري إعادة التحميل','success');
         setTimeout(()=>location.reload(),1500);
       }catch(e){toast('خطأ في قراءة الملف: '+e.message,'error');}
@@ -3635,16 +4006,15 @@ function _syncSheetStaff(){
   sheetEmps=sheetEmps.filter(e=>!e.staffId||staff.find(s=>s.id===e.staffId));
 }
 function _sheetAutoSave(){
-  if(!_sd.sheets)_sd.sheets={};
-  _sd.sheets[sheetMonthKey]={emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId};
-  autosave();
+  serverStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
 }
 
 function initSheetMonth(){
   if(!sheetMonthKey)sheetMonthKey=sheetTodayKey();
-  const d=_sd.sheets&&_sd.sheets[sheetMonthKey];
-  if(d){sheetEmps=d.emps||[];sheetDays=d.days||{};sheetNotes=d.notes||{};sheetNextEId=d.nextId||sheetNextEId;}
-  else{sheetEmps=[];sheetDays={};sheetNotes={};}
+  const raw=serverStorage.getItem('zzsheet_'+sheetMonthKey);
+  if(raw){
+    try{const d=JSON.parse(raw);sheetEmps=d.emps||[];sheetDays=d.days||{};sheetNotes=d.notes||{};sheetNextEId=d.nextId||sheetNextEId;}catch(e){sheetEmps=[];sheetDays={};sheetNotes={};}
+  }else{sheetEmps=[];sheetDays={};sheetNotes={};}
   _syncSheetStaff();
 }
 
@@ -3666,14 +4036,9 @@ function collectSheetFromDOM(){
   }
 }
 
-async function saveSheet(){
+function saveSheet(){
   collectSheetFromDOM();
-  if(!_sd.sheets)_sd.sheets={};
-  _sd.sheets[sheetMonthKey]={emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId};
-  _sd.orders=orders;_sd.drivers=drivers;_sd.staff=staff;_sd.attendance=attendance;
-  _sd.meta={nextOId,nextDId,nextStaffId,nextAttId};
-  clearTimeout(_saveTimer);_saveTimer=null;
-  await _pushToServer();
+  serverStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
   toast('تم حفظ الجدول ✓','success');
 }
 
@@ -3712,6 +4077,7 @@ function renderSheet(){
     h+=`<tr class="${isWknd?'sh-weekend':''}">`;
     h+=`<td class="sh-date-cell"><span class="sh-day-num">${dd}</span><span class="sh-day-name ${isWknd?'sh-wknd-lbl':''}">${DAYS_AR[dow]}</span></td>`;
     sheetEmps.forEach(emp=>{
+      // Manual sheet entry takes priority; fall back to attendance record for the day
       let sv=sheetDays[dd]&&sheetDays[dd][emp.id];
       if(!sv&&emp.staffId){
         const ar=attendance.find(a=>a.staffId===emp.staffId&&a.date===sheetMonthKey+'-'+dd);
@@ -3724,6 +4090,7 @@ function renderSheet(){
       h+=`<td class="sh-hrs-cell" id="sh_${emp.id}_${dd}_t">${hrs}</td>`;
     });
     h+=`<td></td>`;
+    // Note: show attendance notes for the day as fallback when no manual note
     const dayNote=sheetNotes[dd]||attendance.filter(a=>a.date===sheetMonthKey+'-'+dd&&a.notes).map(a=>{const s=staff.find(x=>x.id===a.staffId);return(s?s.name:'')+': '+a.notes;}).join(' | ');
     h+=`<td class="sh-note-cell"><input type="text" class="sh-note-inp" id="sh_note_${dd}" placeholder="ملاحظة…" value="${dayNote}" oninput="sheetNoteChange('${dd}')"></td>`;
     h+='</tr>';
@@ -3853,7 +4220,7 @@ function sheetDelEmp(id){
   renderSheet();
 }
 
-// Check server session and load data
+// Restore session (and load that account's data from the server) or show setup if first run
 checkFirstRun();
 
 // Drop zone drag events

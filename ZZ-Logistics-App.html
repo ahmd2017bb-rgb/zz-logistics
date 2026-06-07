@@ -1319,6 +1319,57 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 
 <script>
 // ══════════════════════════════════════════════════
+// SERVER API LAYER — replaces localStorage with per-account server storage
+// ══════════════════════════════════════════════════
+let _sd={};          // in-memory mirror of all server-stored keys (synced with /api/data)
+let _saveTimer=null; // debounce handle for pushing _sd to the server
+
+async function api(method,url,body){
+  const opts={method,credentials:'same-origin',headers:{'Content-Type':'application/json'}};
+  if(body!==undefined)opts.body=JSON.stringify(body);
+  const r=await fetch(url,opts);
+  if(r.status===401){_doLogoutUI();throw new Error('session-expired');}
+  return r;
+}
+function _doLogoutUI(){
+  currentUser=null;
+  $('mainApp').classList.add('hidden');
+  $('loginScreen').classList.remove('hidden');
+  $('login-identifier').value='';$('login-pass').value='';$('msg').textContent='⚠️ انتهت الجلسة — يرجى تسجيل الدخول مجدداً';
+}
+
+// Drop-in replacement for window.localStorage, backed by the server (per account).
+// Mirrors the Storage interface (getItem/setItem/removeItem/key/length) so the
+// rest of the app can keep using its existing localStorage-style persistence code.
+const serverStorage={
+  getItem(key){return Object.prototype.hasOwnProperty.call(_sd,key)?_sd[key]:null;},
+  setItem(key,val){_sd[key]=String(val);_scheduleSave();},
+  removeItem(key){delete _sd[key];_scheduleSave();},
+  key(i){return Object.keys(_sd)[i]??null;},
+  get length(){return Object.keys(_sd).length;}
+};
+function _scheduleSave(){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(_pushToServer,300);
+}
+async function _pushToServer(){
+  _saveTimer=null;
+  try{await api('PUT','/api/data',_sd);showSaveIndicator();}catch(e){}
+}
+window.addEventListener('beforeunload',()=>{
+  if(_saveTimer){
+    clearTimeout(_saveTimer);_saveTimer=null;
+    fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(_sd),keepalive:true});
+  }
+});
+async function _loadServerData(){
+  try{
+    const r=await api('GET','/api/data');
+    _sd=r.ok?(await r.json()):{};
+  }catch(e){_sd={};}
+}
+
+// ══════════════════════════════════════════════════
 // i18n — BILINGUAL ARABIC / GERMAN
 // ══════════════════════════════════════════════════
 const LANGS={ar:{dir:'rtl',flag:'🇩🇪',next:'Deutsch'},de:{dir:'ltr',flag:'🇸🇦',next:'العربية'}};
@@ -1613,7 +1664,7 @@ function pad(n){return String(n).padStart(2,'0')}
 function dateKey(s){return 'zzlg_'+s}
 
 function loadDay(dateStr){
-  const raw=localStorage.getItem(dateKey(dateStr));
+  const raw=serverStorage.getItem(dateKey(dateStr));
   if(raw){
     try{return JSON.parse(raw)}catch(e){}
   }
@@ -1628,7 +1679,7 @@ function saveDay(){
     rets.push({num:inps[0].value.trim(), qty:inps[1].value.trim()||'0', driver:inps[2].value.trim(), tour:inps[3].value.trim()});
   });
   currentDay.returns=rets;
-  localStorage.setItem(dateKey(currentDate),JSON.stringify(currentDay));
+  serverStorage.setItem(dateKey(currentDate),JSON.stringify(currentDay));
   toast('تم الحفظ بنجاح ✓','success');
   updateReturnCount();
 }
@@ -1974,38 +2025,9 @@ function updateReturnCount(){
 // AUTH
 // ══════════════════════════════════════════════════
 // ══════════════════════════════════════════════════
-// AUTH SYSTEM
+// AUTH SYSTEM — backed by the server (/api/auth/*)
 // ══════════════════════════════════════════════════
-const ACCTS_KEY='zz_accounts';
-const SESSION_KEY='zz_session';
 let currentUser=null;
-
-async function hashPwd(pwd){
-  const enc=new TextEncoder();
-  const buf=await crypto.subtle.digest('SHA-256',enc.encode('zzlg2024::'+pwd));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-function loadAccounts(){try{return JSON.parse(localStorage.getItem(ACCTS_KEY))||[];}catch(e){return[];}}
-function saveAccounts(a){localStorage.setItem(ACCTS_KEY,JSON.stringify(a));}
-function checkSession(){
-  try{const s=JSON.parse(localStorage.getItem(SESSION_KEY));if(s&&Date.now()<s.expires)return s;}catch(e){}
-  return null;
-}
-function createSession(acct){
-  const s={id:acct.id,name:acct.name,expires:Date.now()+30*24*60*60*1000};
-  localStorage.setItem(SESSION_KEY,JSON.stringify(s));
-}
-function clearSession(){localStorage.removeItem(SESSION_KEY);}
-
-function findAccount(identifier){
-  const id=identifier.trim().toLowerCase();
-  return loadAccounts().find(a=>
-    a.name.toLowerCase()===id||
-    (a.email&&a.email.toLowerCase()===id)||
-    (a.phone&&a.phone.replace(/\s/g,'')===id.replace(/\s/g,''))||
-    (a.apple&&a.apple.toLowerCase()===id)
-  );
-}
 
 // Login method selector
 const methodHints={user:'اسم المستخدم',email:'البريد الإلكتروني (Gmail / iCloud)',phone:'رقم الهاتف (+49...)',apple:'Apple ID (iCloud)'};
@@ -2020,17 +2042,25 @@ function switchMethod(m,btn){
   $('login-identifier').focus();
 }
 
+async function _afterAuth(acct){
+  currentUser=acct;
+  await _loadServerData();
+  loadAllData();
+  enterApp(acct);
+}
+
 async function doLogin(){
   const id=$('login-identifier').value.trim();
   const pw=$('login-pass').value;
   $('msg').textContent='';
   if(!id||!pw){$('msg').textContent='يرجى إدخال المعرف وكلمة المرور';return;}
   $('msg').textContent='⏳ جاري التحقق…';
-  const acct=findAccount(id);
-  if(!acct){$('msg').textContent='❌ لا يوجد حساب بهذا المعرف';return;}
-  const hash=await hashPwd(pw);
-  if(hash!==acct.passwordHash){$('msg').textContent='❌ كلمة المرور غير صحيحة';return;}
-  currentUser=acct;createSession(acct);enterApp(acct);
+  try{
+    const r=await api('POST','/api/auth/login',{identifier:id,password:pw});
+    const data=await r.json();
+    if(!r.ok){$('msg').textContent='❌ '+data.error;return;}
+    await _afterAuth(data);
+  }catch(e){if(e.message!=='session-expired')$('msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 function enterApp(acct){
@@ -2051,8 +2081,9 @@ function enterApp(acct){
   setTimeout(()=>{if(nrwLeafletReady&&!Object.keys(nrwZones).length)startNRWLoad();},1200);
 }
 
-function doLogout(){
-  clearSession();currentUser=null;
+async function doLogout(){
+  try{await api('POST','/api/auth/logout');}catch(e){}
+  currentUser=null;
   $('mainApp').classList.add('hidden');
   $('loginScreen').classList.remove('hidden');
   $('login-identifier').value='';$('login-pass').value='';$('msg').textContent='';
@@ -2071,27 +2102,22 @@ const SEC_QUESTIONS=[
 ];
 function populateSecQuestions(){
   const sel=$('su-sec-q');
-  if(!sel)return;
+  if(!sel||sel.options.length>1)return;
   SEC_QUESTIONS.forEach(q=>{const o=document.createElement('option');o.value=q;o.textContent=q;sel.appendChild(o);});
 }
 
-// ── FIRST RUN ──────────────────────────────────
-function checkFirstRun(){
+// ── FIRST RUN / STARTUP ────────────────────────
+async function checkFirstRun(){
   populateSecQuestions();
-  const accts=loadAccounts();
-  const sess=checkSession();
-  if(sess){
-    const acct=accts.find(a=>a.id===sess.id);
-    if(acct){currentUser=acct;enterApp(acct);return;}
-  }
-  // Session expired but accounts exist → show login (NOT setup), data is safe
-  if(!accts.length){
-    $('loginScreen').classList.add('hidden');
-    $('setupScreen').classList.remove('hidden');
-  } else {
-    // Renew session automatically if only one account
-    if(accts.length===1){currentUser=accts[0];createSession(accts[0]);enterApp(accts[0]);}
-  }
+  try{
+    const r=await fetch('/api/auth/status',{credentials:'same-origin'});
+    const s=await r.json();
+    if(s.loggedIn){await _afterAuth(s.user);return;}
+    if(s.firstRun){
+      $('loginScreen').classList.add('hidden');
+      $('setupScreen').classList.remove('hidden');
+    }
+  }catch(e){/* network error — stay on login screen */}
 }
 
 // ── SIGNUP ─────────────────────────────────────
@@ -2124,22 +2150,19 @@ async function submitSetup(){
   if(pw!==pw2){$('su-msg').textContent='كلمتا المرور غير متطابقتين';return;}
   if(!secQ){$('su-msg').textContent='يرجى اختيار سؤال الأمان';return;}
   if(!secA){$('su-msg').textContent='يرجى إدخال إجابة سؤال الأمان';return;}
-  // Check name not already taken
-  if(loadAccounts().find(a=>a.name.toLowerCase()===name.toLowerCase())){
-    $('su-msg').textContent='❌ اسم المستخدم مستخدم بالفعل';return;
-  }
   $('su-msg').textContent='⏳ جاري الإنشاء…';
-  const [hash,secHash]=await Promise.all([hashPwd(pw),hashPwd(secA.toLowerCase())]);
-  const acct={id:Date.now(),name,email,phone,apple,passwordHash:hash,secQuestion:secQ,secAnswerHash:secHash,role:'admin'};
-  const accts=loadAccounts();
-  accts.push(acct);
-  saveAccounts(accts);currentUser=acct;createSession(acct);enterApp(acct);
+  try{
+    const r=await api('POST','/api/auth/signup',{name,email,phone,apple,password:pw,secQuestion:secQ,secAnswer:secA});
+    const data=await r.json();
+    if(!r.ok){$('su-msg').textContent='❌ '+data.error;return;}
+    await _afterAuth(data);
+  }catch(e){if(e.message!=='session-expired')$('su-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 // ── FORGOT PASSWORD ────────────────────────────
-let _forgotAcct=null;
+let _frgAccountId=null,_frgToken=null;
 function showForgot(){
-  _forgotAcct=null;
+  _frgAccountId=null;_frgToken=null;
   resetForgotSteps();
   $('frg-id').value='';$('frg-sec-a').value='';
   $('frg-pw').value='';$('frg-pw2').value='';
@@ -2153,31 +2176,39 @@ function resetForgotSteps(){
   $('frg-step3').classList.add('hidden');
   $('frg-msg').textContent='';
 }
-function forgotFindAccount(){
+async function forgotFindAccount(){
   const id=$('frg-id').value.trim();
   $('frg-msg').textContent='';
   if(!id){$('frg-msg').textContent='يرجى إدخال المعرف';return;}
-  const acct=findAccount(id);
-  if(!acct){$('frg-msg').textContent='❌ لا يوجد حساب بهذا المعرف';return;}
-  if(!acct.secQuestion){$('frg-msg').textContent='❌ هذا الحساب لا يملك سؤال أمان — تواصل مع المسؤول لإعادة تعيين الحساب';return;}
-  _forgotAcct=acct;
-  $('frg-account-name').textContent='👤 '+acct.name;
-  $('frg-sec-q-label').textContent=acct.secQuestion;
-  $('frg-step1').classList.add('hidden');
-  $('frg-step2').classList.remove('hidden');
-  $('frg-sec-a').focus();
+  $('frg-msg').textContent='⏳ جاري البحث…';
+  try{
+    const r=await api('POST','/api/auth/forgot/find',{identifier:id});
+    const data=await r.json();
+    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
+    _frgAccountId=data.accountId;
+    $('frg-account-name').textContent='👤 '+data.accountName;
+    $('frg-sec-q-label').textContent=data.secQuestion;
+    $('frg-msg').textContent='';
+    $('frg-step1').classList.add('hidden');
+    $('frg-step2').classList.remove('hidden');
+    $('frg-sec-a').focus();
+  }catch(e){if(e.message!=='session-expired')$('frg-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 async function forgotVerifyAnswer(){
   const ans=$('frg-sec-a').value.trim();
   $('frg-msg').textContent='';
   if(!ans){$('frg-msg').textContent='يرجى إدخال الإجابة';return;}
   $('frg-msg').textContent='⏳ جاري التحقق…';
-  const hash=await hashPwd(ans.toLowerCase());
-  if(hash!==_forgotAcct.secAnswerHash){$('frg-msg').textContent='❌ الإجابة غير صحيحة';return;}
-  $('frg-msg').textContent='';
-  $('frg-step2').classList.add('hidden');
-  $('frg-step3').classList.remove('hidden');
-  $('frg-pw').focus();
+  try{
+    const r=await api('POST','/api/auth/forgot/verify',{accountId:_frgAccountId,answer:ans});
+    const data=await r.json();
+    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
+    _frgToken=data.token;
+    $('frg-msg').textContent='';
+    $('frg-step2').classList.add('hidden');
+    $('frg-step3').classList.remove('hidden');
+    $('frg-pw').focus();
+  }catch(e){if(e.message!=='session-expired')$('frg-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 async function forgotResetPassword(){
   const pw=$('frg-pw').value,pw2=$('frg-pw2').value;
@@ -2186,22 +2217,15 @@ async function forgotResetPassword(){
   if(pw.length<4){$('frg-msg').textContent='كلمة المرور قصيرة جداً (4 أحرف على الأقل)';return;}
   if(pw!==pw2){$('frg-msg').textContent='كلمتا المرور غير متطابقتين';return;}
   $('frg-msg').textContent='⏳ جاري الحفظ…';
-  const hash=await hashPwd(pw);
-  const accts=loadAccounts();
-  const idx=accts.findIndex(a=>a.id===_forgotAcct.id);
-  if(idx===-1){$('frg-msg').textContent='❌ خطأ غير متوقع';return;}
-  accts[idx].passwordHash=hash;
-  saveAccounts(accts);
-  _forgotAcct=null;
-  $('frg-msg').textContent='';
-  backToLogin();
-  $('msg').textContent='✅ تم تغيير كلمة المرور — يمكنك تسجيل الدخول الآن';
-}
-
-function showResetAccount(){
-  $('confirm-msg').textContent='سيتم حذف بيانات الدخول فقط (الحسابات وكلمات المرور). هل تريد المتابعة؟';
-  $('confirm-ok').onclick=()=>{closeModal('modal-confirm');clearSession();localStorage.removeItem(ACCTS_KEY);location.reload();};
-  openM('modal-confirm');
+  try{
+    const r=await api('POST','/api/auth/forgot/reset',{token:_frgToken,password:pw});
+    const data=await r.json();
+    if(!r.ok){$('frg-msg').textContent='❌ '+data.error;return;}
+    _frgAccountId=null;_frgToken=null;
+    $('frg-msg').textContent='';
+    backToLogin();
+    $('msg').textContent='✅ تم تغيير كلمة المرور — يمكنك تسجيل الدخول الآن';
+  }catch(e){if(e.message!=='session-expired')$('frg-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 // ── PROFILE SETTINGS ───────────────────────────
@@ -2223,16 +2247,16 @@ async function saveProfile(){
   if(!name){$('pr-msg').textContent='يرجى إدخال الاسم';return;}
   if(pw&&pw.length<4){$('pr-msg').textContent='كلمة المرور قصيرة جداً';return;}
   if(pw&&pw!==pw2){$('pr-msg').textContent='كلمتا المرور غير متطابقتين';return;}
-  const accts=loadAccounts();
-  const idx=accts.findIndex(a=>a.id===currentUser.id);
-  if(idx===-1)return;
-  accts[idx]={...accts[idx],name,email,phone,apple};
-  if(pw)accts[idx].passwordHash=await hashPwd(pw);
-  saveAccounts(accts);currentUser=accts[idx];
-  const av=name[0].toUpperCase();
-  $('sbAv').textContent=av;$('tbAv').textContent=av;
-  $('sbName').textContent=name;$('tbName').textContent=name;
-  closeModal('modal-profile');toast('تم تحديث الحساب ✓','success');
+  try{
+    const r=await api('PUT','/api/auth/profile',{name,email,phone,apple,password:pw||undefined});
+    const data=await r.json();
+    if(!r.ok){$('pr-msg').textContent='❌ '+data.error;return;}
+    currentUser=data;
+    const av=name[0].toUpperCase();
+    $('sbAv').textContent=av;$('tbAv').textContent=av;
+    $('sbName').textContent=name;$('tbName').textContent=name;
+    closeModal('modal-profile');toast('تم تحديث الحساب ✓','success');
+  }catch(e){if(e.message!=='session-expired')$('pr-msg').textContent='❌ تعذّر الاتصال بالخادم';}
 }
 
 // ══════════════════════════════════════════════════
@@ -2378,7 +2402,7 @@ function filterOrders(q){fq=q.toLowerCase();renderOrders()}
 function filterByStatus(s){fst=s;renderOrders()}
 function setTaskDate(d){_taskDate=d;const el=$('task-date-filter');if(el)el.value=d;renderOrders();}
 function shiftTaskDate(delta){const d=new Date(_taskDate+'T12:00:00');d.setDate(d.getDate()+delta);setTaskDate(d.toISOString().slice(0,10));}
-function saveMemo(val){_taskMemo=val;try{localStorage.setItem(DB.memo,val);}catch(e){}}
+function saveMemo(val){_taskMemo=val;try{serverStorage.setItem(DB.memo,val);}catch(e){}}
 function openOrderModal(t){
   if(t){
     $('modal-order-h').textContent='تعديل المهمة';
@@ -3102,10 +3126,10 @@ function renderReports(){
         rate=tot?Math.round(del/tot*100):0;
   // Count all returns across all saved days
   let totalReturns=0;
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
+  for(let i=0;i<serverStorage.length;i++){
+    const k=serverStorage.key(i);
     if(k&&k.startsWith('zzlg_')){
-      try{const d=JSON.parse(localStorage.getItem(k));totalReturns+=(d.returns||[]).length}catch(e){}
+      try{const d=JSON.parse(serverStorage.getItem(k));totalReturns+=(d.returns||[]).length}catch(e){}
     }
   }
   $('rp-total').textContent=tot;$('rp-rate').textContent=rate+'%';$('rp-returns').textContent=totalReturns;
@@ -3114,10 +3138,10 @@ function renderReports(){
 
 // ── STAFF HISTORY ────────────────────────────────
 function _iterSheetMonths(cb){
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
+  for(let i=0;i<serverStorage.length;i++){
+    const k=serverStorage.key(i);
     if(k&&k.startsWith('zzsheet_')&&k!=='zzsheet_'+sheetMonthKey){
-      try{const d=JSON.parse(localStorage.getItem(k));cb(k.replace('zzsheet_',''),d);}catch(e){}
+      try{const d=JSON.parse(serverStorage.getItem(k));cb(k.replace('zzsheet_',''),d);}catch(e){}
     }
   }
 }
@@ -3863,15 +3887,15 @@ let _firstLoad=true; // tracks if localStorage had no data (first-run)
 
 function loadAllData(){
   let loaded=false;
-  try{const r=localStorage.getItem(DB.orders);if(r){orders=JSON.parse(r);loaded=true;}}catch(e){}
-  try{const r=localStorage.getItem(DB.drivers);if(r){drivers=JSON.parse(r);loaded=true;}}catch(e){}
-  try{const r=localStorage.getItem(DB.staff);if(r){staff=JSON.parse(r);loaded=true;}}catch(e){}
-  try{const r=localStorage.getItem(DB.attendance);if(r){attendance=JSON.parse(r);loaded=true;}}catch(e){}
-  try{const r=localStorage.getItem(DB.payments);if(r){payments=JSON.parse(r);loaded=true;}}catch(e){}
-  try{const r=localStorage.getItem(DB.staffArchive);if(r){staffArchive=JSON.parse(r);loaded=true;}}catch(e){}
-  try{const r=localStorage.getItem(DB.memo);if(r){_taskMemo=r;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.orders);if(r){orders=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.drivers);if(r){drivers=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.staff);if(r){staff=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.attendance);if(r){attendance=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.payments);if(r){payments=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.staffArchive);if(r){staffArchive=JSON.parse(r);loaded=true;}}catch(e){}
+  try{const r=serverStorage.getItem(DB.memo);if(r){_taskMemo=r;}}catch(e){}
   try{
-    const r=localStorage.getItem(DB.meta);
+    const r=serverStorage.getItem(DB.meta);
     if(r){const m=JSON.parse(r);
       if(m.nextOId)nextOId=m.nextOId;if(m.nextDId)nextDId=m.nextDId;
       if(m.nextStaffId)nextStaffId=m.nextStaffId;if(m.nextAttId)nextAttId=m.nextAttId;
@@ -3885,13 +3909,13 @@ function loadAllData(){
 
 function autosave(){
   try{
-    localStorage.setItem(DB.orders,JSON.stringify(orders));
-    localStorage.setItem(DB.drivers,JSON.stringify(drivers));
-    localStorage.setItem(DB.staff,JSON.stringify(staff));
-    localStorage.setItem(DB.attendance,JSON.stringify(attendance));
-    localStorage.setItem(DB.payments,JSON.stringify(payments));
-    localStorage.setItem(DB.staffArchive,JSON.stringify(staffArchive));
-    localStorage.setItem(DB.meta,JSON.stringify({nextOId,nextDId,nextStaffId,nextAttId,nextPayId}));
+    serverStorage.setItem(DB.orders,JSON.stringify(orders));
+    serverStorage.setItem(DB.drivers,JSON.stringify(drivers));
+    serverStorage.setItem(DB.staff,JSON.stringify(staff));
+    serverStorage.setItem(DB.attendance,JSON.stringify(attendance));
+    serverStorage.setItem(DB.payments,JSON.stringify(payments));
+    serverStorage.setItem(DB.staffArchive,JSON.stringify(staffArchive));
+    serverStorage.setItem(DB.meta,JSON.stringify({nextOId,nextDId,nextStaffId,nextAttId,nextPayId}));
     showSaveIndicator();
   }catch(e){console.warn('autosave:',e);}
 }
@@ -3909,11 +3933,11 @@ function resetAllData(){
   $('confirm-msg').textContent='سيتم حذف جميع البيانات (الطلبات، السائقون، الموظفون، الدوام). هل أنت متأكد؟';
   $('confirm-ok').onclick=()=>{
     closeModal('modal-confirm');
-    [DB.orders,DB.drivers,DB.staff,DB.attendance,DB.meta].forEach(k=>localStorage.removeItem(k));
+    [DB.orders,DB.drivers,DB.staff,DB.attendance,DB.meta].forEach(k=>serverStorage.removeItem(k));
     // also clear daily and sheet data
     const toRemove=[];
-    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.startsWith('zzlg_')||k.startsWith('zzsheet_')))toRemove.push(k);}
-    toRemove.forEach(k=>localStorage.removeItem(k));
+    for(let i=0;i<serverStorage.length;i++){const k=serverStorage.key(i);if(k&&(k.startsWith('zzlg_')||k.startsWith('zzsheet_')))toRemove.push(k);}
+    toRemove.forEach(k=>serverStorage.removeItem(k));
     location.reload();
   };
   openM('modal-confirm');
@@ -3982,12 +4006,12 @@ function _syncSheetStaff(){
   sheetEmps=sheetEmps.filter(e=>!e.staffId||staff.find(s=>s.id===e.staffId));
 }
 function _sheetAutoSave(){
-  localStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
+  serverStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
 }
 
 function initSheetMonth(){
   if(!sheetMonthKey)sheetMonthKey=sheetTodayKey();
-  const raw=localStorage.getItem('zzsheet_'+sheetMonthKey);
+  const raw=serverStorage.getItem('zzsheet_'+sheetMonthKey);
   if(raw){
     try{const d=JSON.parse(raw);sheetEmps=d.emps||[];sheetDays=d.days||{};sheetNotes=d.notes||{};sheetNextEId=d.nextId||sheetNextEId;}catch(e){sheetEmps=[];sheetDays={};sheetNotes={};}
   }else{sheetEmps=[];sheetDays={};sheetNotes={};}
@@ -4014,7 +4038,7 @@ function collectSheetFromDOM(){
 
 function saveSheet(){
   collectSheetFromDOM();
-  localStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
+  serverStorage.setItem('zzsheet_'+sheetMonthKey,JSON.stringify({emps:sheetEmps,days:sheetDays,notes:sheetNotes,nextId:sheetNextEId}));
   toast('تم حفظ الجدول ✓','success');
 }
 
@@ -4196,11 +4220,7 @@ function sheetDelEmp(id){
   renderSheet();
 }
 
-// Load all persisted data immediately on page load
-loadAllData();
-// Ensure data is saved before the page is closed/refreshed
-window.addEventListener('beforeunload', autosave);
-// Restore session or show setup if first run
+// Restore session (and load that account's data from the server) or show setup if first run
 checkFirstRun();
 
 // Drop zone drag events
