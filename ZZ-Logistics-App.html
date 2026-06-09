@@ -195,7 +195,7 @@ button,select,input{font-family:inherit;font-size:inherit}
 .act-btn:hover{opacity:.75}
 
 /* DISPATCH PLAN */
-.dp-page{background:#fff;width:100%;max-width:960px;margin:0 auto 32px;box-shadow:0 2px 12px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+.dp-page{background:#fff;width:100%;max-width:960px;margin:0 auto 32px;box-shadow:0 2px 12px rgba(0,0,0,.12);border-radius:6px;overflow:visible}
 .dp-header{background:#c0392b;background:linear-gradient(135deg,#c0392b,#96281b);color:#fff;text-align:center;padding:14px 16px}
 .dp-title{font-size:20px;font-weight:900;letter-spacing:1px;direction:rtl}
 .dp-subhdr{background:#1a2744;color:#e8eaf6;text-align:center;padding:7px 16px;font-size:13px}
@@ -286,6 +286,82 @@ button,select,input{font-family:inherit;font-size:inherit}
   .frow{grid-template-columns:1fr}
 }
 @media(max-width:500px){.stat-row{grid-template-columns:1fr}.login-card{padding:32px 24px 28px}}
+
+/* ── MOBILE RESPONSIVE OVERRIDES ─────────────── */
+/* 1. Make sort/disp result pages scrollable horizontally */
+#dp-pages{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* NRW panel toggle button — shown only on mobile */
+#nrw-mob-toggle{display:none;width:100%;padding:10px 14px;background:#1F2C5C;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;text-align:right;align-items:center;justify-content:space-between;gap:8px;z-index:20;flex-shrink:0}
+
+@media(max-width:768px){
+  /* ── Topbar: hide name text, shrink spacing ── */
+  #tbName{display:none}
+  .tb-right{gap:8px}
+  #lang-switcher{padding:5px 9px;font-size:11px}
+  .tb-notif{font-size:17px}
+
+  /* ── NRW map: stack vertically ── */
+  .pv-map-full{flex-direction:column!important;height:auto!important;margin:0!important}
+  #nrw-map-wrap{height:58vw;min-height:220px;flex:unset}
+  #nrw-panel{width:100%!important;min-width:unset!important;flex-direction:column;height:auto;max-height:260px;overflow-y:auto;border-left:none!important;border-top:2px solid #2a2a4e}
+  #nrw-panel.mob-collapsed{max-height:0;overflow:hidden;padding:0}
+  #nrw-mob-toggle{display:flex}
+
+  /* ── Page area / card padding ── */
+  .page-area{padding:10px}
+  .card{padding:16px}
+
+  /* ── Topbar overflow prevention ── */
+  .tb-left{gap:8px;min-width:0}
+  .tb-title{font-size:16px}
+
+  /* ── Date nav bar: wrap smaller ── */
+  .date-nav{gap:5px;padding:8px 10px}
+  .date-nav-btn{padding:6px 9px;font-size:11px;white-space:nowrap}
+  .date-nav-title{font-size:13px}
+
+  /* ── Stat cards: 2 cols ── */
+  .stat-row{grid-template-columns:1fr 1fr}
+  .stat-card{padding:14px}
+
+  /* ── Override inline max-width:50% on sort mapper form groups ── */
+  .frow .form-group[style*="50%"]{max-width:100%!important}
+
+  /* ── Tables: remove overflowing min-widths when inside scroll wrapper ── */
+  .tb-inp{min-width:0!important}
+
+  /* ── Modals: slide up from bottom ── */
+  .modal-bg{align-items:flex-end;padding:0}
+  .modal{border-radius:20px 20px 0 0;max-height:92vh;overflow-y:auto;max-width:100%!important;width:100%!important}
+
+  /* ── Staff cards grid ── */
+  .staff-cards{grid-template-columns:1fr!important}
+
+  /* ── Two-col layout collapses ── */
+  .two-col{grid-template-columns:1fr!important}
+
+  /* ── Sort upload area ── */
+  .sort-upload-card{margin:12px auto 0}
+
+  /* ── Toolbar (print/import row) ── */
+  .toolbar{flex-wrap:wrap;gap:8px}
+  .toolbar .btn{padding:9px 14px;font-size:13px}
+
+  /* ── Login card ── */
+  .login-card{margin:10px;padding:28px 18px 22px}
+}
+
+@media(max-width:480px){
+  /* ── Stat cards: 1 col ── */
+  .stat-row{grid-template-columns:1fr}
+  /* ── NRW map height ── */
+  #nrw-map-wrap{height:52vw;min-height:180px}
+  /* ── Sort cards: on screen shrink grid to 1 col ── */
+  .sk-grid{grid-template-columns:1fr 1fr!important}
+  /* ── Date nav: hide labels ── */
+  .date-nav-title{display:none}
+}
 
 /* ── NRW MAP PAGE ─────────────────────────── */
 .pv-map-full{margin:-26px -28px;height:calc(100vh - 55px);display:flex;direction:ltr}
@@ -1108,6 +1184,10 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
       <!-- ====== NRW MAP ====== -->
       <section class="pv pv-map-full" id="pv-map">
         <!-- LEFT PANEL -->
+        <button id="nrw-mob-toggle" onclick="document.getElementById('nrw-panel').classList.toggle('mob-collapsed')">
+          <span>⚙ خيارات الخريطة / Kartenoptionen</span>
+          <span id="nrw-tog-ico">▲</span>
+        </button>
         <div id="nrw-panel">
           <div class="nrw-psec">
             <span class="nrw-plbl">Farbe wählen / اختر لوناً</span>
@@ -2174,6 +2254,7 @@ function enterApp(acct){
   $('pageTitle').textContent=titles['map']();
   $('pageDate').textContent=now.toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   initNRWMapPage();
+  _initNRWMobToggle();
   setTimeout(()=>{if(nrwLeafletReady&&!Object.keys(nrwZones).length)startNRWLoad();},1200);
 }
 
@@ -2411,6 +2492,17 @@ function _goPageReal(name,btn){
   if(window.innerWidth<=800)$('sidebar').classList.remove('open');
 }
 function toggleSidebar(){$('sidebar').classList.toggle('open')}
+function _initNRWMobToggle(){
+  const btn=$('nrw-mob-toggle');const panel=$('nrw-panel');
+  if(!btn||!panel)return;
+  // collapse panel by default on mobile
+  if(window.innerWidth<=768)panel.classList.add('mob-collapsed');
+  btn.onclick=()=>{
+    panel.classList.toggle('mob-collapsed');
+    const ico=$('nrw-tog-ico');
+    if(ico)ico.textContent=panel.classList.contains('mob-collapsed')?'▼':'▲';
+  };
+}
 function toggleDataMenu(){$('data-menu').classList.toggle('hidden')}
 document.addEventListener('click',e=>{const m=$('data-menu');if(m&&!m.classList.contains('hidden')&&!m.contains(e.target)&&!e.target.classList.contains('tb-data-btn'))m.classList.add('hidden');})
 
