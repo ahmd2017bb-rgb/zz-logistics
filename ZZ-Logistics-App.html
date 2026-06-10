@@ -546,7 +546,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{opacity:.6}
 .ref-del:hover{opacity:1}
 .ref-tour-sep td{background:#1e3a5f!important;height:4px;padding:0}
 .ref-footer-row td{background:#fff8e1;font-weight:700;text-align:center;padding:6px;border:1px solid #d1d5db}
-
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -3850,10 +3850,12 @@ function populateAttStaffFilter(){
   sel.value=cur;
 }
 function renderAttendance(){
+  const tbody=$('att-tbody');
+  if(!tbody)return;
   let data=[...attendance].sort((a,b)=>b.date.localeCompare(a.date));
   if(attDateFilter)data=data.filter(a=>a.date===attDateFilter);
   if(attStaffFilter)data=data.filter(a=>a.staffId===parseInt(attStaffFilter));
-  $('att-tbody').innerHTML=data.length===0
+  tbody.innerHTML=data.length===0
     ?'<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted)">لا توجد سجلات دوام</td></tr>'
     :data.map(a=>{
         const s=staff.find(x=>x.id===a.staffId);
@@ -3905,6 +3907,7 @@ function delAttendance(id){
 
 // ── SALARY REPORT ────────────────────────────────
 function renderSalaryReport(){
+  if(!$('salary-tbody'))return;
   const{start,end}=getPeriodRange(currentSalaryPeriod);
   $('salary-period-label').textContent=start?`(${start} → ${end})`:'';
   const data=attendance.filter(a=>(!start||a.date>=start)&&(!end||a.date<=end));
